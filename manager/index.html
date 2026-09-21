@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Website Manager</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Thai:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="../assets/app-config.js"></script>
+  <style>
+    body{font-family:'Noto Sans Thai',sans-serif;background:#f8fafc}.glass{background:rgba(255,255,255,.76);backdrop-filter:blur(22px);border:1px solid rgba(255,255,255,.9);box-shadow:0 10px 40px rgba(15,23,42,.06)}
+    .field{width:100%;background:rgba(255,255,255,.9);border:1px solid #e2e8f0;border-radius:1rem;padding:.75rem 1rem;font-size:.875rem;outline:none}.field:focus{border-color:#fb923c;box-shadow:0 0 0 3px rgba(251,146,60,.15)}
+    .label{display:block;font-size:.75rem;font-weight:700;color:#475569;margin-bottom:.4rem}.sidebar-btn.active{background:#f97316;color:white;box-shadow:0 8px 20px rgba(249,115,22,.22)}
+    .blob{position:fixed;filter:blur(110px);z-index:-1;opacity:.45}.scroll-thin::-webkit-scrollbar{width:6px}.scroll-thin::-webkit-scrollbar-thumb{background:#cbd5e1;border-radius:999px}
+  </style>
+</head>
+<body class="min-h-screen text-slate-800">
+  <div class="blob bg-orange-300/50 w-[45vw] h-[45vw] rounded-full -top-40 -left-32"></div>
+  <div class="blob bg-rose-300/30 w-[35vw] h-[35vw] rounded-full -bottom-24 -right-24"></div>
+
+  <div id="login-screen" class="fixed inset-0 z-[100] bg-slate-950/70 backdrop-blur-xl flex items-center justify-center p-4">
+    <div class="w-full max-w-md glass rounded-[2rem] p-8 bg-white/90">
+      <div class="w-14 h-14 rounded-2xl bg-orange-500 text-white flex items-center justify-center shadow-lg shadow-orange-200 mb-5"><i data-lucide="shield-check" class="w-7 h-7"></i></div>
+      <h1 class="text-2xl font-bold text-slate-900">Website Manager</h1>
+      <p class="text-sm text-slate-500 mt-2 mb-6">เข้าสู่ระบบเพื่อจัดการข้อมูลเว็บไซต์โรงเรียน</p>
+      <div id="config-warning" class="hidden bg-amber-50 border border-amber-200 text-amber-700 rounded-2xl p-4 text-xs mb-5">ยังไม่ได้ตั้งค่า Supabase ใน <b>assets/app-config.js</b></div>
+      <form id="login-form" class="space-y-4">
+        <div><label class="label">อีเมลผู้ดูแล</label><input id="login-email" type="email" class="field" required autocomplete="email"></div>
+        <div><label class="label">รหัสผ่าน</label><input id="login-password" type="password" class="field" required autocomplete="current-password"></div>
+        <button class="w-full bg-orange-500 hover:bg-orange-600 text-white rounded-2xl py-3 font-bold transition-colors flex items-center justify-center gap-2"><i data-lucide="log-in" class="w-4 h-4"></i> เข้าสู่ระบบ</button>
+      </form>
+      <p id="login-error" class="text-xs text-red-500 mt-4 hidden"></p>
+      <a href="../" class="mt-6 text-xs text-slate-500 hover:text-orange-600 inline-flex items-center gap-1"><i data-lucide="arrow-left" class="w-3.5 h-3.5"></i> กลับเว็บไซต์หลัก</a>
+    </div>
+  </div>
+
+  <div id="app" class="hidden min-h-screen lg:grid lg:grid-cols-[280px_1fr]">
+    <aside class="lg:sticky lg:top-0 lg:h-screen bg-slate-950 text-slate-300 p-4 lg:p-5 flex flex-col z-40">
+      <div class="flex items-center gap-3 px-2 py-3 mb-5">
+        <div class="w-11 h-11 rounded-xl bg-orange-500 text-white flex items-center justify-center"><i data-lucide="settings-2" class="w-5 h-5"></i></div>
+        <div><h1 class="font-bold text-white">Website Manager</h1><p class="text-[10px] text-slate-500">Supabase CMS</p></div>
+      </div>
+      <nav class="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-1 gap-2 lg:space-y-1 flex-1 overflow-y-auto scroll-thin" id="sidebar-nav">
+        <button class="sidebar-btn active flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold text-left" data-view="dashboard"><i data-lucide="layout-dashboard" class="w-4 h-4"></i> ภาพรวม</button>
+        <button class="sidebar-btn flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold text-left hover:bg-white/5" data-view="general"><i data-lucide="school" class="w-4 h-4"></i> ข้อมูล/โลโก้</button>
+        <button class="sidebar-btn flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold text-left hover:bg-white/5" data-view="visual"><i data-lucide="image" class="w-4 h-4"></i> ภาพ/แบนเนอร์</button>
+        <button class="sidebar-btn flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold text-left hover:bg-white/5" data-view="staff"><i data-lucide="users" class="w-4 h-4"></i> บุคลากร</button>
+        <button class="sidebar-btn flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold text-left hover:bg-white/5" data-view="content"><i data-lucide="newspaper" class="w-4 h-4"></i> เนื้อหา</button>
+        <button class="sidebar-btn flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold text-left hover:bg-white/5" data-view="achievements"><i data-lucide="award" class="w-4 h-4"></i> ผลงาน</button>
+        <button class="sidebar-btn flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold text-left hover:bg-white/5" data-view="advanced"><i data-lucide="braces" class="w-4 h-4"></i> ขั้นสูง</button>
+      </nav>
+      <div class="pt-4 border-t border-white/10 space-y-2">
+        <a href="../" target="_blank" class="w-full flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs hover:bg-white/5"><i data-lucide="external-link" class="w-4 h-4"></i> เปิดเว็บไซต์หลัก</a>
+        <button id="logout-btn" class="w-full flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs text-red-300 hover:bg-red-500/10"><i data-lucide="log-out" class="w-4 h-4"></i> ออกจากระบบ</button>
+      </div>
+    </aside>
+
+    <main class="min-w-0">
+      <header class="sticky top-0 z-30 glass border-b border-white/70 px-4 sm:px-8 py-4 flex items-center justify-between gap-3">
+        <div><h2 id="page-title" class="font-bold text-slate-900">ภาพรวม</h2><p id="save-status" class="text-[11px] text-slate-500">พร้อมแก้ไขข้อมูล</p></div>
+        <button id="save-btn" class="bg-orange-500 hover:bg-orange-600 text-white rounded-xl px-4 sm:px-5 py-2.5 text-sm font-bold shadow-lg shadow-orange-200 flex items-center gap-2"><i data-lucide="save" class="w-4 h-4"></i><span class="hidden sm:inline">บันทึกเว็บไซต์</span></button>
+      </header>
+
+      <div class="p-4 sm:p-8 max-w-7xl mx-auto space-y-6">
+        <section data-panel="dashboard" class="panel space-y-6">
+          <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
+            <div class="glass rounded-3xl p-5"><p class="text-xs text-slate-500">สามเณรนักเรียน</p><p id="dash-students" class="text-3xl font-black text-orange-600 mt-2">-</p></div>
+            <div class="glass rounded-3xl p-5"><p class="text-xs text-slate-500">บุคลากร</p><p id="dash-staff" class="text-3xl font-black text-slate-900 mt-2">-</p></div>
+            <div class="glass rounded-3xl p-5"><p class="text-xs text-slate-500">ครูในระบบ</p><p id="dash-teachers" class="text-3xl font-black text-slate-900 mt-2">-</p></div>
+            <div class="glass rounded-3xl p-5"><p class="text-xs text-slate-500">ผลงานทั้งหมด</p><p id="dash-achievements" class="text-3xl font-black text-slate-900 mt-2">-</p></div>
+          </div>
+          <div class="glass rounded-[2rem] p-6 sm:p-8"><h3 class="text-xl font-bold">จัดการเว็บไซต์จากหน้าเดียว</h3><p class="text-sm text-slate-500 mt-2 leading-relaxed">แก้โลโก้ ชื่อโรงเรียน จำนวนสามเณร ภาพหน้าแรก แบนเนอร์ ประกาศ บุคลากร ข่าวสาร และผลงานได้จากเมนูด้านซ้าย เมื่อกด “บันทึกเว็บไซต์” หน้าเว็บหลักจะอ่านข้อมูลใหม่จาก Supabase โดยอัตโนมัติ</p><div class="mt-5 grid sm:grid-cols-3 gap-3"><button data-jump="general" class="p-4 rounded-2xl bg-orange-50 text-orange-700 text-left font-bold text-sm">แก้ข้อมูลโรงเรียน →</button><button data-jump="staff" class="p-4 rounded-2xl bg-slate-100 text-slate-700 text-left font-bold text-sm">จัดการครู →</button><button data-jump="achievements" class="p-4 rounded-2xl bg-amber-50 text-amber-700 text-left font-bold text-sm">เพิ่มผลงาน →</button></div></div>
+        </section>
+
+        <section data-panel="general" class="panel hidden space-y-6">
+          <div class="glass rounded-[2rem] p-6 sm:p-8"><h3 class="text-lg font-bold mb-5">ข้อมูลโรงเรียนและ Branding</h3><div class="grid md:grid-cols-2 gap-5">
+            <div class="md:col-span-2"><label class="label">โลโก้โรงเรียน</label><div class="flex flex-col sm:flex-row gap-3"><input data-path="branding.logoUrl" class="field" placeholder="URL รูปโลโก้"><label class="cursor-pointer bg-slate-900 text-white px-4 py-3 rounded-2xl text-sm font-bold text-center"><input type="file" accept="image/*" class="hidden" data-upload-target="branding.logoUrl">อัปโหลดโลโก้</label></div></div>
+            <div><label class="label">ชื่อโรงเรียน (ไทย)</label><input data-path="info.nameTh" class="field"></div><div><label class="label">ชื่อโรงเรียน (อังกฤษ)</label><input data-path="info.nameEn" class="field"></div>
+            <div><label class="label">ชื่อผู้อำนวยการ</label><input data-path="info.directorName" class="field"></div><div><label class="label">ภาพผู้อำนวยการ</label><div class="flex gap-2"><input data-path="info.directorImage" class="field"><label class="cursor-pointer px-4 py-3 rounded-2xl bg-slate-100 text-xs font-bold"><input type="file" accept="image/*" class="hidden" data-upload-target="info.directorImage">อัปโหลด</label></div></div>
+            <div class="md:col-span-2"><label class="label">สารจากผู้อำนวยการ</label><textarea data-path="info.directorMsg" class="field min-h-28"></textarea></div>
+            <div><label class="label">เบอร์โทร</label><input data-path="info.phone" class="field"></div><div><label class="label">อีเมล</label><input data-path="info.email" class="field"></div>
+            <div class="md:col-span-2"><label class="label">ที่อยู่</label><textarea data-path="info.address" class="field"></textarea></div>
+            <div><label class="label">จำนวนสามเณรนักเรียน</label><input data-path="info.stats.0.value" class="field" placeholder="เช่น 1,845"></div><div><label class="label">จำนวนบุคลากร</label><input data-path="info.stats.1.value" class="field" placeholder="เช่น 112"></div>
+          </div></div>
+        </section>
+
+        <section data-panel="visual" class="panel hidden space-y-6">
+          <div class="glass rounded-[2rem] p-6 sm:p-8"><h3 class="text-lg font-bold mb-5">Intro / ประกาศด่วน</h3><div class="grid md:grid-cols-2 gap-5">
+            <label class="flex items-center gap-3 p-4 rounded-2xl bg-white/70 border border-white"><input type="checkbox" data-path="introPage.show" class="w-5 h-5 accent-orange-500"><span class="text-sm font-bold">เปิดหน้า Intro</span></label>
+            <label class="flex items-center gap-3 p-4 rounded-2xl bg-white/70 border border-white"><input type="checkbox" data-path="announcement.show" class="w-5 h-5 accent-red-500"><span class="text-sm font-bold">เปิดประกาศด่วน</span></label>
+            <div class="md:col-span-2"><label class="label">หัวข้อ Intro</label><input data-path="introPage.title" class="field"></div><div class="md:col-span-2"><label class="label">ข้อความ Intro</label><textarea data-path="introPage.subtitle" class="field"></textarea></div>
+            <div class="md:col-span-2"><label class="label">ภาพ Intro</label><div class="flex gap-2"><input data-path="introPage.image" class="field"><label class="cursor-pointer px-4 py-3 rounded-2xl bg-slate-100 text-xs font-bold"><input type="file" accept="image/*" class="hidden" data-upload-target="introPage.image">อัปโหลด</label></div></div>
+            <div class="md:col-span-2"><label class="label">ข้อความประกาศด่วน</label><textarea data-path="announcement.text" class="field"></textarea></div>
+          </div></div>
+          <div class="glass rounded-[2rem] p-6 sm:p-8"><h3 class="text-lg font-bold mb-5">ภาพหน้าแรกและแบนเนอร์</h3><div class="mb-5"><label class="label">ภาพ Welcome</label><div class="flex gap-2"><input data-path="welcomeImage" class="field"><label class="cursor-pointer px-4 py-3 rounded-2xl bg-slate-100 text-xs font-bold"><input type="file" accept="image/*" class="hidden" data-upload-target="welcomeImage">อัปโหลด</label></div></div><div class="flex items-center justify-between mb-3"><label class="label !mb-0">แบนเนอร์ประชาสัมพันธ์</label><button id="add-banner" class="text-xs font-bold text-orange-600 bg-orange-50 px-3 py-2 rounded-xl">+ เพิ่มแบนเนอร์</button></div><div id="banner-list" class="space-y-3"></div></div>
+        </section>
+
+        <section data-panel="staff" class="panel hidden space-y-6">
+          <div class="flex flex-col sm:flex-row sm:items-end justify-between gap-3"><div><h3 class="text-2xl font-bold">จัดการบุคลากร</h3><p class="text-sm text-slate-500 mt-1">เพิ่ม ลบ แก้ไข และอัปโหลดรูปได้โดยไม่ต้องแก้ HTML</p></div><button id="add-staff" class="bg-orange-500 text-white px-4 py-2.5 rounded-xl text-sm font-bold flex items-center gap-2"><i data-lucide="user-plus" class="w-4 h-4"></i> เพิ่มบุคลากร</button></div>
+          <div class="glass rounded-[2rem] p-4 flex gap-2 overflow-x-auto"><button class="staff-tab bg-orange-500 text-white px-4 py-2 rounded-xl text-sm font-bold" data-staff-kind="teachers">ครูและบุคลากร</button><button class="staff-tab bg-white/70 text-slate-600 px-4 py-2 rounded-xl text-sm font-bold" data-staff-kind="executives">ผู้บริหาร</button><button class="staff-tab bg-white/70 text-slate-600 px-4 py-2 rounded-xl text-sm font-bold" data-staff-kind="specialTeachers">ครูพิเศษ</button></div>
+          <div id="staff-list" class="grid sm:grid-cols-2 xl:grid-cols-3 gap-4"></div>
+        </section>
+
+        <section data-panel="content" class="panel hidden space-y-6">
+          <div class="glass rounded-[2rem] p-6 sm:p-8"><h3 class="text-lg font-bold mb-5">ประวัติและข้อมูลสำคัญ</h3><div class="grid gap-5"><div><label class="label">ประวัติย่อ 1</label><textarea data-path="history.paragraph1" class="field min-h-28"></textarea></div><div><label class="label">ประวัติย่อ 2</label><textarea data-path="history.paragraph2" class="field min-h-28"></textarea></div><div><label class="label">ปรัชญา/วิสัยทัศน์</label><input data-path="history.vision" class="field"></div><div class="grid md:grid-cols-2 gap-4"><div><label class="label">ภาพอดีต</label><input data-path="history.oldImage" class="field"></div><div><label class="label">ภาพปัจจุบัน</label><input data-path="history.newImage" class="field"></div></div></div></div>
+          <div class="grid lg:grid-cols-2 gap-6"><div class="glass rounded-[2rem] p-6"><h3 class="font-bold mb-4">โซเชียล/แผนที่</h3><div class="space-y-4"><div><label class="label">Facebook</label><input data-path="social.facebook" class="field"></div><div><label class="label">LINE</label><input data-path="social.line" class="field"></div><div><label class="label">YouTube</label><input data-path="social.youtube" class="field"></div><div><label class="label">Google Maps Link</label><input data-path="map.linkUrl" class="field"></div><div><label class="label">Map Embed URL</label><input data-path="map.embedIframe" class="field"></div></div></div><div class="glass rounded-[2rem] p-6"><h3 class="font-bold mb-4">ข้อมูลเสริม</h3><div class="space-y-4"><div><label class="label">วันที่สอบบาลี</label><input data-path="examDate" class="field"></div><div><label class="label">บาลีวันละคำ</label><input data-path="paliWord.word" class="field"></div><div><label class="label">คำอ่าน</label><input data-path="paliWord.reading" class="field"></div><div><label class="label">ความหมาย</label><input data-path="paliWord.meaning" class="field"></div><div><label class="label">พุทธสุภาษิต</label><input data-path="dhammaQuote.pali" class="field"></div><div><label class="label">คำแปล</label><input data-path="dhammaQuote.thai" class="field"></div></div></div></div>
+          <div class="glass rounded-[2rem] p-6"><div class="flex justify-between items-center mb-4"><div><h3 class="font-bold">ข่าวประชาสัมพันธ์ / กิจกรรม</h3><p class="text-xs text-slate-500 mt-1">แก้แบบรวดเร็วด้วย JSON เฉพาะส่วนนี้</p></div></div><div class="grid lg:grid-cols-2 gap-5"><div><label class="label">News</label><textarea id="news-json" class="field min-h-72 font-mono text-xs"></textarea></div><div><label class="label">Events</label><textarea id="events-json" class="field min-h-72 font-mono text-xs"></textarea></div></div></div>
+        </section>
+
+        <section data-panel="achievements" class="panel hidden space-y-6">
+          <div class="flex flex-col sm:flex-row sm:items-end justify-between gap-3"><div><h3 class="text-2xl font-bold">ผลงานแห่งความภาคภูมิใจ</h3><p class="text-sm text-slate-500 mt-1">รายการใหม่สุดจะขึ้นหน้าเว็บไซต์หลัก 3 อันดับแรกโดยอัตโนมัติ</p></div><button id="add-achievement" class="bg-orange-500 text-white px-4 py-2.5 rounded-xl text-sm font-bold flex items-center gap-2"><i data-lucide="plus" class="w-4 h-4"></i> เพิ่มผลงาน</button></div>
+          <div id="achievement-list" class="grid sm:grid-cols-2 xl:grid-cols-3 gap-5"></div>
+        </section>
+
+        <section data-panel="advanced" class="panel hidden space-y-6">
+          <div class="glass rounded-[2rem] p-6 sm:p-8"><h3 class="text-lg font-bold">Advanced Settings</h3><p class="text-sm text-slate-500 mt-2 mb-5">ข้อมูลทุกส่วนของเว็บไซต์อยู่ใน JSON นี้ จึงสามารถแก้รายการที่ยังไม่มีฟอร์มเฉพาะได้ทั้งหมด แนะนำให้สำรองก่อนแก้ไข</p><textarea id="raw-json" class="field min-h-[60vh] font-mono text-xs leading-relaxed"></textarea><div class="flex flex-wrap gap-3 mt-4"><button id="apply-json" class="bg-slate-900 text-white px-4 py-2.5 rounded-xl text-sm font-bold">นำ JSON มาใช้</button><button id="copy-json" class="bg-white border border-slate-200 px-4 py-2.5 rounded-xl text-sm font-bold">คัดลอก JSON</button></div></div>
+        </section>
+      </div>
+    </main>
+  </div>
+
+  <div id="editor-modal" class="fixed inset-0 z-[90] hidden items-center justify-center p-4"><div class="absolute inset-0 bg-slate-950/60 backdrop-blur-sm" data-close-modal></div><div class="relative z-10 w-full max-w-xl glass bg-white/95 rounded-[2rem] p-6 sm:p-8 max-h-[90vh] overflow-y-auto scroll-thin"><div class="flex items-center justify-between mb-6"><h3 id="modal-title" class="text-xl font-bold">แก้ไข</h3><button data-close-modal class="w-9 h-9 rounded-full bg-slate-100 flex items-center justify-center"><i data-lucide="x" class="w-4 h-4"></i></button></div><form id="editor-form" class="space-y-4"></form></div></div>
+
+  <div id="toast" class="fixed right-4 bottom-4 z-[120] hidden max-w-sm bg-slate-900 text-white px-5 py-3 rounded-2xl shadow-2xl text-sm"></div>
+  <script src="./manager.js"></script>
+</body>
+</html>

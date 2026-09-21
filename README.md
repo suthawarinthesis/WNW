@@ -27,12 +27,12 @@ on conflict (user_id) do nothing;
 ```
 
 5. ไปที่ **Project Settings / API** แล้วคัดลอก Project URL และ `anon` / publishable key
-6. เปิด `assets/app-config.js` แล้วใส่ค่า:
+6. `assets/app-config.js` ถูกตั้งค่า Supabase Project URL + publishable key ให้แล้ว หากย้าย Project ค่อยเปลี่ยนค่าตรงนี้:
 
 ```js
 window.SCHOOL_APP_CONFIG = {
-  SUPABASE_URL: 'https://xxxx.supabase.co',
-  SUPABASE_ANON_KEY: 'YOUR_ANON_OR_PUBLISHABLE_KEY',
+  SUPABASE_URL: 'https://pcapjltgscofrgfcvdkm.supabase.co',
+  SUPABASE_ANON_KEY: 'sb_publishable_…', // publishable key ของโปรเจกต์นี้
   STORAGE_BUCKET: 'site-media'
 };
 ```

@@ -6,8 +6,8 @@
    IMPORTANT: Never place the service_role key in GitHub Pages.
    ============================================================ */
 window.SCHOOL_APP_CONFIG = {
-  SUPABASE_URL: 'https://YOUR_PROJECT.supabase.co',
-  SUPABASE_ANON_KEY: 'YOUR_SUPABASE_ANON_OR_PUBLISHABLE_KEY',
+  SUPABASE_URL: 'https://pcapjltgscofrgfcvdkm.supabase.co',
+  SUPABASE_ANON_KEY: 'sb_publishable_NTJJiE0r1hojS-8DTRzWFA_3BPADfEH',
   STORAGE_BUCKET: 'site-media'
 };
 

@@ -9,7 +9,8 @@ window.SCHOOL_APP_CONFIG = {
   SUPABASE_URL: 'https://pcapjltgscofrgfcvdkm.supabase.co',
   SUPABASE_ANON_KEY: 'sb_publishable_NTJJiE0r1hojS-8DTRzWFA_3BPADfEH',
   STORAGE_BUCKET: 'site-media',
-  ADMISSION_STORAGE_BUCKET: 'admission-files'
+  ADMISSION_STORAGE_BUCKET: 'admission-files',
+  STUDENT_PORTAL_STORAGE_BUCKET: 'student-portal-files'
 };
 
 (() => {

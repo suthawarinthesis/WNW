@@ -109,7 +109,8 @@
         </section>
 
         <section data-panel="staff" class="panel hidden space-y-6">
-          <div class="flex flex-col sm:flex-row gap-3 sm:items-center justify-between"><div><h3 class="text-2xl font-bold">บุคลากร</h3><p class="text-sm text-slate-500 mt-1">เพิ่ม แก้ไข ลบ และอัปโหลดรูปได้จากฟอร์ม</p></div><button id="add-staff" class="btn-primary">+ เพิ่มบุคลากร</button></div>
+          <div class="flex flex-col sm:flex-row gap-3 sm:items-center justify-between"><div><h3 class="text-2xl font-bold">บุคลากร</h3><p class="text-sm text-slate-500 mt-1">ข้อมูลส่วนนี้บันทึกลงตาราง <code>personnel</code> ใน Supabase โดยตรง</p></div><button id="add-staff" class="btn-primary">+ เพิ่มบุคลากร</button></div>
+          <div id="personnel-db-status" class="rounded-2xl bg-slate-50 text-slate-500 px-4 py-3 text-xs font-bold">กำลังตรวจสอบฐานข้อมูลบุคลากร...</div>
           <div class="glass rounded-[2rem] p-4 flex gap-2 overflow-x-auto"><button class="staff-tab bg-orange-500 text-white px-4 py-2 rounded-xl text-sm font-bold" data-staff-kind="teachers">ครูและบุคลากร</button><button class="staff-tab bg-white/70 text-slate-600 px-4 py-2 rounded-xl text-sm font-bold" data-staff-kind="executives">ผู้บริหาร</button><button class="staff-tab bg-white/70 text-slate-600 px-4 py-2 rounded-xl text-sm font-bold" data-staff-kind="specialTeachers">ครูพิเศษ</button></div>
           <div id="staff-list" class="grid md:grid-cols-2 xl:grid-cols-3 gap-4"></div>
         </section>
@@ -172,6 +173,6 @@
     </div>
   </div>
   <div id="toast" class="hidden"></div>
-  <script src="manager.js?v=20260922-personnel-display-autosave-v3"></script>
+  <script src="manager.js?v=20260922-personnel-supabase-v1"></script>
 </body>
 </html>

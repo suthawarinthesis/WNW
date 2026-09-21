@@ -895,7 +895,7 @@
             return target;
         }
 
-        function applyRemoteResults(settingsResult, achievementsResult, newsResult) {
+        function applyRemoteResults(settingsResult, achievementsResult, newsResult, personnelResult) {
             if (settingsResult?.data?.data) deepMerge(SCHOOL_DATA, settingsResult.data.data);
             if (Array.isArray(achievementsResult?.data)) {
                 SCHOOL_DATA.achievements = achievementsResult.data.map(item => ({
@@ -910,6 +910,21 @@
                     date: item.date_text || '', monthYear: item.month_year || '', url: item.url || '', published: true,
                     sortOrder: item.sort_order, created_at: item.created_at
                 }));
+            }
+            if (!personnelResult?.error && Array.isArray(personnelResult?.data)) {
+                SCHOOL_DATA.executives = [];
+                SCHOOL_DATA.teachers = [];
+                SCHOOL_DATA.specialTeachers = [];
+                personnelResult.data.forEach(row => {
+                    const kind = ['executives','teachers','specialTeachers'].includes(row.staff_type) ? row.staff_type : 'teachers';
+                    SCHOOL_DATA[kind].push({
+                        id: row.id,
+                        name: row.full_name || '', position: row.position || '', department: row.department || '',
+                        img: row.image_url || '', education: row.education || '', phone: row.phone || '', email: row.email || '',
+                        isAlumni: !!row.is_alumni, alumniBatch: row.alumni_batch || '', published: row.published !== false,
+                        sortOrder: Number(row.sort_order || 0), created_at: row.created_at
+                    });
+                });
             }
         }
 
@@ -928,18 +943,19 @@
             const remoteQuery = Promise.all([
                 db.from('site_settings').select('data').eq('id', 1).maybeSingle(),
                 db.from('achievements').select('id,title,year,image_url,description,created_at').eq('published', true).order('created_at', { ascending: false }).limit(3),
-                db.from('news').select('id,title,summary,image_url,category,category_color,date_text,month_year,url,sort_order,created_at').eq('published', true).order('sort_order', { ascending: true }).order('created_at', { ascending: false })
+                db.from('news').select('id,title,summary,image_url,category,category_color,date_text,month_year,url,sort_order,created_at').eq('published', true).order('sort_order', { ascending: true }).order('created_at', { ascending: false }),
+                db.from('personnel').select('id,staff_type,full_name,position,department,image_url,education,phone,email,is_alumni,alumni_batch,published,sort_order,created_at').eq('published', true).order('staff_type', { ascending: true }).order('sort_order', { ascending: true }).order('created_at', { ascending: true })
             ]);
             let timedOut = false;
             try {
                 const timeout = new Promise((_, reject) => setTimeout(() => { timedOut = true; reject(new Error('Supabase load timeout')); }, 4500));
-                const [settingsResult, achievementsResult, newsResult] = await Promise.race([remoteQuery, timeout]);
-                applyRemoteResults(settingsResult, achievementsResult, newsResult);
+                const [settingsResult, achievementsResult, newsResult, personnelResult] = await Promise.race([remoteQuery, timeout]);
+                applyRemoteResults(settingsResult, achievementsResult, newsResult, personnelResult);
             } catch (error) {
                 console.warn('Supabase initial load is slow — page will refresh remote sections when data arrives.', error);
                 if (timedOut) {
-                    remoteQuery.then(([settingsResult, achievementsResult, newsResult]) => {
-                        applyRemoteResults(settingsResult, achievementsResult, newsResult);
+                    remoteQuery.then(([settingsResult, achievementsResult, newsResult, personnelResult]) => {
+                        applyRemoteResults(settingsResult, achievementsResult, newsResult, personnelResult);
                         refreshRemoteSectionsAfterLateLoad();
                     }).catch(err => console.warn('Late Supabase refresh failed.', err));
                 }
@@ -1352,23 +1368,13 @@
         }
 
         function staffExtraHtml(person) {
+            // หน้า Card แสดงเพียงสถานะศิษย์เก่า/รุ่น เพื่อให้การ์ดกระชับ
+            // ประวัติการศึกษา เบอร์โทร และ Email ยังคงเก็บใน Supabase
+            // และยังดูได้จากหน้าต่างรายละเอียดเมื่อกดที่การ์ด
             const p = normalizeStaffPerson(person);
-            const educationLines = String(p.education || '').split(/\n+/).map(x => x.trim()).filter(Boolean);
-            const education = educationLines.length
-                ? `<div class="mt-3 w-full text-left rounded-xl bg-slate-50/90 border border-slate-100 px-3 py-2">
-                     <div class="text-[9px] uppercase tracking-wide text-slate-400 font-bold mb-1">ประวัติการศึกษา</div>
-                     <div class="text-[10px] text-slate-600 leading-relaxed line-clamp-2">${escapeStaffHtml(educationLines.join(' • '))}</div>
-                   </div>`
+            return p.isAlumni
+                ? `<span class="text-[10px] font-bold text-amber-800 bg-amber-50 border border-amber-200 px-2.5 py-1 rounded-full mt-2">ศิษย์เก่า${p.alumniBatch ? ' • '+escapeStaffHtml(p.alumniBatch) : ''}</span>`
                 : '';
-            const contacts = [
-                p.phone ? `<span class="inline-flex items-center gap-1"><i data-lucide="phone" class="w-3 h-3"></i>${escapeStaffHtml(p.phone)}</span>` : '',
-                p.email ? `<span class="inline-flex items-center gap-1"><i data-lucide="mail" class="w-3 h-3"></i>${escapeStaffHtml(p.email)}</span>` : ''
-            ].filter(Boolean).join('');
-            const contactHtml = contacts ? `<div class="mt-2 w-full flex flex-col gap-1 text-[10px] text-slate-500 break-all">${contacts}</div>` : '';
-            const alumni = p.isAlumni
-                ? `<span class="text-[10px] font-bold text-amber-800 bg-amber-50 border border-amber-200 px-2 py-1 rounded-full mt-2">ศิษย์เก่า${p.alumniBatch ? ' • '+escapeStaffHtml(p.alumniBatch) : ''}</span>`
-                : '';
-            return `${alumni}${education}${contactHtml}`;
         }
 
         function renderStaff() {
@@ -1380,17 +1386,17 @@
             (SCHOOL_DATA.executives || []).forEach((rawPerson, index) => {
                 const person = normalizeStaffPerson(rawPerson);
                 const search = `${person.name || ''} ${person.position || ''} ${person.education || ''} ${person.phone || ''} ${person.email || ''} ${person.alumniBatch || ''}`.toLowerCase();
-                execContainer.innerHTML += `<button type="button" onclick="openStaffProfileModal('executives',${index})" data-staff-card data-category="executive" data-search="${escapeStaffHtml(search)}" class="w-full glass-panel rounded-2xl p-6 flex flex-col items-center text-center hover:shadow-lg hover:border-orange-300 transition-all group cursor-pointer"><div class="w-24 h-24 rounded-full overflow-hidden mb-4 border-4 border-white/60 shadow-sm group-hover:border-orange-200 transition-colors bg-orange-50"><img src="${escapeStaffHtml(person.img || '')}" alt="${escapeStaffHtml(person.name || '')}" class="w-full h-full object-cover" loading="lazy"></div><span class="text-[10px] font-bold text-orange-600 bg-orange-50 border border-orange-100 px-2 py-1 rounded-full mb-2">คณะผู้บริหาร</span><h4 class="font-bold text-slate-800 mb-1 group-hover:text-orange-600 transition-colors">${escapeStaffHtml(person.name || '')}</h4><p class="text-xs text-orange-600 font-medium">${escapeStaffHtml(person.position || '')}</p>${staffExtraHtml(person)}<span class="text-[10px] text-orange-500 font-semibold mt-3">กดเพื่อดูรายละเอียดทั้งหมด</span></button>`;
+                execContainer.innerHTML += `<button type="button" onclick="openStaffProfileModal('executives',${index})" data-staff-card data-category="executive" data-search="${escapeStaffHtml(search)}" class="w-full glass-panel rounded-2xl p-6 flex flex-col items-center text-center hover:shadow-lg hover:border-orange-300 transition-all group cursor-pointer"><div class="w-24 h-24 rounded-full overflow-hidden mb-4 border-4 border-white/60 shadow-sm group-hover:border-orange-200 transition-colors bg-orange-50"><img src="${escapeStaffHtml(person.img || '')}" alt="${escapeStaffHtml(person.name || '')}" class="w-full h-full object-cover" loading="lazy"></div><span class="text-[10px] font-bold text-orange-600 bg-orange-50 border border-orange-100 px-2 py-1 rounded-full mb-2">คณะผู้บริหาร</span><h4 class="font-bold text-slate-800 mb-1 group-hover:text-orange-600 transition-colors">${escapeStaffHtml(person.name || '')}</h4><p class="text-xs text-orange-600 font-medium">${escapeStaffHtml(person.position || '')}</p>${staffExtraHtml(person)}</button>`;
             });
             (SCHOOL_DATA.teachers || []).forEach((rawPerson, index) => {
                 const person = normalizeStaffPerson(rawPerson);
                 const search = `${person.name || ''} ${person.department || ''} ${person.position || ''} ${person.education || ''} ${person.phone || ''} ${person.email || ''} ${person.alumniBatch || ''}`.toLowerCase();
-                teacherContainer.innerHTML += `<button type="button" onclick="openStaffProfileModal('teachers',${index})" data-staff-card data-category="teacher" data-search="${escapeStaffHtml(search)}" class="w-full glass-panel rounded-2xl p-5 flex flex-col items-center text-center hover:shadow-lg hover:-translate-y-1 hover:border-orange-200 transition-all group cursor-pointer"><div class="w-24 h-24 rounded-2xl overflow-hidden mb-4 border-4 border-white/70 shadow-sm bg-slate-100 group-hover:shadow-md transition-all"><img src="${escapeStaffHtml(person.img || '')}" alt="${escapeStaffHtml(person.name || '')}" class="w-full h-full object-cover" loading="lazy"></div><h4 class="text-sm font-bold text-slate-800 mb-1 group-hover:text-orange-600 transition-colors">${escapeStaffHtml(person.name || '')}</h4>${person.position ? `<p class="text-[11px] text-orange-600 font-semibold mb-1">${escapeStaffHtml(person.position)}</p>` : ''}<p class="text-[10px] text-slate-600 bg-white/60 border border-white/70 px-2.5 py-1.5 rounded-lg">${escapeStaffHtml(person.department || '')}</p>${staffExtraHtml(person)}<span class="text-[10px] text-orange-500 font-semibold mt-3">กดเพื่อดูรายละเอียดทั้งหมด</span></button>`;
+                teacherContainer.innerHTML += `<button type="button" onclick="openStaffProfileModal('teachers',${index})" data-staff-card data-category="teacher" data-search="${escapeStaffHtml(search)}" class="w-full glass-panel rounded-2xl p-5 flex flex-col items-center text-center hover:shadow-lg hover:-translate-y-1 hover:border-orange-200 transition-all group cursor-pointer"><div class="w-24 h-24 rounded-2xl overflow-hidden mb-4 border-4 border-white/70 shadow-sm bg-slate-100 group-hover:shadow-md transition-all"><img src="${escapeStaffHtml(person.img || '')}" alt="${escapeStaffHtml(person.name || '')}" class="w-full h-full object-cover" loading="lazy"></div><h4 class="text-sm font-bold text-slate-800 mb-1 group-hover:text-orange-600 transition-colors">${escapeStaffHtml(person.name || '')}</h4>${person.position ? `<p class="text-[11px] text-orange-600 font-semibold mb-1">${escapeStaffHtml(person.position)}</p>` : ''}<p class="text-[10px] text-slate-600 bg-white/60 border border-white/70 px-2.5 py-1.5 rounded-lg">${escapeStaffHtml(person.department || '')}</p>${staffExtraHtml(person)}</button>`;
             });
             (SCHOOL_DATA.specialTeachers || []).forEach((rawPerson, index) => {
                 const person = normalizeStaffPerson(rawPerson);
                 const search = `${person.name || ''} ${person.department || ''} ${person.position || ''} ${person.education || ''} ${person.phone || ''} ${person.email || ''} ${person.alumniBatch || ''}`.toLowerCase();
-                specialTeacherContainer.innerHTML += `<button type="button" onclick="openStaffProfileModal('specialTeachers',${index})" data-staff-card data-category="special" data-search="${escapeStaffHtml(search)}" class="w-full glass-panel rounded-2xl p-5 flex flex-col items-center text-center hover:shadow-lg hover:border-orange-300 hover:-translate-y-1 transition-all group bg-orange-50/30 cursor-pointer"><div class="w-24 h-24 rounded-2xl overflow-hidden mb-4 border-4 border-white shadow-sm bg-orange-50 group-hover:scale-105 transition-transform"><img src="${escapeStaffHtml(person.img || '')}" alt="${escapeStaffHtml(person.name || '')}" class="w-full h-full object-cover" loading="lazy"></div><span class="text-[10px] font-bold text-amber-700 bg-amber-50 border border-amber-100 px-2 py-1 rounded-full mb-2">ครูพิเศษ</span><h4 class="text-sm font-bold text-slate-800 mb-1 group-hover:text-orange-600 transition-colors">${escapeStaffHtml(person.name || '')}</h4><p class="text-[10px] text-orange-600 bg-orange-100/80 border border-orange-200 px-2 py-1 rounded-md">${escapeStaffHtml(person.department || '')}</p>${staffExtraHtml(person)}<span class="text-[10px] text-orange-500 font-semibold mt-3">กดเพื่อดูรายละเอียดทั้งหมด</span></button>`;
+                specialTeacherContainer.innerHTML += `<button type="button" onclick="openStaffProfileModal('specialTeachers',${index})" data-staff-card data-category="special" data-search="${escapeStaffHtml(search)}" class="w-full glass-panel rounded-2xl p-5 flex flex-col items-center text-center hover:shadow-lg hover:border-orange-300 hover:-translate-y-1 transition-all group bg-orange-50/30 cursor-pointer"><div class="w-24 h-24 rounded-2xl overflow-hidden mb-4 border-4 border-white shadow-sm bg-orange-50 group-hover:scale-105 transition-transform"><img src="${escapeStaffHtml(person.img || '')}" alt="${escapeStaffHtml(person.name || '')}" class="w-full h-full object-cover" loading="lazy"></div><span class="text-[10px] font-bold text-amber-700 bg-amber-50 border border-amber-100 px-2 py-1 rounded-full mb-2">ครูพิเศษ</span><h4 class="text-sm font-bold text-slate-800 mb-1 group-hover:text-orange-600 transition-colors">${escapeStaffHtml(person.name || '')}</h4><p class="text-[10px] text-orange-600 bg-orange-100/80 border border-orange-200 px-2 py-1 rounded-md">${escapeStaffHtml(person.department || '')}</p>${staffExtraHtml(person)}</button>`;
             });
             initStaffFilters();
             lucide.createIcons();

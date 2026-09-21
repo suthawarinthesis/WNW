@@ -5,6 +5,8 @@ let achievements = [];
 let news = [];
 let newsTableReady = true;
 let newsLoadError = null;
+let personnelTableReady = true;
+let personnelLoadError = null;
 let currentStaffKind = 'teachers';
 
 const $ = s => document.querySelector(s);
@@ -97,24 +99,56 @@ function showLoginError(msg){$('#login-error').textContent=msg;$('#login-error')
 
 async function loadAll(){
   const fallback=await loadDefault();settings=clone(fallback);
-  const [s,a,n]=await Promise.all([
+  const [s,a,n,p]=await Promise.all([
     db.from('site_settings').select('data,updated_at').eq('id',1).maybeSingle(),
     db.from('achievements').select('*').order('created_at',{ascending:false}),
-    db.from('news').select('*').order('sort_order',{ascending:true}).order('created_at',{ascending:false})
+    db.from('news').select('*').order('sort_order',{ascending:true}).order('created_at',{ascending:false}),
+    db.from('personnel').select('*').order('staff_type',{ascending:true}).order('sort_order',{ascending:true}).order('created_at',{ascending:true})
   ]);
   if(s.data?.data)settings=mergeDefaults(fallback,s.data.data);
-  // News now lives in its own Supabase table. Do not keep/save a duplicate JSON copy.
+  // News and personnel now live in dedicated Supabase tables. Do not keep/save duplicate JSON copies.
   delete settings.news;
   if(settings.introPage?.subtitle)settings.introPage.subtitle=String(settings.introPage.subtitle).replace(/<br\s*\/?>/gi,'\n');
   achievements=a.data||[];
   newsTableReady=!n.error;
   newsLoadError=n.error||null;
   news=n.data||[];
+  personnelTableReady=!p.error;
+  personnelLoadError=p.error||null;
+  if(personnelTableReady){
+    settings.executives=[]; settings.teachers=[]; settings.specialTeachers=[];
+    (p.data||[]).forEach(row=>{
+      const kind=['executives','teachers','specialTeachers'].includes(row.staff_type)?row.staff_type:'teachers';
+      settings[kind].push(personnelRowToStaff(row));
+    });
+  }
 }
 function mergeDefaults(base,incoming){
   if(Array.isArray(base))return Array.isArray(incoming)?clone(incoming):clone(base);
   if(base&&typeof base==='object'){const out=clone(base);if(incoming&&typeof incoming==='object')Object.keys(incoming).forEach(k=>{out[k]=(k in base)?mergeDefaults(base[k],incoming[k]):clone(incoming[k])});return out}
   return incoming===undefined?base:incoming;
+}
+
+function personnelRowToStaff(row={}){
+  return {
+    id:row.id||'', name:row.full_name||'', position:row.position||'', department:row.department||'',
+    img:row.image_url||'', education:row.education||'', phone:row.phone||'', email:row.email||'',
+    isAlumni:!!row.is_alumni, alumniBatch:row.alumni_batch||'', published:row.published!==false,
+    sortOrder:Number(row.sort_order||0)
+  };
+}
+function staffToPersonnelRow(item={},kind='teachers',sortOrder=0){
+  return {
+    staff_type:kind, full_name:String(item.name||'').trim(), position:String(item.position||'').trim(),
+    department:String(item.department||'').trim(), image_url:String(item.img||'').trim(),
+    education:String(item.education||'').trim(), phone:String(item.phone||'').trim(), email:String(item.email||'').trim(),
+    is_alumni:!!item.isAlumni, alumni_batch:item.isAlumni?String(item.alumniBatch||'').trim():'',
+    published:item.published!==false, sort_order:Number.isFinite(Number(sortOrder))?Number(sortOrder):0
+  };
+}
+function nextPersonnelSortOrder(kind){
+  const arr=settings[kind]||[];
+  return arr.length?Math.max(...arr.map(x=>Number(x.sortOrder||0)))+10:0;
 }
 
 function bindUI(){
@@ -148,7 +182,7 @@ function refreshDerived(dirty=true){
 }
 
 async function saveSettings(){
-  const btn=$('#save-btn');try{btn.disabled=true;$('#save-status').textContent='กำลังบันทึก...';const payload=clone(settings);delete payload.news;const {error}=await db.from('site_settings').upsert({id:1,data:payload,updated_at:new Date().toISOString()},{onConflict:'id'});if(error)throw error;$('#save-status').textContent='บันทึกแล้ว '+new Date().toLocaleTimeString('th-TH',{hour:'2-digit',minute:'2-digit'});toast('บันทึกและเผยแพร่ข้อมูลเรียบร้อย')}
+  const btn=$('#save-btn');try{btn.disabled=true;$('#save-status').textContent='กำลังบันทึก...';const payload=clone(settings);delete payload.news;if(personnelTableReady){delete payload.executives;delete payload.teachers;delete payload.specialTeachers;}const {error}=await db.from('site_settings').upsert({id:1,data:payload,updated_at:new Date().toISOString()},{onConflict:'id'});if(error)throw error;$('#save-status').textContent='บันทึกแล้ว '+new Date().toLocaleTimeString('th-TH',{hour:'2-digit',minute:'2-digit'});toast('บันทึกและเผยแพร่ข้อมูลเรียบร้อย')}
   catch(e){$('#save-status').textContent='บันทึกไม่สำเร็จ';toast(e.message,true)}finally{btn.disabled=false}
 }
 
@@ -162,10 +196,26 @@ function renderBanners(){
 function moveArrayItem(arr,index,dir,rerender){const to=index+dir;if(to<0||to>=arr.length)return;[arr[index],arr[to]]=[arr[to],arr[index]];rerender();markDirty()}
 
 function renderStaff(){
-  const list=$('#staff-list'),arr=settings[currentStaffKind]||[],isExec=currentStaffKind==='executives';
+  const list=$('#staff-list'),arr=settings[currentStaffKind]||[],isExec=currentStaffKind==='executives',status=$('#personnel-db-status'),addBtn=$('#add-staff');
+  if(!personnelTableReady){
+    if(status){status.className='rounded-2xl bg-red-50 text-red-700 px-4 py-3 text-xs font-bold';status.textContent='ยังไม่พบตาราง personnel ใน Supabase — กรุณารันไฟล์ supabase/personnel-system.sql ก่อน';}
+    if(addBtn)addBtn.disabled=true;
+    list.innerHTML='<div class="md:col-span-2 xl:col-span-3 rounded-3xl bg-red-50 p-8 text-center text-sm text-red-500">ระบบบุคลากรยังเชื่อมฐานข้อมูลไม่ได้</div>';
+    lucide.createIcons(); return;
+  }
+  if(status){status.className='rounded-2xl bg-green-50 text-green-700 px-4 py-3 text-xs font-bold';status.textContent=`เชื่อมต่อ Supabase personnel แล้ว • บุคลากรทั้งหมด ${(settings.executives?.length||0)+(settings.teachers?.length||0)+(settings.specialTeachers?.length||0)} รายการ • บันทึกอัตโนมัติ`; }
+  if(addBtn)addBtn.disabled=false;
   list.innerHTML=arr.map((p,i)=>`<article class="glass rounded-3xl p-5 flex gap-4 items-center"><img src="${esc(p.img||'')}" class="w-20 h-20 rounded-2xl object-cover bg-slate-100"><div class="min-w-0 flex-1"><div class="flex items-center gap-2 flex-wrap"><h4 class="font-bold truncate">${esc(p.name||'-')}</h4>${p.isAlumni?`<span class="text-[10px] font-bold bg-amber-50 text-amber-700 border border-amber-200 px-2 py-0.5 rounded-full">ศิษย์เก่า${p.alumniBatch?' • '+esc(p.alumniBatch):''}</span>`:''}</div><p class="text-xs text-slate-500 mt-1 line-clamp-2">${esc(isExec?(p.position||''):(p.position||p.department||''))}</p><p class="text-[10px] text-slate-400 mt-1">${p.phone?'☎ '+esc(p.phone):''}${p.phone&&p.email?' • ':''}${p.email?'✉ '+esc(p.email):''}</p></div><div class="flex flex-col gap-2"><button class="p-2.5 rounded-xl bg-orange-50 text-orange-600" data-edit-staff="${i}"><i data-lucide="pencil" class="w-4 h-4"></i></button><button class="p-2.5 rounded-xl bg-red-50 text-red-500" data-delete-staff="${i}"><i data-lucide="trash-2" class="w-4 h-4"></i></button></div></article>`).join('')||'<div class="md:col-span-2 xl:col-span-3 glass rounded-3xl p-10 text-center text-slate-400">ยังไม่มีบุคลากรในหมวดนี้</div>';
-  $$('[data-edit-staff]').forEach(b=>b.addEventListener('click',()=>openStaffEditor(+b.dataset.editStaff)));$$('[data-delete-staff]').forEach(b=>b.addEventListener('click',async()=>{if(confirm('ลบบุคลากรรายการนี้?')){settings[currentStaffKind].splice(+b.dataset.deleteStaff,1);renderStaff();refreshDerived(false);await saveSettings()}}));lucide.createIcons();
+  $$('[data-edit-staff]').forEach(b=>b.addEventListener('click',()=>openStaffEditor(+b.dataset.editStaff)));
+  $$('[data-delete-staff]').forEach(b=>b.addEventListener('click',async()=>{
+    const i=+b.dataset.deleteStaff,item=(settings[currentStaffKind]||[])[i]; if(!item||!confirm('ลบบุคลากรรายการนี้?'))return;
+    if(!item.id){toast('ไม่พบรหัสบุคลากร กรุณารีเฟรชหน้า Manager',true);return;}
+    const {error}=await db.from('personnel').delete().eq('id',item.id);
+    if(error){toast(error.message,true);return;}
+    settings[currentStaffKind].splice(i,1);renderStaff();refreshDerived(false);toast('ลบบุคลากรแล้ว');
+  }));lucide.createIcons();
 }
+
 function openStaffEditor(index=null){
   const editing=index!==null,item=editing?clone(settings[currentStaffKind][index]):{name:'',department:'',position:'',img:'',education:'',phone:'',email:'',isAlumni:false,alumniBatch:''};$('#modal-title').textContent=editing?'แก้ไขบุคลากร':'เพิ่มบุคลากร';$('#modal-help').textContent='ข้อมูลนี้จะแสดงในทำเนียบบุคลากรทันทีหลังบันทึกรายการ หากเป็นศิษย์เก่าให้ติ๊กและระบุรุ่น';
   $('#editor-form').innerHTML=`
@@ -202,11 +252,23 @@ function openStaffEditor(index=null){
       return;
     }
     alumniInput.setCustomValidity('');
-    const value={name:f.get('name'),position:f.get('position'),department:f.get('department'),education:f.get('education'),phone:f.get('phone'),email:f.get('email'),isAlumni,alumniBatch:isAlumni?String(f.get('alumniBatch')||'').trim():'',img:f.get('img')};
+    const value={name:f.get('name'),position:f.get('position'),department:f.get('department'),education:f.get('education'),phone:f.get('phone'),email:f.get('email'),isAlumni,alumniBatch:isAlumni?String(f.get('alumniBatch')||'').trim():'',img:f.get('img'),published:true};
+    if(!personnelTableReady){toast('ยังไม่พบตาราง personnel ใน Supabase',true);return;}
     settings[currentStaffKind]=settings[currentStaffKind]||[];
-    if(editing)settings[currentStaffKind][index]=value;else settings[currentStaffKind].push(value);
-    closeModal();renderStaff();refreshDerived(false);
-    await saveSettings();
+    try{
+      if(editing){
+        const old=settings[currentStaffKind][index];
+        if(!old?.id)throw new Error('ไม่พบรหัสบุคลากร กรุณารีเฟรชหน้า Manager');
+        const row=staffToPersonnelRow(value,currentStaffKind,old.sortOrder??index*10);
+        const {data,error}=await db.from('personnel').update(row).eq('id',old.id).select().single();
+        if(error)throw error; settings[currentStaffKind][index]=personnelRowToStaff(data);
+      }else{
+        const row=staffToPersonnelRow(value,currentStaffKind,nextPersonnelSortOrder(currentStaffKind));
+        const {data,error}=await db.from('personnel').insert(row).select().single();
+        if(error)throw error; settings[currentStaffKind].push(personnelRowToStaff(data));
+      }
+      closeModal();renderStaff();refreshDerived(false);toast(editing?'แก้ไขข้อมูลบุคลากรแล้ว':'เพิ่มบุคลากรแล้ว');
+    }catch(err){toast(err.message||'บันทึกบุคลากรไม่สำเร็จ',true);}
   };
   staffFile.onchange=async e=>{if(!e.target.files?.[0])return;const file=e.target.files[0];previewSelectedImage(staffFile,file);const url=await uploadFile(file,'staff');if(url){staffUrl.value=url;setImagePreview(staffFile,url,'อัปโหลดแล้ว • พร้อมบันทึกรายการ')}};openModal();
 }

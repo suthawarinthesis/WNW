@@ -20,9 +20,10 @@ async function loadData(){
     renderError('ยังไม่ได้เชื่อมต่อ Supabase');
     return;
   }
-  const [{data:settingsRow,error:settingsError},{data:rows,error:alumniError}] = await Promise.all([
+  const [{data:settingsRow,error:settingsError},{data:rows,error:alumniError},{data:personnelRows,error:personnelError}] = await Promise.all([
     db.from('site_settings').select('data').eq('id',1).maybeSingle(),
-    db.from('alumni').select('*').eq('published',true).order('sort_order',{ascending:true}).order('full_name',{ascending:true})
+    db.from('alumni').select('*').eq('published',true).order('sort_order',{ascending:true}).order('full_name',{ascending:true}),
+    db.from('personnel').select('*').eq('published',true).eq('is_alumni',true).order('sort_order',{ascending:true}).order('full_name',{ascending:true})
   ]);
   if(settingsError) console.warn(settingsError);
   if(alumniError){
@@ -37,11 +38,27 @@ async function loadData(){
     education:r.education, phone:r.phone, email:r.email, facebookUrl:r.facebook_url, bio:r.bio,
     showContact:!!r.show_contact, featured:!!r.featured
   }));
-  staffAlumni = extractStaffAlumni(schoolSettings);
+  if(personnelError){
+    console.warn('personnel table unavailable; using legacy staff arrays from site_settings', personnelError);
+    staffAlumni = extractStaffAlumni(schoolSettings);
+  }else{
+    staffAlumni = extractPersonnelAlumni(personnelRows||[]);
+  }
   combined = mergeAlumni(alumniRows, staffAlumni);
   applyBranding();
   populateBatches();
   render();
+}
+
+function extractPersonnelAlumni(rows){
+  const labels={executives:'คณะผู้บริหาร',teachers:'ครูและบุคลากร',specialTeachers:'ครูพิเศษ'};
+  return (rows||[]).filter(p=>p?.is_alumni).map((p,i)=>({
+    id:`staff-${p.id||i}`, source:'staff', staffKind:p.staff_type||'teachers', fullName:p.full_name||'', photo:p.image_url||'',
+    batch:p.alumni_batch||'', graduationYear:'', graduationLevel:'', currentPosition:p.position||'',
+    occupation:p.position||'', organization:p.department||labels[p.staff_type]||'บุคลากร', education:p.education||'', phone:p.phone||'',
+    email:p.email||'', facebookUrl:'', bio:`ปัจจุบันเป็น${p.position||labels[p.staff_type]||'บุคลากร'}${p.department?' • '+p.department:''}`,
+    showContact:true, featured:false, staffLabel:labels[p.staff_type]||'บุคลากร'
+  }));
 }
 
 function extractStaffAlumni(s){

@@ -582,6 +582,39 @@
     <!-- 🟢 หน้าต่างป๊อปอัพ (Modals) -->
     <!-- ========================================== -->
     
+    <!-- MODAL: โปรไฟล์บุคลากร -->
+    <div id="staff-profile-modal" class="fixed inset-0 z-[110] hidden items-center justify-center p-4">
+        <div class="absolute inset-0 bg-slate-900/60 backdrop-blur-sm" onclick="closeStaffProfileModal()"></div>
+        <div class="glass-panel bg-white/95 relative z-10 w-full max-w-2xl max-h-[90vh] rounded-[2rem] overflow-hidden shadow-2xl border border-white flex flex-col">
+            <div class="flex justify-between items-center p-5 sm:p-6 border-b border-slate-100">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-full bg-orange-100 text-orange-600 flex items-center justify-center"><i data-lucide="user-round" class="w-5 h-5"></i></div>
+                    <div><h2 class="text-xl font-bold text-slate-800">ข้อมูลบุคลากร</h2><p class="text-xs text-slate-400">ทำเนียบบุคลากรโรงเรียน</p></div>
+                </div>
+                <button onclick="closeStaffProfileModal()" class="w-10 h-10 rounded-full bg-slate-100 hover:bg-red-50 text-slate-400 hover:text-red-500 flex items-center justify-center"><i data-lucide="x" class="w-5 h-5"></i></button>
+            </div>
+            <div class="overflow-y-auto p-5 sm:p-7">
+                <div class="flex flex-col sm:flex-row gap-6 items-center sm:items-start">
+                    <img id="staff-modal-img" src="" alt="รูปบุคลากร" class="w-32 h-32 rounded-[1.75rem] object-cover bg-slate-100 border-4 border-white shadow-md shrink-0">
+                    <div class="flex-1 text-center sm:text-left min-w-0">
+                        <div id="staff-modal-badges" class="flex flex-wrap gap-2 justify-center sm:justify-start mb-2"></div>
+                        <h3 id="staff-modal-name" class="text-2xl font-bold text-slate-900"></h3>
+                        <p id="staff-modal-position" class="text-sm font-semibold text-orange-600 mt-1"></p>
+                        <p id="staff-modal-department" class="text-sm text-slate-500 mt-1"></p>
+                        <div class="flex flex-wrap gap-2 justify-center sm:justify-start mt-4">
+                            <a id="staff-modal-phone-link" href="#" class="hidden items-center gap-2 px-3 py-2 rounded-xl bg-orange-50 text-orange-700 text-xs font-bold"><i data-lucide="phone" class="w-4 h-4"></i><span id="staff-modal-phone"></span></a>
+                            <a id="staff-modal-email-link" href="#" class="hidden items-center gap-2 px-3 py-2 rounded-xl bg-blue-50 text-blue-700 text-xs font-bold"><i data-lucide="mail" class="w-4 h-4"></i><span id="staff-modal-email"></span></a>
+                        </div>
+                    </div>
+                </div>
+                <div id="staff-modal-education-wrap" class="mt-7 rounded-2xl bg-slate-50 border border-slate-100 p-5 hidden">
+                    <h4 class="font-bold text-slate-800 flex items-center gap-2 mb-3"><i data-lucide="graduation-cap" class="w-4 h-4 text-orange-500"></i> ประวัติการศึกษา</h4>
+                    <div id="staff-modal-education" class="space-y-2 text-sm text-slate-600 leading-relaxed"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- MODAL: ร่วมทำบุญ (Donation) -->
     <div id="donation-modal" class="fixed inset-0 z-[100] hidden items-center justify-center">
         <div class="absolute inset-0 bg-slate-900/60 backdrop-blur-sm" onclick="closeDonationModal()"></div>
@@ -1219,25 +1252,81 @@
             });
         }
 
+        function openStaffProfileModal(kind, index) {
+            const group = SCHOOL_DATA[kind] || [];
+            const person = group[index];
+            if (!person) return;
+            const modal = document.getElementById('staff-profile-modal');
+            const img = document.getElementById('staff-modal-img');
+            img.src = person.img || '';
+            img.alt = person.name || 'รูปบุคลากร';
+            document.getElementById('staff-modal-name').textContent = person.name || '-';
+            document.getElementById('staff-modal-position').textContent = person.position || '';
+            document.getElementById('staff-modal-department').textContent = person.department || '';
+            const badges = document.getElementById('staff-modal-badges');
+            badges.innerHTML = '';
+            const kindLabel = kind === 'executives' ? 'คณะผู้บริหาร' : kind === 'specialTeachers' ? 'ครูพิเศษ' : 'ครูและบุคลากร';
+            const kindBadge = document.createElement('span');
+            kindBadge.className = 'text-[10px] font-bold text-orange-700 bg-orange-50 border border-orange-100 px-2.5 py-1 rounded-full';
+            kindBadge.textContent = kindLabel;
+            badges.appendChild(kindBadge);
+            if (person.isAlumni) {
+                const alumniBadge = document.createElement('span');
+                alumniBadge.className = 'text-[10px] font-bold text-amber-800 bg-amber-50 border border-amber-200 px-2.5 py-1 rounded-full';
+                alumniBadge.textContent = `ศิษย์เก่า${person.alumniBatch ? ' • ' + person.alumniBatch : ''}`;
+                badges.appendChild(alumniBadge);
+            }
+            const phoneLink = document.getElementById('staff-modal-phone-link');
+            const emailLink = document.getElementById('staff-modal-email-link');
+            if (person.phone) {
+                document.getElementById('staff-modal-phone').textContent = person.phone;
+                phoneLink.href = `tel:${String(person.phone).replace(/[^0-9+]/g,'')}`;
+                phoneLink.classList.remove('hidden'); phoneLink.classList.add('inline-flex');
+            } else { phoneLink.classList.add('hidden'); phoneLink.classList.remove('inline-flex'); }
+            if (person.email) {
+                document.getElementById('staff-modal-email').textContent = person.email;
+                emailLink.href = `mailto:${person.email}`;
+                emailLink.classList.remove('hidden'); emailLink.classList.add('inline-flex');
+            } else { emailLink.classList.add('hidden'); emailLink.classList.remove('inline-flex'); }
+            const educationWrap = document.getElementById('staff-modal-education-wrap');
+            const education = document.getElementById('staff-modal-education');
+            education.innerHTML = '';
+            const lines = String(person.education || '').split(/\n+/).map(x => x.trim()).filter(Boolean);
+            if (lines.length) {
+                lines.forEach(line => { const p = document.createElement('p'); p.textContent = line; education.appendChild(p); });
+                educationWrap.classList.remove('hidden');
+            } else { educationWrap.classList.add('hidden'); }
+            modal.classList.remove('hidden'); modal.classList.add('flex'); document.body.style.overflow = 'hidden'; lucide.createIcons();
+        }
+
+        function closeStaffProfileModal() {
+            const modal = document.getElementById('staff-profile-modal');
+            modal.classList.add('hidden'); modal.classList.remove('flex'); document.body.style.overflow = 'auto';
+        }
+
         function renderStaff() {
             const execContainer = document.getElementById('executives-container');
             const teacherContainer = document.getElementById('teachers-container');
             const specialTeacherContainer = document.getElementById('special-teachers-container');
             execContainer.innerHTML = ''; teacherContainer.innerHTML = ''; specialTeacherContainer.innerHTML = '';
 
-            SCHOOL_DATA.executives.forEach(person => {
-                const search = `${person.name || ''} ${person.position || ''}`.toLowerCase();
-                execContainer.innerHTML += `<div data-staff-card data-category="executive" data-search="${search}" class="glass-panel rounded-2xl p-6 flex flex-col items-center text-center hover:shadow-lg hover:border-orange-300 transition-all group"><div class="w-24 h-24 rounded-full overflow-hidden mb-4 border-4 border-white/60 shadow-sm group-hover:border-orange-200 transition-colors bg-orange-50"><img src="${person.img || ''}" alt="${person.name}" class="w-full h-full object-cover" loading="lazy"></div><span class="text-[10px] font-bold text-orange-600 bg-orange-50 border border-orange-100 px-2 py-1 rounded-full mb-2">คณะผู้บริหาร</span><h4 class="font-bold text-slate-800 mb-1 group-hover:text-orange-600 transition-colors">${person.name}</h4><p class="text-xs text-orange-600 font-medium">${person.position || ''}</p></div>`;
+            SCHOOL_DATA.executives.forEach((person, index) => {
+                const search = `${person.name || ''} ${person.position || ''} ${person.education || ''} ${person.phone || ''} ${person.email || ''} ${person.alumniBatch || ''}`.toLowerCase();
+                const alumni = person.isAlumni ? `<span class="text-[10px] font-bold text-amber-800 bg-amber-50 border border-amber-200 px-2 py-1 rounded-full mt-2">ศิษย์เก่า${person.alumniBatch ? ' • '+person.alumniBatch : ''}</span>` : '';
+                execContainer.innerHTML += `<button type="button" onclick="openStaffProfileModal('executives',${index})" data-staff-card data-category="executive" data-search="${search}" class="w-full glass-panel rounded-2xl p-6 flex flex-col items-center text-center hover:shadow-lg hover:border-orange-300 transition-all group cursor-pointer"><div class="w-24 h-24 rounded-full overflow-hidden mb-4 border-4 border-white/60 shadow-sm group-hover:border-orange-200 transition-colors bg-orange-50"><img src="${person.img || ''}" alt="${person.name}" class="w-full h-full object-cover" loading="lazy"></div><span class="text-[10px] font-bold text-orange-600 bg-orange-50 border border-orange-100 px-2 py-1 rounded-full mb-2">คณะผู้บริหาร</span><h4 class="font-bold text-slate-800 mb-1 group-hover:text-orange-600 transition-colors">${person.name}</h4><p class="text-xs text-orange-600 font-medium">${person.position || ''}</p>${alumni}<span class="text-[10px] text-slate-400 mt-3">กดเพื่อดูประวัติ</span></button>`;
             });
-            SCHOOL_DATA.teachers.forEach(person => {
-                const search = `${person.name || ''} ${person.department || ''} ${person.position || ''}`.toLowerCase();
-                teacherContainer.innerHTML += `<div data-staff-card data-category="teacher" data-search="${search}" class="glass-panel rounded-2xl p-5 flex flex-col items-center text-center hover:shadow-lg hover:-translate-y-1 hover:border-orange-200 transition-all group"><div class="w-24 h-24 rounded-2xl overflow-hidden mb-4 border-4 border-white/70 shadow-sm bg-slate-100 group-hover:shadow-md transition-all"><img src="${person.img || ''}" alt="${person.name}" class="w-full h-full object-cover" loading="lazy"></div><h4 class="text-sm font-bold text-slate-800 mb-1 group-hover:text-orange-600 transition-colors">${person.name}</h4>${person.position ? `<p class="text-[11px] text-orange-600 font-semibold mb-1">${person.position}</p>` : ''}<p class="text-[10px] text-slate-600 bg-white/60 border border-white/70 px-2.5 py-1.5 rounded-lg">${person.department || ''}</p></div>`;
+            SCHOOL_DATA.teachers.forEach((person, index) => {
+                const search = `${person.name || ''} ${person.department || ''} ${person.position || ''} ${person.education || ''} ${person.phone || ''} ${person.email || ''} ${person.alumniBatch || ''}`.toLowerCase();
+                const alumni = person.isAlumni ? `<span class="text-[10px] font-bold text-amber-800 bg-amber-50 border border-amber-200 px-2 py-1 rounded-full mt-2">ศิษย์เก่า${person.alumniBatch ? ' • '+person.alumniBatch : ''}</span>` : '';
+                teacherContainer.innerHTML += `<button type="button" onclick="openStaffProfileModal('teachers',${index})" data-staff-card data-category="teacher" data-search="${search}" class="w-full glass-panel rounded-2xl p-5 flex flex-col items-center text-center hover:shadow-lg hover:-translate-y-1 hover:border-orange-200 transition-all group cursor-pointer"><div class="w-24 h-24 rounded-2xl overflow-hidden mb-4 border-4 border-white/70 shadow-sm bg-slate-100 group-hover:shadow-md transition-all"><img src="${person.img || ''}" alt="${person.name}" class="w-full h-full object-cover" loading="lazy"></div><h4 class="text-sm font-bold text-slate-800 mb-1 group-hover:text-orange-600 transition-colors">${person.name}</h4>${person.position ? `<p class="text-[11px] text-orange-600 font-semibold mb-1">${person.position}</p>` : ''}<p class="text-[10px] text-slate-600 bg-white/60 border border-white/70 px-2.5 py-1.5 rounded-lg">${person.department || ''}</p>${alumni}<span class="text-[10px] text-slate-400 mt-3">กดเพื่อดูประวัติ</span></button>`;
             });
-            SCHOOL_DATA.specialTeachers.forEach(person => {
-                const search = `${person.name || ''} ${person.department || ''} ${person.position || ''}`.toLowerCase();
-                specialTeacherContainer.innerHTML += `<div data-staff-card data-category="special" data-search="${search}" class="glass-panel rounded-2xl p-5 flex flex-col items-center text-center hover:shadow-lg hover:border-orange-300 hover:-translate-y-1 transition-all group bg-orange-50/30"><div class="w-24 h-24 rounded-2xl overflow-hidden mb-4 border-4 border-white shadow-sm bg-orange-50 group-hover:scale-105 transition-transform"><img src="${person.img || ''}" alt="${person.name}" class="w-full h-full object-cover" loading="lazy"></div><span class="text-[10px] font-bold text-amber-700 bg-amber-50 border border-amber-100 px-2 py-1 rounded-full mb-2">ครูพิเศษ</span><h4 class="text-sm font-bold text-slate-800 mb-1 group-hover:text-orange-600 transition-colors">${person.name}</h4><p class="text-[10px] text-orange-600 bg-orange-100/80 border border-orange-200 px-2 py-1 rounded-md">${person.department || ''}</p></div>`;
+            SCHOOL_DATA.specialTeachers.forEach((person, index) => {
+                const search = `${person.name || ''} ${person.department || ''} ${person.position || ''} ${person.education || ''} ${person.phone || ''} ${person.email || ''} ${person.alumniBatch || ''}`.toLowerCase();
+                const alumni = person.isAlumni ? `<span class="text-[10px] font-bold text-amber-800 bg-amber-50 border border-amber-200 px-2 py-1 rounded-full mt-2">ศิษย์เก่า${person.alumniBatch ? ' • '+person.alumniBatch : ''}</span>` : '';
+                specialTeacherContainer.innerHTML += `<button type="button" onclick="openStaffProfileModal('specialTeachers',${index})" data-staff-card data-category="special" data-search="${search}" class="w-full glass-panel rounded-2xl p-5 flex flex-col items-center text-center hover:shadow-lg hover:border-orange-300 hover:-translate-y-1 transition-all group bg-orange-50/30 cursor-pointer"><div class="w-24 h-24 rounded-2xl overflow-hidden mb-4 border-4 border-white shadow-sm bg-orange-50 group-hover:scale-105 transition-transform"><img src="${person.img || ''}" alt="${person.name}" class="w-full h-full object-cover" loading="lazy"></div><span class="text-[10px] font-bold text-amber-700 bg-amber-50 border border-amber-100 px-2 py-1 rounded-full mb-2">ครูพิเศษ</span><h4 class="text-sm font-bold text-slate-800 mb-1 group-hover:text-orange-600 transition-colors">${person.name}</h4><p class="text-[10px] text-orange-600 bg-orange-100/80 border border-orange-200 px-2 py-1 rounded-md">${person.department || ''}</p>${alumni}<span class="text-[10px] text-slate-400 mt-3">กดเพื่อดูประวัติ</span></button>`;
             });
             initStaffFilters();
+            lucide.createIcons();
         }
 
         function initStaffFilters() {

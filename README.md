@@ -91,3 +91,11 @@ Intro/หน้ารำลึกจะแสดงตั้งแต่ first p
 - `./admission/manager/` ระบบเจ้าหน้าที่รับสมัคร
 
 ก่อนใช้งานให้รัน `supabase/admission-system.sql` ใน Supabase SQL Editor ดูรายละเอียดเพิ่มเติมที่ `admission/README.md`
+
+## Update: Personnel profile + News images
+
+- Personnel Manager fields now include education history, phone, email, alumni checkbox, and alumni batch/generation.
+- Alumni batch is required only when the alumni checkbox is enabled.
+- Public personnel cards show an alumni badge and open a detail modal with education/contact information.
+- News Manager supports cover-image upload with live preview; the image is stored in Supabase Storage and its public URL is saved in `news.image_url`.
+- No additional SQL migration is required for these personnel fields because personnel remain stored inside `site_settings.data`. The existing dedicated `news` table already contains `image_url`.

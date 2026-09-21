@@ -99,3 +99,16 @@ Intro/หน้ารำลึกจะแสดงตั้งแต่ first p
 - Public personnel cards show an alumni badge and open a detail modal with education/contact information.
 - News Manager supports cover-image upload with live preview; the image is stored in Supabase Storage and its public URL is saved in `news.image_url`.
 - No additional SQL migration is required for these personnel fields because personnel remain stored inside `site_settings.data`. The existing dedicated `news` table already contains `image_url`.
+
+---
+
+## Alumni Directory Subweb
+
+เพิ่มระบบสมุดทำเนียบศิษย์เก่าเป็น subweb แยก:
+
+- `./alumni/` — สมุดทำเนียบศิษย์เก่า ค้นหาและกรองตามรุ่นได้ พร้อมเปิดโปรไฟล์รายบุคคลและพิมพ์ทำเนียบรุ่น
+- `./alumni/manager/` — Alumni Manager สำหรับเพิ่ม/แก้ไข/ลบ/ซ่อน-แสดงข้อมูลศิษย์เก่า อัปโหลดรูป และ Export CSV
+
+ก่อนใช้งาน ให้รัน `supabase/alumni-directory.sql` ใน Supabase SQL Editor หนึ่งครั้ง
+
+ข้อมูลโลโก้และชื่อโรงเรียนดึงจาก `site_settings` ของเว็บหลักอัตโนมัติ ส่วนบุคลากรที่ถูกติ๊ก `isAlumni` ใน Website Manager จะถูกนำมาแสดงในทำเนียบศิษย์เก่าอัตโนมัติ โดยไม่ต้องเพิ่มซ้ำในตาราง `alumni`

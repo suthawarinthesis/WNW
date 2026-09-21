@@ -172,16 +172,41 @@ function openStaffEditor(index=null){
     <div><label class="label">ชื่อ-นามสกุล</label><input name="name" class="field" value="${esc(item.name)}" required></div>
     <div><label class="label">ตำแหน่ง</label><input name="position" class="field" value="${esc(item.position||'')}"></div>
     <div><label class="label">กลุ่มสาระ / หน้าที่</label><input name="department" class="field" value="${esc(item.department||'')}"></div>
-    <div><label class="label">ประวัติการศึกษา</label><textarea name="education" class="field min-h-28" placeholder="เช่น ปริญญาตรี ...&#10;ปริญญาโท ...">${esc(item.education||'')}</textarea><p class="text-[10px] text-slate-400 mt-1">กด Enter เพื่อแยกแต่ละวุฒิ/สถาบันได้</p></div>
-    <div class="grid sm:grid-cols-2 gap-3"><div><label class="label">เบอร์โทรศัพท์</label><input name="phone" type="tel" class="field" value="${esc(item.phone||'')}" placeholder="เช่น 08x-xxx-xxxx"></div><div><label class="label">Email</label><input name="email" type="email" class="field" value="${esc(item.email||'')}" placeholder="name@school.ac.th"></div></div>
-    <label class="flex items-center gap-3 p-4 rounded-2xl bg-orange-50 border border-orange-100"><input id="staff-is-alumni" name="isAlumni" type="checkbox" class="w-5 h-5 accent-orange-500" ${item.isAlumni?'checked':''}><div><span class="text-sm font-bold text-slate-800">เคยเป็นศิษย์เก่าโรงเรียน</span><p class="text-[10px] text-slate-500 mt-0.5">เมื่อเลือก ระบบจะแสดงป้ายศิษย์เก่าบนหน้าเว็บไซต์</p></div></label>
-    <div id="staff-alumni-batch-wrap" class="${item.isAlumni?'':'hidden'}"><label class="label">ศิษย์เก่ารุ่นที่</label><input name="alumniBatch" class="field" value="${esc(item.alumniBatch||'')}" placeholder="เช่น รุ่น 25 / รุ่นปีการศึกษา 2560"><p class="text-[10px] text-slate-400 mt-1">กรอกเฉพาะชื่อรุ่นหรือปีที่ต้องการให้แสดง</p></div>
+    <div class="rounded-2xl border border-orange-100 bg-orange-50/40 p-4 space-y-4">
+      <div><p class="text-sm font-bold text-slate-800">ข้อมูลเพิ่มเติมของบุคลากร</p><p class="text-[10px] text-slate-500 mt-0.5">ข้อมูลส่วนนี้จะแสดงเมื่อเปิดดูรายละเอียดบุคลากร</p></div>
+      <div><label class="label">ประวัติการศึกษา</label><textarea name="education" class="field min-h-28" placeholder="เช่น ปริญญาตรี ...&#10;ปริญญาโท ...">${esc(item.education||'')}</textarea><p class="text-[10px] text-slate-400 mt-1">กด Enter เพื่อแยกแต่ละวุฒิ/สถาบันได้</p></div>
+      <div class="grid sm:grid-cols-2 gap-3"><div><label class="label">เบอร์โทรศัพท์</label><input name="phone" type="tel" class="field" value="${esc(item.phone||'')}" placeholder="เช่น 08x-xxx-xxxx"></div><div><label class="label">Email</label><input name="email" type="email" class="field" value="${esc(item.email||'')}" placeholder="name@school.ac.th"></div></div>
+      <label class="flex items-center gap-3 p-4 rounded-2xl bg-white border border-orange-200 cursor-pointer"><input id="staff-is-alumni" name="isAlumni" type="checkbox" class="w-5 h-5 accent-orange-500" ${item.isAlumni?'checked':''}><div><span class="text-sm font-bold text-slate-800">เคยเป็นศิษย์เก่าโรงเรียน</span><p class="text-[10px] text-slate-500 mt-0.5">ติ๊กเพื่อให้แสดงในทำเนียบศิษย์เก่าและแสดงป้ายศิษย์เก่า</p></div></label>
+      <div id="staff-alumni-batch-wrap" class="${item.isAlumni?'':'hidden'}"><label class="label">ศิษย์เก่ารุ่นที่ <span class="text-red-500">*</span></label><input name="alumniBatch" class="field" value="${esc(item.alumniBatch||'')}" placeholder="เช่น รุ่น 25 / รุ่นปีการศึกษา 2560"><p id="staff-alumni-batch-help" class="text-[10px] text-orange-600 mt-1">จำเป็นต้องกรอกเมื่อเลือก “เคยเป็นศิษย์เก่าโรงเรียน”</p></div>
+    </div>
     <div><label class="label">รูปภาพ</label><div class="flex gap-2"><input name="img" class="field" value="${esc(item.img||'')}" placeholder="URL รูป หรือกดอัปโหลด"><label class="cursor-pointer px-4 py-3 rounded-2xl bg-slate-100 text-xs font-bold"><input id="modal-staff-upload" type="file" accept="image/*" class="hidden">อัปโหลด</label></div></div>
     <button class="w-full bg-orange-500 text-white rounded-2xl py-3 font-bold">บันทึกรายการ</button>`;
   const staffFile=$('#modal-staff-upload'),staffUrl=$('#editor-form [name="img"]'),alumniCheck=$('#staff-is-alumni'),alumniWrap=$('#staff-alumni-batch-wrap'),alumniInput=$('#editor-form [name="alumniBatch"]');
-  const toggleAlumni=()=>{alumniWrap.classList.toggle('hidden',!alumniCheck.checked);alumniInput.required=alumniCheck.checked;if(!alumniCheck.checked)alumniInput.value=''};alumniCheck.addEventListener('change',toggleAlumni);toggleAlumni();
+  const toggleAlumni=()=>{
+    alumniWrap.classList.toggle('hidden',!alumniCheck.checked);
+    alumniInput.required=alumniCheck.checked;
+    if(!alumniCheck.checked){alumniInput.value='';alumniInput.setCustomValidity('');}
+    else if(!alumniInput.value.trim()){alumniInput.setCustomValidity('กรุณาระบุศิษย์เก่ารุ่นที่');}
+  };
+  alumniCheck.addEventListener('change',toggleAlumni);
+  alumniInput.addEventListener('input',()=>alumniInput.setCustomValidity(alumniCheck.checked&&!alumniInput.value.trim()?'กรุณาระบุศิษย์เก่ารุ่นที่':''));
+  toggleAlumni();
   setImagePreview(staffFile,staffUrl.value,staffUrl.value?'ภาพปัจจุบัน':'ยังไม่ได้เลือกภาพ');staffUrl.addEventListener('input',()=>setImagePreview(staffFile,staffUrl.value,staffUrl.value?'ตัวอย่างจาก URL':'ยังไม่ได้เลือกภาพ'));
-  $('#editor-form').onsubmit=e=>{e.preventDefault();const f=new FormData(e.currentTarget),isAlumni=f.get('isAlumni')==='on',value={name:f.get('name'),position:f.get('position'),department:f.get('department'),education:f.get('education'),phone:f.get('phone'),email:f.get('email'),isAlumni,alumniBatch:isAlumni?f.get('alumniBatch'):'',img:f.get('img')};settings[currentStaffKind]=settings[currentStaffKind]||[];if(editing)settings[currentStaffKind][index]=value;else settings[currentStaffKind].push(value);closeModal();renderStaff();refreshDerived();markDirty()};
+  $('#editor-form').onsubmit=e=>{
+    e.preventDefault();
+    const f=new FormData(e.currentTarget),isAlumni=f.get('isAlumni')==='on';
+    if(isAlumni&&!String(f.get('alumniBatch')||'').trim()){
+      alumniInput.setCustomValidity('กรุณาระบุศิษย์เก่ารุ่นที่');
+      alumniInput.reportValidity();
+      alumniInput.focus();
+      return;
+    }
+    alumniInput.setCustomValidity('');
+    const value={name:f.get('name'),position:f.get('position'),department:f.get('department'),education:f.get('education'),phone:f.get('phone'),email:f.get('email'),isAlumni,alumniBatch:isAlumni?String(f.get('alumniBatch')||'').trim():'',img:f.get('img')};
+    settings[currentStaffKind]=settings[currentStaffKind]||[];
+    if(editing)settings[currentStaffKind][index]=value;else settings[currentStaffKind].push(value);
+    closeModal();renderStaff();refreshDerived();markDirty()
+  };
   staffFile.onchange=async e=>{if(!e.target.files?.[0])return;const file=e.target.files[0];previewSelectedImage(staffFile,file);const url=await uploadFile(file,'staff');if(url){staffUrl.value=url;setImagePreview(staffFile,url,'อัปโหลดแล้ว • พร้อมบันทึกรายการ')}};openModal();
 }
 

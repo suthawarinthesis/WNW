@@ -45,8 +45,9 @@ const colorOptions=[
 ];
 const badgeColors={red:'bg-red-100 text-red-600',green:'bg-green-100 text-green-600',blue:'bg-blue-100 text-blue-600',orange:'bg-orange-100 text-orange-600',purple:'bg-purple-100 text-purple-600',amber:'bg-amber-100 text-amber-600'};
 const collectionSchemas={
-  news:{title:'ข่าวประชาสัมพันธ์',empty:'ยังไม่มีข่าวประชาสัมพันธ์',summary:x=>`${x.date||''} ${x.monthYear||''} • ${x.type||'ข่าว'} • ${x.title||''}`,defaults:{date:'',monthYear:'',type:'ข่าว',typeColor:'bg-orange-100 text-orange-600',title:'',url:'',published:true},fields:[
-    {name:'date',label:'วันที่',placeholder:'เช่น 5',required:true},{name:'monthYear',label:'เดือน / ปี',placeholder:'เช่น มี.ค. 69',required:true},{name:'type',label:'หมวดข่าว',placeholder:'เช่น รับสมัคร / กิจกรรม',required:true},{name:'typeColor',label:'สีป้ายหมวด',type:'badgeColor'},{name:'title',label:'หัวข้อข่าว',type:'textarea',required:true},{name:'url',label:'ลิงก์รายละเอียด (ถ้ามี)',placeholder:'https://...'},{name:'published',label:'แสดงข่าวนี้บนเว็บไซต์',type:'checkbox'}]},
+  news:{title:'ข่าวสาร',empty:'ยังไม่มีข่าวสาร',summary:x=>`${x.date||''} ${x.monthYear||''} • ${x.type||'ข่าวสาร'} • ${x.title||''}`,defaults:{date:'',monthYear:'',type:'ข่าวสาร',typeColor:'bg-orange-100 text-orange-600',title:'',summary:'',image:'',url:'',published:true},fields:[
+    {name:'image',label:'ภาพปกข่าว',type:'image',uploadPrefix:'news'},
+    {name:'date',label:'วันที่',placeholder:'เช่น 5',required:true},{name:'monthYear',label:'เดือน / ปี',placeholder:'เช่น มี.ค. 69',required:true},{name:'type',label:'หมวดข่าว',placeholder:'เช่น ข่าวสาร / ประกาศ / รับสมัคร',required:true},{name:'typeColor',label:'สีป้ายหมวด',type:'badgeColor'},{name:'title',label:'หัวข้อข่าว',type:'textarea',required:true},{name:'summary',label:'คำโปรย / สรุปสั้น ๆ',type:'textarea',placeholder:'ข้อความสั้น ๆ ที่จะแสดงบนการ์ดข่าว'},{name:'url',label:'ลิงก์อ่านรายละเอียด (ถ้ามี)',placeholder:'https://...'},{name:'published',label:'เผยแพร่ข่าวนี้บนเว็บไซต์',type:'checkbox'}]},
   events:{title:'กิจกรรม',empty:'ยังไม่มีกิจกรรม',summary:x=>`${x.date||''} • ${x.title||''} • ${x.time||''}`,defaults:{date:'',title:'',time:'',url:'',published:true},fields:[{name:'date',label:'วันที่ / ช่วงวันที่',placeholder:'เช่น 15 มีนาคม',required:true},{name:'title',label:'ชื่อกิจกรรม',required:true},{name:'time',label:'เวลา',placeholder:'เช่น 08:00 - 12:00'},{name:'url',label:'ลิงก์รายละเอียด (ถ้ามี)'},{name:'published',label:'แสดงกิจกรรมนี้บนเว็บไซต์',type:'checkbox'}]},
   'examStats.naktham':{title:'สถิติแผนกธรรม',empty:'ยังไม่มีสถิติ',summary:x=>`${x.name||''} — ผ่าน ${x.passRate??0}%`,defaults:{name:'',passRate:0,published:true},fields:[{name:'name',label:'ชื่อระดับ',required:true},{name:'passRate',label:'อัตราสอบผ่าน (%)',type:'number',min:0,max:100,required:true},{name:'published',label:'แสดงบนเว็บไซต์',type:'checkbox'}]},
   'examStats.pali':{title:'สถิติแผนกบาลี',empty:'ยังไม่มีสถิติ',summary:x=>`${x.name||''} — ผ่าน ${x.passRate??0}%`,defaults:{name:'',passRate:0,published:true},fields:[{name:'name',label:'ชื่อระดับ',required:true},{name:'passRate',label:'อัตราสอบผ่าน (%)',type:'number',min:0,max:100,required:true},{name:'published',label:'แสดงบนเว็บไซต์',type:'checkbox'}]},
@@ -108,7 +109,7 @@ function bindPathInputs(){
 
 function showView(name){
   $$('.panel').forEach(p=>p.classList.toggle('hidden',p.dataset.panel!==name));$$('.sidebar-btn').forEach(b=>b.classList.toggle('active',b.dataset.view===name));
-  const titles={dashboard:'ภาพรวม',general:'ข้อมูลโรงเรียน',visual:'หน้าแรก / แบนเนอร์',staff:'บุคลากร',news:'ข่าวประชาสัมพันธ์ / กิจกรรม',academic:'ข้อมูลวิชาการ',services:'บริการ / ลิงก์ / เอกสาร',achievements:'ผลงานแห่งความภาคภูมิใจ',admins:'บัญชีผู้ดูแลระบบ'};$('#page-title').textContent=titles[name]||'Website Manager';
+  const titles={dashboard:'ภาพรวม',general:'ข้อมูลโรงเรียน',visual:'หน้าแรก / แบนเนอร์',staff:'บุคลากร',news:'ข่าวสาร',events:'กิจกรรม / ปฏิทิน',academic:'ข้อมูลวิชาการ',services:'บริการ / ลิงก์ / เอกสาร',achievements:'ผลงานแห่งความภาคภูมิใจ',admins:'บัญชีผู้ดูแลระบบ'};$('#page-title').textContent=titles[name]||'Website Manager';
 }
 
 function renderAll(){
@@ -158,7 +159,22 @@ function moveCollection(path,index,dir){const arr=getPath(settings,path)||[],to=
 function openCollectionEditor(path,index=null){
   const schema=collectionSchemas[path];if(!schema)return;const arr=getPath(settings,path)||[];const editing=index!==null,item=editing?clone(arr[index]):clone(schema.defaults);$('#modal-title').textContent=(editing?'แก้ไข':'เพิ่ม')+schema.title;$('#modal-help').textContent='กรอกข้อมูลตามช่อง ไม่ต้องแก้โค้ดหรือ JSON';
   $('#editor-form').innerHTML=schema.fields.map(f=>fieldHtml(f,item,path)).join('')+`<button class="w-full bg-orange-500 hover:bg-orange-600 text-white rounded-2xl py-3 font-bold">${editing?'บันทึกการแก้ไข':'เพิ่มรายการ'}</button>`;
-  hydrateSpecialFields(item);$$('[data-modal-file-upload]').forEach(inp=>inp.addEventListener('change',async()=>{if(!inp.files?.[0])return;const url=await uploadFile(inp.files[0],inp.dataset.modalFileUpload||'document');if(url){const target=$('#editor-form').elements[inp.dataset.targetName];if(target)target.value=url}}));$('#editor-form').onsubmit=e=>{e.preventDefault();const form=e.currentTarget,next=clone(item);schema.fields.forEach(f=>{if(f.type==='quickColor')return;const el=form.elements[f.name];if(!el)return;let v=f.type==='checkbox'?el.checked:el.value;if(f.type==='number'&&v!=='')v=Number(v);next[f.name]=v});if(path==='quickLinks'){const color=form.elements.colorPicker.value;const found=colorOptions.find(x=>x[0]===color)||colorOptions[0];next.bg=found[2];next.text=found[3]};if(!getPath(settings,path))setPath(settings,path,[]);const target=getPath(settings,path);if(editing)target[index]=next;else target.push(next);closeModal();renderCollection(path);markDirty()};openModal();
+  hydrateSpecialFields(item);
+  $$('[data-modal-file-upload]').forEach(inp=>{
+    const target=$('#editor-form').elements[inp.dataset.targetName];
+    if(inp.accept?.includes('image')){
+      setImagePreview(inp,target?.value||'',target?.value?'ภาพปัจจุบัน':'ยังไม่ได้เลือกภาพ');
+      target?.addEventListener('input',()=>setImagePreview(inp,target.value,target.value?'ตัวอย่างจาก URL':'ยังไม่ได้เลือกภาพ'));
+    }
+    inp.addEventListener('change',async()=>{
+      if(!inp.files?.[0])return;
+      const file=inp.files[0];
+      if(inp.accept?.includes('image')) previewSelectedImage(inp,file);
+      const url=await uploadFile(file,inp.dataset.modalFileUpload||'document');
+      if(url&&target){target.value=url;if(inp.accept?.includes('image'))setImagePreview(inp,url,'อัปโหลดแล้ว • พร้อมบันทึกรายการ')}
+    });
+  });
+  $('#editor-form').onsubmit=e=>{e.preventDefault();const form=e.currentTarget,next=clone(item);schema.fields.forEach(f=>{if(f.type==='quickColor')return;const el=form.elements[f.name];if(!el)return;let v=f.type==='checkbox'?el.checked:el.value;if(f.type==='number'&&v!=='')v=Number(v);next[f.name]=v});if(path==='quickLinks'){const color=form.elements.colorPicker.value;const found=colorOptions.find(x=>x[0]===color)||colorOptions[0];next.bg=found[2];next.text=found[3]};if(!getPath(settings,path))setPath(settings,path,[]);const target=getPath(settings,path);if(editing)target[index]=next;else target.push(next);closeModal();renderCollection(path);markDirty()};openModal();
 }
 function fieldHtml(f,item,path){
   const val=item[f.name]??'';if(f.type==='textarea')return `<div><label class="label">${f.label}</label><textarea name="${f.name}" class="field min-h-24" ${f.required?'required':''}>${esc(val)}</textarea></div>`;
@@ -167,6 +183,7 @@ function fieldHtml(f,item,path){
   if(f.type==='badgeColor'){const key=Object.entries(badgeColors).find(([,cls])=>cls===val)?.[0]||'orange';return `<div><label class="label">${f.label}</label><select name="${f.name}" class="field">${Object.entries({orange:'ส้ม',red:'แดง',green:'เขียว',blue:'น้ำเงิน',purple:'ม่วง',amber:'เหลือง'}).map(([k,n])=>`<option value="${badgeColors[k]}" ${key===k?'selected':''}>${n}</option>`).join('')}</select></div>`}
   if(f.type==='boxColor'){return `<div><label class="label">${f.label}</label><select name="${f.name}" class="field">${colorOptions.map(x=>`<option value="${x[2]} ${x[3]}" ${val===`${x[2]} ${x[3]}`?'selected':''}>${x[1]}</option>`).join('')}</select></div>`}
   if(f.type==='quickColor'){const current=colorOptions.find(x=>x[2]===item.bg&&x[3]===item.text)?.[0]||'orange';return `<div><label class="label">${f.label}</label><select name="colorPicker" class="field">${colorOptions.map(x=>`<option value="${x[0]}" ${current===x[0]?'selected':''}>${x[1]}</option>`).join('')}</select></div>`}
+  if(f.type==='image')return `<div><label class="label">${f.label}</label><div class="flex gap-2"><input name="${f.name}" class="field" value="${esc(val)}" placeholder="URL รูป หรือกดอัปโหลด"><label class="cursor-pointer px-4 py-3 rounded-2xl bg-slate-100 text-xs font-bold shrink-0"><input type="file" accept="image/*" class="hidden" data-modal-file-upload="${esc(f.uploadPrefix||'image')}" data-target-name="${f.name}">อัปโหลดภาพ</label></div></div>`;
   return `<div><label class="label">${f.label}</label><input name="${f.name}" type="${f.type||'text'}" class="field" value="${esc(val)}" placeholder="${esc(f.placeholder||'')}" ${f.required?'required':''} ${f.min!==undefined?`min="${f.min}"`:''} ${f.max!==undefined?`max="${f.max}"`:''}></div>`;
 }
 function hydrateSpecialFields(){lucide.createIcons()}

@@ -117,8 +117,8 @@
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex justify-between items-center h-20">
                 <div class="flex items-center gap-3">
-                    <div class="w-12 h-12 bg-gradient-to-br from-orange-400 to-orange-600 rounded-full flex items-center justify-center text-white shadow-lg shadow-orange-200 overflow-hidden">
-                        <img id="nav-logo-img" src="" alt="โลโก้โรงเรียน" class="w-full h-full object-cover hidden">
+                    <div id="nav-logo-frame" class="w-12 h-12 bg-gradient-to-br from-orange-400 to-orange-600 rounded-full flex items-center justify-center text-white shadow-lg shadow-orange-200 overflow-hidden">
+                        <img id="nav-logo-img" src="" alt="โลโก้โรงเรียน" class="w-full h-full object-contain hidden">
                         <i id="nav-logo-icon" data-lucide="book-open" class="w-6 h-6"></i>
                     </div>
                     <div>
@@ -131,7 +131,7 @@
                     <a href="#history-section" class="text-slate-600 hover:text-orange-600 font-medium transition-colors">ประวัติโรงเรียน</a>
                     <a href="#staff-section" class="text-slate-600 hover:text-orange-600 font-medium transition-colors">ทำเนียบบุคลากร</a>
                     <a href="#stats-section" class="text-slate-600 hover:text-orange-600 font-medium transition-colors">สถิติผลการสอบ</a>
-                    <a href="#" class="text-slate-600 hover:text-orange-600 font-medium transition-colors">ข่าวสาร</a>
+                    <a href="#news-section" class="text-slate-600 hover:text-orange-600 font-medium transition-colors">ข่าวสาร</a>
                     <a href="https://sites.google.com/view/wnwvit/home" target="_blank" class="bg-orange-500 hover:bg-orange-600 text-white px-5 py-2.5 rounded-full font-medium transition-all shadow-md shadow-orange-200 hover:shadow-lg hover:-translate-y-0.5 flex items-center gap-2">
                         <i data-lucide="graduation-cap" class="w-4 h-4"></i> สมัครเรียน
                     </a>
@@ -150,7 +150,7 @@
                 <a href="#history-section" class="block px-3 py-3 rounded-xl text-slate-700 hover:bg-orange-50 hover:text-orange-600 font-medium">ประวัติโรงเรียน</a>
                 <a href="#staff-section" class="block px-3 py-3 rounded-xl text-slate-700 hover:bg-orange-50 hover:text-orange-600 font-medium">ทำเนียบบุคลากร</a>
                 <a href="#stats-section" class="block px-3 py-3 rounded-xl text-slate-700 hover:bg-orange-50 hover:text-orange-600 font-medium">สถิติผลการสอบ</a>
-                <a href="#" class="block px-3 py-3 rounded-xl text-slate-700 hover:bg-orange-50 hover:text-orange-600 font-medium">ติดต่อเรา</a>
+                <a href="#news-section" class="block px-3 py-3 rounded-xl text-slate-700 hover:bg-orange-50 hover:text-orange-600 font-medium">ข่าวสาร</a>
                 <a href="https://sites.google.com/view/wnwvit/home" target="_blank" class="flex items-center justify-center gap-2 w-full mt-4 bg-orange-500 text-white px-5 py-3 rounded-xl font-medium shadow-md">
                     <i data-lucide="graduation-cap" class="w-5 h-5"></i> สมัครเรียน
                 </a>
@@ -403,6 +403,24 @@
             </div>
         </section>
 
+        <!-- ข่าวสารล่าสุด (Dedicated News Section) -->
+        <section id="news-section" class="scroll-mt-32">
+            <div class="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-8">
+                <div class="flex items-center gap-3">
+                    <div class="w-2 h-8 bg-gradient-to-b from-orange-400 to-orange-600 rounded-full shadow-md"></div>
+                    <div>
+                        <h2 class="text-2xl sm:text-3xl font-bold text-slate-800 drop-shadow-sm">ข่าวสาร</h2>
+                        <p class="text-sm text-slate-500 mt-1">ข่าวประชาสัมพันธ์ ประกาศ และความเคลื่อนไหวล่าสุดของโรงเรียน</p>
+                    </div>
+                </div>
+                <div class="inline-flex items-center gap-2 text-xs font-bold text-orange-600 bg-orange-50 border border-orange-100 px-4 py-2 rounded-full w-fit">
+                    <i data-lucide="newspaper" class="w-4 h-4"></i> ข่าวล่าสุด
+                </div>
+            </div>
+            <div id="news-section-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"></div>
+            <div id="news-section-empty" class="hidden glass-panel rounded-[2rem] p-10 text-center text-slate-400">ยังไม่มีข่าวสารที่เผยแพร่</div>
+        </section>
+
         <!-- สถิติผลการสอบ (Exam Results Dashboard) -->
         <section id="stats-section">
             <div class="flex items-center gap-3 mb-8">
@@ -525,8 +543,8 @@
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 grid grid-cols-1 md:grid-cols-3 gap-8">
             <div>
                 <div class="flex items-center gap-2 mb-4">
-                    <div class="w-10 h-10 bg-orange-500 rounded-lg flex items-center justify-center text-white overflow-hidden">
-                        <img id="footer-logo-img" src="" alt="โลโก้โรงเรียน" class="w-full h-full object-cover hidden">
+                    <div id="footer-logo-frame" class="w-10 h-10 bg-orange-500 rounded-lg flex items-center justify-center text-white overflow-hidden">
+                        <img id="footer-logo-img" src="" alt="โลโก้โรงเรียน" class="w-full h-full object-contain hidden">
                         <i id="footer-logo-icon" data-lucide="book-open" class="w-5 h-5"></i>
                     </div>
                     <div><h2 class="text-lg font-bold text-white leading-tight" id="footer-school-name-th">...</h2><p class="text-xs text-orange-400" id="footer-school-name-en">...</p></div>
@@ -1043,9 +1061,27 @@
             const directorIcon = document.getElementById('director-icon');
             if (SCHOOL_DATA.info.directorImage) { directorImg.src = SCHOOL_DATA.info.directorImage; directorImg.classList.remove('hidden'); directorIcon.classList.add('hidden'); }
             const logoUrl = SCHOOL_DATA.branding?.logoUrl;
+            const logoFrameClasses = {
+                nav: {
+                    add: ['bg-transparent', 'shadow-none', 'text-transparent'],
+                    remove: ['bg-gradient-to-br', 'from-orange-400', 'to-orange-600', 'shadow-lg', 'shadow-orange-200', 'text-white']
+                },
+                footer: {
+                    add: ['bg-transparent', 'shadow-none', 'text-transparent'],
+                    remove: ['bg-orange-500', 'text-white']
+                }
+            };
             ['nav','footer'].forEach(prefix => {
-                const img = document.getElementById(`${prefix}-logo-img`), icon = document.getElementById(`${prefix}-logo-icon`);
-                if (logoUrl && img && icon) { img.src = logoUrl; img.classList.remove('hidden'); icon.classList.add('hidden'); }
+                const img = document.getElementById(`${prefix}-logo-img`), icon = document.getElementById(`${prefix}-logo-icon`), frame = document.getElementById(`${prefix}-logo-frame`);
+                if (logoUrl && img && icon) {
+                    img.src = logoUrl;
+                    img.classList.remove('hidden');
+                    icon.classList.add('hidden');
+                    if (frame && logoFrameClasses[prefix]) {
+                        frame.classList.remove(...logoFrameClasses[prefix].remove);
+                        frame.classList.add(...logoFrameClasses[prefix].add);
+                    }
+                }
             });
             document.getElementById('contact-phone').textContent = SCHOOL_DATA.info.phone;
             document.getElementById('contact-email').textContent = SCHOOL_DATA.info.email;
@@ -1119,13 +1155,42 @@
         }
 
         function renderNews() {
+            const items = (SCHOOL_DATA.news || []).filter(item => item.published !== false);
             const container = document.getElementById('news-container');
-            SCHOOL_DATA.news.filter(item => item.published !== false).forEach(item => {
-                container.innerHTML += `
-                    <${item.url ? 'a' : 'div'} ${item.url ? `href="${item.url}" target="_blank" rel="noopener"` : ''} class="group flex items-start gap-4 p-3 -mx-3 rounded-2xl hover:bg-slate-50 transition-colors cursor-pointer border border-transparent hover:border-slate-100">
-                        <div class="bg-orange-100 text-orange-600 rounded-xl p-3 text-center min-w-[64px] shadow-sm"><span class="block text-xl font-bold leading-none">${item.date}</span><span class="block text-[10px] font-semibold mt-1">${item.monthYear}</span></div>
-                        <div class="flex-1 pt-1"><span class="text-[10px] font-bold px-2 py-0.5 rounded-full mb-1.5 inline-block ${item.typeColor}">${item.type}</span><h4 class="text-sm font-bold text-slate-800 group-hover:text-orange-600 transition-colors line-clamp-2">${item.title}</h4></div>
-                    </${item.url ? 'a' : 'div'}>`;
+            if (container) {
+                container.innerHTML = '';
+                items.slice(0, 3).forEach(item => {
+                    container.innerHTML += `
+                        <${item.url ? 'a' : 'div'} ${item.url ? `href="${item.url}" target="_blank" rel="noopener"` : ''} class="group flex items-start gap-4 p-3 -mx-3 rounded-2xl hover:bg-slate-50 transition-colors cursor-pointer border border-transparent hover:border-slate-100">
+                            <div class="bg-orange-100 text-orange-600 rounded-xl p-3 text-center min-w-[64px] shadow-sm"><span class="block text-xl font-bold leading-none">${item.date || '-'}</span><span class="block text-[10px] font-semibold mt-1">${item.monthYear || ''}</span></div>
+                            <div class="flex-1 pt-1"><span class="text-[10px] font-bold px-2 py-0.5 rounded-full mb-1.5 inline-block ${item.typeColor || 'bg-orange-100 text-orange-600'}">${item.type || 'ข่าวสาร'}</span><h4 class="text-sm font-bold text-slate-800 group-hover:text-orange-600 transition-colors line-clamp-2">${item.title || ''}</h4></div>
+                        </${item.url ? 'a' : 'div'}>`;
+                });
+            }
+
+            const section = document.getElementById('news-section-container');
+            const empty = document.getElementById('news-section-empty');
+            if (!section) return;
+            section.innerHTML = '';
+            if (!items.length) { if (empty) empty.classList.remove('hidden'); return; }
+            if (empty) empty.classList.add('hidden');
+            items.slice(0, 6).forEach(item => {
+                const tag = item.url ? 'a' : 'article';
+                const linkAttrs = item.url ? `href="${item.url}" target="_blank" rel="noopener"` : '';
+                const image = item.image ? `<img src="${item.image}" alt="${item.title || 'ข่าวสาร'}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" loading="lazy">` : `<div class="w-full h-full bg-gradient-to-br from-orange-100 via-amber-50 to-white flex items-center justify-center text-orange-300"><i data-lucide="newspaper" class="w-14 h-14"></i></div>`;
+                section.innerHTML += `
+                    <${tag} ${linkAttrs} class="group glass-panel rounded-[2rem] overflow-hidden hover:-translate-y-1 hover:shadow-xl transition-all duration-300 border border-white/70">
+                        <div class="aspect-[16/10] bg-slate-100 overflow-hidden">${image}</div>
+                        <div class="p-5 sm:p-6">
+                            <div class="flex items-center justify-between gap-3 mb-3">
+                                <span class="text-[10px] font-bold px-2.5 py-1 rounded-full ${item.typeColor || 'bg-orange-100 text-orange-600'}">${item.type || 'ข่าวสาร'}</span>
+                                <span class="text-[11px] text-slate-400 font-medium">${item.date || ''} ${item.monthYear || ''}</span>
+                            </div>
+                            <h3 class="font-bold text-slate-800 text-base sm:text-lg leading-relaxed line-clamp-2 group-hover:text-orange-600 transition-colors">${item.title || ''}</h3>
+                            ${item.summary ? `<p class="text-sm text-slate-500 mt-3 leading-relaxed line-clamp-3">${item.summary}</p>` : ''}
+                            <div class="mt-5 flex items-center gap-1 text-xs font-bold text-orange-600">${item.url ? 'อ่านเพิ่มเติม <i data-lucide="arrow-right" class="w-3.5 h-3.5"></i>' : 'ข่าวประชาสัมพันธ์'}</div>
+                        </div>
+                    </${tag}>`;
             });
         }
 

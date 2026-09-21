@@ -50,7 +50,8 @@
         <button class="sidebar-btn flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold text-left hover:bg-white/5" data-view="general"><i data-lucide="school" class="w-4 h-4"></i> ข้อมูลโรงเรียน</button>
         <button class="sidebar-btn flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold text-left hover:bg-white/5" data-view="visual"><i data-lucide="image" class="w-4 h-4"></i> หน้าแรก/แบนเนอร์</button>
         <button class="sidebar-btn flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold text-left hover:bg-white/5" data-view="staff"><i data-lucide="users" class="w-4 h-4"></i> บุคลากร</button>
-        <button class="sidebar-btn flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold text-left hover:bg-white/5" data-view="news"><i data-lucide="newspaper" class="w-4 h-4"></i> ข่าว/กิจกรรม</button>
+        <button class="sidebar-btn flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold text-left hover:bg-white/5" data-view="news"><i data-lucide="newspaper" class="w-4 h-4"></i> ข่าวสาร</button>
+        <button class="sidebar-btn flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold text-left hover:bg-white/5" data-view="events"><i data-lucide="calendar-days" class="w-4 h-4"></i> กิจกรรม / ปฏิทิน</button>
         <button class="sidebar-btn flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold text-left hover:bg-white/5" data-view="academic"><i data-lucide="book-open-check" class="w-4 h-4"></i> วิชาการ</button>
         <button class="sidebar-btn flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold text-left hover:bg-white/5" data-view="services"><i data-lucide="panels-top-left" class="w-4 h-4"></i> บริการ/ลิงก์</button>
         <button class="sidebar-btn flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold text-left hover:bg-white/5" data-view="achievements"><i data-lucide="award" class="w-4 h-4"></i> ผลงาน</button>
@@ -78,7 +79,7 @@
           </div>
           <div class="glass rounded-[2rem] p-6 sm:p-8">
             <div class="flex items-start gap-4"><div class="w-12 h-12 rounded-2xl bg-green-100 text-green-600 flex items-center justify-center shrink-0"><i data-lucide="mouse-pointer-click" class="w-6 h-6"></i></div><div><h3 class="text-xl font-bold">จัดการได้ทั้งหมดโดยไม่ต้องแก้โค้ด</h3><p class="text-sm text-slate-500 mt-2 leading-relaxed">ทุกข้อมูลที่คนดูแลเว็บต้องแก้มีแบบฟอร์มให้แล้ว เช่น ข่าว กิจกรรม ปฏิทิน ครู แผนการเรียน เอกสาร E-Services สถิติ บัญชีบริจาค และภาพต่าง ๆ</p></div></div>
-            <div class="mt-5 grid sm:grid-cols-4 gap-3"><button data-jump="news" class="p-4 rounded-2xl bg-orange-50 text-orange-700 text-left font-bold text-sm">เพิ่มข่าว/กิจกรรม →</button><button data-jump="staff" class="p-4 rounded-2xl bg-slate-100 text-slate-700 text-left font-bold text-sm">จัดการครู →</button><button data-jump="academic" class="p-4 rounded-2xl bg-blue-50 text-blue-700 text-left font-bold text-sm">แก้ข้อมูลวิชาการ →</button><button data-jump="achievements" class="p-4 rounded-2xl bg-amber-50 text-amber-700 text-left font-bold text-sm">เพิ่มผลงาน →</button></div>
+            <div class="mt-5 grid sm:grid-cols-4 gap-3"><button data-jump="news" class="p-4 rounded-2xl bg-orange-50 text-orange-700 text-left font-bold text-sm">เพิ่มข่าวสาร →</button><button data-jump="staff" class="p-4 rounded-2xl bg-slate-100 text-slate-700 text-left font-bold text-sm">จัดการครู →</button><button data-jump="academic" class="p-4 rounded-2xl bg-blue-50 text-blue-700 text-left font-bold text-sm">แก้ข้อมูลวิชาการ →</button><button data-jump="achievements" class="p-4 rounded-2xl bg-amber-50 text-amber-700 text-left font-bold text-sm">เพิ่มผลงาน →</button></div>
           </div>
         </section>
 
@@ -111,8 +112,23 @@
         </section>
 
         <section data-panel="news" class="panel hidden space-y-6">
-          <div class="glass rounded-[2rem] p-6 sm:p-8"><div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-5"><div><h3 class="text-lg font-bold">ข่าวประชาสัมพันธ์</h3><p class="section-help">ไม่ต้องเขียน JSON — กดเพิ่มข่าวแล้วกรอกแบบฟอร์มได้เลย</p></div><button class="btn-primary" data-add-collection="news">+ เพิ่มข่าว</button></div><div id="collection-news" class="space-y-3"></div></div>
-          <div class="glass rounded-[2rem] p-6 sm:p-8"><div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-5"><div><h3 class="text-lg font-bold">ปฏิทินกิจกรรม</h3><p class="section-help">เพิ่มวัน เวลา และชื่อกิจกรรมได้โดยตรง</p></div><button class="btn-primary" data-add-collection="events">+ เพิ่มกิจกรรม</button></div><div id="collection-events" class="space-y-3"></div></div>
+          <div class="glass rounded-[2rem] p-6 sm:p-8">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-5">
+              <div><h3 class="text-lg font-bold">ข่าวสาร</h3><p class="section-help">เพิ่มข่าวพร้อมภาพปก หมวด วันที่ คำโปรย และลิงก์รายละเอียดได้จากฟอร์ม ข่าวที่อยู่บนสุดจะแสดงก่อนบนหน้าเว็บไซต์</p></div>
+              <button class="btn-primary" data-add-collection="news">+ เพิ่มข่าวสาร</button>
+            </div>
+            <div id="collection-news" class="space-y-3"></div>
+          </div>
+        </section>
+
+        <section data-panel="events" class="panel hidden space-y-6">
+          <div class="glass rounded-[2rem] p-6 sm:p-8">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-5">
+              <div><h3 class="text-lg font-bold">กิจกรรม / ปฏิทิน</h3><p class="section-help">จัดการวัน เวลา และชื่อกิจกรรมโดยไม่ปะปนกับข่าวสาร</p></div>
+              <button class="btn-primary" data-add-collection="events">+ เพิ่มกิจกรรม</button>
+            </div>
+            <div id="collection-events" class="space-y-3"></div>
+          </div>
         </section>
 
         <section data-panel="academic" class="panel hidden space-y-6">

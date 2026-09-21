@@ -31,12 +31,13 @@ create or replace function public.is_site_admin()
 returns boolean
 language sql
 stable
-security definer
+security invoker
 set search_path = public
 as $$
-  select exists (
-    select 1 from public.site_admins a where a.user_id = auth.uid()
-  );
+  -- Authentication-first manager mode. Supabase anonymous users also use the
+  -- authenticated Postgres role, so explicitly reject the is_anonymous claim.
+  select auth.uid() is not null
+     and coalesce((auth.jwt()->>'is_anonymous')::boolean, false) = false;
 $$;
 
 revoke all on function public.is_site_admin() from public;
@@ -109,7 +110,7 @@ for each row execute function public.set_updated_at();
 
 -- Public image bucket for website media.
 insert into storage.buckets (id, name, public, file_size_limit, allowed_mime_types)
-values ('site-media', 'site-media', true, 10485760, array['image/jpeg','image/png','image/webp','image/gif'])
+values ('site-media', 'site-media', true, 20971520, array['image/jpeg','image/png','image/webp','image/gif','application/pdf','application/msword','application/vnd.openxmlformats-officedocument.wordprocessingml.document','application/vnd.ms-excel','application/vnd.openxmlformats-officedocument.spreadsheetml.sheet','application/vnd.ms-powerpoint','application/vnd.openxmlformats-officedocument.presentationml.presentation','text/plain'])
 on conflict (id) do update set public = excluded.public, file_size_limit = excluded.file_size_limit, allowed_mime_types = excluded.allowed_mime_types;
 
 drop policy if exists "public read site media" on storage.objects;
@@ -460,10 +461,18 @@ select * from (values
 where not exists (select 1 from public.achievements);
 
 -- ============================================================
--- AFTER creating your manager user in Authentication > Users,
--- replace the email below and run ONLY this statement once:
+-- AUTHENTICATION-FIRST ADMIN MODE
+-- ============================================================
+-- No manual insert into site_admins is required.
+-- Every non-anonymous account created in:
+--   Supabase Dashboard > Authentication > Users
+-- can sign in to /manager/ and receives Website Manager permissions.
 --
--- insert into public.site_admins (user_id)
--- select id from auth.users where email = 'YOUR_ADMIN_EMAIL@example.com'
--- on conflict (user_id) do nothing;
+-- IMPORTANT SECURITY SETTINGS in Authentication > General Configuration:
+--   1) Disable "Allow new users to sign up"
+--   2) Disable anonymous sign-ins
+-- This keeps manager account creation under the Supabase project owner's control.
+--
+-- The site_admins table is retained only for backward compatibility and can be
+-- ignored by this version.
 -- ============================================================

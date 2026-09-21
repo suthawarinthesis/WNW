@@ -132,7 +132,7 @@
                     <a href="#staff-section" class="text-slate-600 hover:text-orange-600 font-medium transition-colors">ทำเนียบบุคลากร</a>
                     <a href="#stats-section" class="text-slate-600 hover:text-orange-600 font-medium transition-colors">สถิติผลการสอบ</a>
                     <a href="#news-section" class="text-slate-600 hover:text-orange-600 font-medium transition-colors">ข่าวสาร</a>
-                    <a href="https://sites.google.com/view/wnwvit/home" target="_blank" class="bg-orange-500 hover:bg-orange-600 text-white px-5 py-2.5 rounded-full font-medium transition-all shadow-md shadow-orange-200 hover:shadow-lg hover:-translate-y-0.5 flex items-center gap-2">
+                    <a href="./admission/" class="bg-orange-500 hover:bg-orange-600 text-white px-5 py-2.5 rounded-full font-medium transition-all shadow-md shadow-orange-200 hover:shadow-lg hover:-translate-y-0.5 flex items-center gap-2">
                         <i data-lucide="graduation-cap" class="w-4 h-4"></i> สมัครเรียน
                     </a>
                 </div>
@@ -151,7 +151,7 @@
                 <a href="#staff-section" class="block px-3 py-3 rounded-xl text-slate-700 hover:bg-orange-50 hover:text-orange-600 font-medium">ทำเนียบบุคลากร</a>
                 <a href="#stats-section" class="block px-3 py-3 rounded-xl text-slate-700 hover:bg-orange-50 hover:text-orange-600 font-medium">สถิติผลการสอบ</a>
                 <a href="#news-section" class="block px-3 py-3 rounded-xl text-slate-700 hover:bg-orange-50 hover:text-orange-600 font-medium">ข่าวสาร</a>
-                <a href="https://sites.google.com/view/wnwvit/home" target="_blank" class="flex items-center justify-center gap-2 w-full mt-4 bg-orange-500 text-white px-5 py-3 rounded-xl font-medium shadow-md">
+                <a href="./admission/" class="flex items-center justify-center gap-2 w-full mt-4 bg-orange-500 text-white px-5 py-3 rounded-xl font-medium shadow-md">
                     <i data-lucide="graduation-cap" class="w-5 h-5"></i> สมัครเรียน
                 </a>
             </div>
@@ -555,7 +555,7 @@
                 <h3 class="text-white font-bold mb-4">ลิงก์ที่เกี่ยวข้อง</h3>
                 <ul class="space-y-2 text-sm">
                     <li><a href="#" class="hover:text-orange-400 transition-colors">กระทรวงศึกษาธิการ</a></li>
-                    <li><a href="https://sites.google.com/view/wnwvit/home" target="_blank" class="hover:text-orange-400 transition-colors text-orange-400">ระบบรับสมัครนักเรียน (ออนไลน์)</a></li>
+                    <li><a href="./admission/" class="hover:text-orange-400 transition-colors text-orange-400">ระบบรับสมัครนักเรียน (ออนไลน์)</a></li>
                 </ul>
             </div>
             <div>
@@ -801,7 +801,7 @@
             quickLinks: [
                 { icon: "users", label: "ระบบสารสนเทศ", bg: "bg-orange-100", text: "text-orange-600", url: "#" },
                 { icon: "book-open", label: "E-Learning", bg: "bg-orange-100", text: "text-orange-600", url: "#" },
-                { icon: "graduation-cap", label: "รับสมัครนักเรียน", bg: "bg-orange-500", text: "text-white", url: "https://sites.google.com/view/wnwvit/home" }
+                { icon: "graduation-cap", label: "รับสมัครนักเรียน", bg: "bg-orange-500", text: "text-white", url: "./admission/" }
             ]
         };
     </script>
@@ -862,15 +862,26 @@
             try {
                 const remoteQuery = Promise.all([
                     db.from('site_settings').select('data').eq('id', 1).maybeSingle(),
-                    db.from('achievements').select('id,title,year,image_url,description,created_at').eq('published', true).order('created_at', { ascending: false }).limit(3)
+                    db.from('achievements').select('id,title,year,image_url,description,created_at').eq('published', true).order('created_at', { ascending: false }).limit(3),
+                    db.from('news').select('id,title,summary,image_url,category,category_color,date_text,month_year,url,sort_order,created_at').eq('published', true).order('sort_order', { ascending: true }).order('created_at', { ascending: false })
                 ]);
                 // Do not let a slow connection trap visitors on the boot cover forever.
                 const timeout = new Promise((_, reject) => setTimeout(() => reject(new Error('Supabase load timeout')), 4500));
-                const [settingsResult, achievementsResult] = await Promise.race([remoteQuery, timeout]);
+                const [settingsResult, achievementsResult, newsResult] = await Promise.race([remoteQuery, timeout]);
                 if (settingsResult.data?.data) deepMerge(SCHOOL_DATA, settingsResult.data.data);
-                if (Array.isArray(achievementsResult.data) && achievementsResult.data.length) {
+                if (Array.isArray(achievementsResult.data)) {
                     SCHOOL_DATA.achievements = achievementsResult.data.map(item => ({
                         id: item.id, title: item.title, year: item.year || '', img: item.image_url || '', description: item.description || '', created_at: item.created_at
+                    }));
+                }
+                // Dedicated news table. An empty table intentionally means “no published news”.
+                if (!newsResult.error && Array.isArray(newsResult.data)) {
+                    SCHOOL_DATA.news = newsResult.data.map(item => ({
+                        id: item.id,
+                        title: item.title || '', summary: item.summary || '', image: item.image_url || '',
+                        type: item.category || 'ข่าวสาร', typeColor: item.category_color || 'bg-orange-100 text-orange-600',
+                        date: item.date_text || '', monthYear: item.month_year || '', url: item.url || '', published: true,
+                        sortOrder: item.sort_order, created_at: item.created_at
                     }));
                 }
             } catch (error) {

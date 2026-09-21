@@ -321,7 +321,7 @@
       "label": "รับสมัครนักเรียน",
       "bg": "bg-orange-500",
       "text": "text-white",
-      "url": "https://sites.google.com/view/wnwvit/home"
+      "url": "./admission/"
     }
   ]
 }

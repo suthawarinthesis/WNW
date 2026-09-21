@@ -71,10 +71,11 @@
 
       <div class="p-4 sm:p-8 max-w-7xl mx-auto space-y-6">
         <section data-panel="dashboard" class="panel space-y-6">
-          <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
+          <div class="grid grid-cols-2 lg:grid-cols-5 gap-4">
             <div class="glass rounded-3xl p-5"><p class="text-xs text-slate-500">สามเณรนักเรียน</p><p id="dash-students" class="text-3xl font-black text-orange-600 mt-2">-</p></div>
             <div class="glass rounded-3xl p-5"><p class="text-xs text-slate-500">บุคลากร</p><p id="dash-staff" class="text-3xl font-black text-slate-900 mt-2">-</p></div>
             <div class="glass rounded-3xl p-5"><p class="text-xs text-slate-500">ครูในระบบ</p><p id="dash-teachers" class="text-3xl font-black text-slate-900 mt-2">-</p></div>
+            <div class="glass rounded-3xl p-5"><p class="text-xs text-slate-500">ข่าวสาร</p><p id="dash-news" class="text-3xl font-black text-orange-600 mt-2">-</p></div>
             <div class="glass rounded-3xl p-5"><p class="text-xs text-slate-500">ผลงานทั้งหมด</p><p id="dash-achievements" class="text-3xl font-black text-slate-900 mt-2">-</p></div>
           </div>
           <div class="glass rounded-[2rem] p-6 sm:p-8">
@@ -114,10 +115,11 @@
         <section data-panel="news" class="panel hidden space-y-6">
           <div class="glass rounded-[2rem] p-6 sm:p-8">
             <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-5">
-              <div><h3 class="text-lg font-bold">ข่าวสาร</h3><p class="section-help">เพิ่มข่าวพร้อมภาพปก หมวด วันที่ คำโปรย และลิงก์รายละเอียดได้จากฟอร์ม ข่าวที่อยู่บนสุดจะแสดงก่อนบนหน้าเว็บไซต์</p></div>
-              <button class="btn-primary" data-add-collection="news">+ เพิ่มข่าวสาร</button>
+              <div><h3 class="text-lg font-bold">ข่าวสาร</h3><p class="section-help">ข่าวส่วนนี้บันทึกลงตาราง <code class="text-orange-600">news</code> ใน Supabase โดยตรง ไม่ต้องกด “บันทึกเว็บไซต์” ซ้ำ</p></div>
+              <button id="add-news" class="btn-primary">+ เพิ่มข่าวสาร</button>
             </div>
-            <div id="collection-news" class="space-y-3"></div>
+            <div id="news-db-status" class="mb-4 rounded-2xl bg-green-50 text-green-700 px-4 py-3 text-xs font-bold">กำลังตรวจสอบฐานข้อมูลข่าวสาร...</div>
+            <div id="news-list" class="space-y-3"></div>
           </div>
         </section>
 

@@ -2,6 +2,9 @@ const db = window.SCHOOL_SUPABASE;
 const bucket = window.SCHOOL_APP_CONFIG?.STORAGE_BUCKET || 'site-media';
 let settings = {};
 let achievements = [];
+let news = [];
+let newsTableReady = true;
+let newsLoadError = null;
 let currentStaffKind = 'teachers';
 
 const $ = s => document.querySelector(s);
@@ -44,10 +47,21 @@ const colorOptions=[
   ['orange','ส้ม','bg-orange-100','text-orange-600'],['blue','น้ำเงิน','bg-blue-100','text-blue-600'],['green','เขียว','bg-green-100','text-green-600'],['red','แดง','bg-red-100','text-red-600'],['amber','เหลือง','bg-amber-100','text-amber-600'],['purple','ม่วง','bg-purple-100','text-purple-600']
 ];
 const badgeColors={red:'bg-red-100 text-red-600',green:'bg-green-100 text-green-600',blue:'bg-blue-100 text-blue-600',orange:'bg-orange-100 text-orange-600',purple:'bg-purple-100 text-purple-600',amber:'bg-amber-100 text-amber-600'};
+const newsSchema={
+  defaults:{date_text:'',month_year:'',category:'ข่าวสาร',category_color:'bg-orange-100 text-orange-600',title:'',summary:'',image_url:'',url:'',published:true},
+  fields:[
+    {name:'image_url',label:'ภาพปกข่าว',type:'image',uploadPrefix:'news'},
+    {name:'date_text',label:'วันที่',placeholder:'เช่น 5',required:true},
+    {name:'month_year',label:'เดือน / ปี',placeholder:'เช่น มี.ค. 69',required:true},
+    {name:'category',label:'หมวดข่าว',placeholder:'เช่น ข่าวสาร / ประกาศ / รับสมัคร',required:true},
+    {name:'category_color',label:'สีป้ายหมวด',type:'badgeColor'},
+    {name:'title',label:'หัวข้อข่าว',type:'textarea',required:true},
+    {name:'summary',label:'คำโปรย / สรุปสั้น ๆ',type:'textarea',placeholder:'ข้อความสั้น ๆ ที่จะแสดงบนการ์ดข่าว'},
+    {name:'url',label:'ลิงก์อ่านรายละเอียด (ถ้ามี)',placeholder:'https://...'},
+    {name:'published',label:'เผยแพร่ข่าวนี้บนเว็บไซต์',type:'checkbox'}
+  ]
+};
 const collectionSchemas={
-  news:{title:'ข่าวสาร',empty:'ยังไม่มีข่าวสาร',summary:x=>`${x.date||''} ${x.monthYear||''} • ${x.type||'ข่าวสาร'} • ${x.title||''}`,defaults:{date:'',monthYear:'',type:'ข่าวสาร',typeColor:'bg-orange-100 text-orange-600',title:'',summary:'',image:'',url:'',published:true},fields:[
-    {name:'image',label:'ภาพปกข่าว',type:'image',uploadPrefix:'news'},
-    {name:'date',label:'วันที่',placeholder:'เช่น 5',required:true},{name:'monthYear',label:'เดือน / ปี',placeholder:'เช่น มี.ค. 69',required:true},{name:'type',label:'หมวดข่าว',placeholder:'เช่น ข่าวสาร / ประกาศ / รับสมัคร',required:true},{name:'typeColor',label:'สีป้ายหมวด',type:'badgeColor'},{name:'title',label:'หัวข้อข่าว',type:'textarea',required:true},{name:'summary',label:'คำโปรย / สรุปสั้น ๆ',type:'textarea',placeholder:'ข้อความสั้น ๆ ที่จะแสดงบนการ์ดข่าว'},{name:'url',label:'ลิงก์อ่านรายละเอียด (ถ้ามี)',placeholder:'https://...'},{name:'published',label:'เผยแพร่ข่าวนี้บนเว็บไซต์',type:'checkbox'}]},
   events:{title:'กิจกรรม',empty:'ยังไม่มีกิจกรรม',summary:x=>`${x.date||''} • ${x.title||''} • ${x.time||''}`,defaults:{date:'',title:'',time:'',url:'',published:true},fields:[{name:'date',label:'วันที่ / ช่วงวันที่',placeholder:'เช่น 15 มีนาคม',required:true},{name:'title',label:'ชื่อกิจกรรม',required:true},{name:'time',label:'เวลา',placeholder:'เช่น 08:00 - 12:00'},{name:'url',label:'ลิงก์รายละเอียด (ถ้ามี)'},{name:'published',label:'แสดงกิจกรรมนี้บนเว็บไซต์',type:'checkbox'}]},
   'examStats.naktham':{title:'สถิติแผนกธรรม',empty:'ยังไม่มีสถิติ',summary:x=>`${x.name||''} — ผ่าน ${x.passRate??0}%`,defaults:{name:'',passRate:0,published:true},fields:[{name:'name',label:'ชื่อระดับ',required:true},{name:'passRate',label:'อัตราสอบผ่าน (%)',type:'number',min:0,max:100,required:true},{name:'published',label:'แสดงบนเว็บไซต์',type:'checkbox'}]},
   'examStats.pali':{title:'สถิติแผนกบาลี',empty:'ยังไม่มีสถิติ',summary:x=>`${x.name||''} — ผ่าน ${x.passRate??0}%`,defaults:{name:'',passRate:0,published:true},fields:[{name:'name',label:'ชื่อระดับ',required:true},{name:'passRate',label:'อัตราสอบผ่าน (%)',type:'number',min:0,max:100,required:true},{name:'published',label:'แสดงบนเว็บไซต์',type:'checkbox'}]},
@@ -83,8 +97,19 @@ function showLoginError(msg){$('#login-error').textContent=msg;$('#login-error')
 
 async function loadAll(){
   const fallback=await loadDefault();settings=clone(fallback);
-  const [s,a]=await Promise.all([db.from('site_settings').select('data,updated_at').eq('id',1).maybeSingle(),db.from('achievements').select('*').order('created_at',{ascending:false})]);
-  if(s.data?.data)settings=mergeDefaults(fallback,s.data.data);if(settings.introPage?.subtitle)settings.introPage.subtitle=String(settings.introPage.subtitle).replace(/<br\s*\/?>/gi,'\n');achievements=a.data||[];
+  const [s,a,n]=await Promise.all([
+    db.from('site_settings').select('data,updated_at').eq('id',1).maybeSingle(),
+    db.from('achievements').select('*').order('created_at',{ascending:false}),
+    db.from('news').select('*').order('sort_order',{ascending:true}).order('created_at',{ascending:false})
+  ]);
+  if(s.data?.data)settings=mergeDefaults(fallback,s.data.data);
+  // News now lives in its own Supabase table. Do not keep/save a duplicate JSON copy.
+  delete settings.news;
+  if(settings.introPage?.subtitle)settings.introPage.subtitle=String(settings.introPage.subtitle).replace(/<br\s*\/?>/gi,'\n');
+  achievements=a.data||[];
+  newsTableReady=!n.error;
+  newsLoadError=n.error||null;
+  news=n.data||[];
 }
 function mergeDefaults(base,incoming){
   if(Array.isArray(base))return Array.isArray(incoming)?clone(incoming):clone(base);
@@ -99,7 +124,9 @@ function bindUI(){
   bindPathInputs();
   $('#add-banner').addEventListener('click',()=>{settings.promoBanners=settings.promoBanners||[];settings.promoBanners.push('');renderBanners();markDirty()});
   $('#add-staff').addEventListener('click',()=>openStaffEditor());$$('.staff-tab').forEach(b=>b.addEventListener('click',()=>{currentStaffKind=b.dataset.staffKind;$$('.staff-tab').forEach(x=>{x.classList.remove('bg-orange-500','text-white');x.classList.add('bg-white/70','text-slate-600')});b.classList.add('bg-orange-500','text-white');b.classList.remove('bg-white/70','text-slate-600');renderStaff()}));
-  $('#add-achievement').addEventListener('click',()=>openAchievementEditor());$$('[data-add-collection]').forEach(b=>b.addEventListener('click',()=>openCollectionEditor(b.dataset.addCollection)));
+  $('#add-achievement').addEventListener('click',()=>openAchievementEditor());
+  $('#add-news').addEventListener('click',()=>openNewsEditor());
+  $$('[data-add-collection]').forEach(b=>b.addEventListener('click',()=>openCollectionEditor(b.dataset.addCollection)));
   $$('[data-close-modal]').forEach(x=>x.addEventListener('click',closeModal));
 }
 function bindPathInputs(){
@@ -114,14 +141,14 @@ function showView(name){
 
 function renderAll(){
   $$('[data-path]').forEach(el=>{let v=getPath(settings,el.dataset.path);if(el.type==='checkbox')el.checked=!!v;else if(el.type==='datetime-local')el.value=String(v||'').slice(0,16);else el.value=v??''});
-  refreshStaticImagePreviews();renderBanners();renderStaff();Object.keys(collectionSchemas).forEach(renderCollection);renderAchievements();refreshDerived(false);
+  refreshStaticImagePreviews();renderBanners();renderStaff();renderNewsManager();Object.keys(collectionSchemas).forEach(renderCollection);renderAchievements();refreshDerived(false);
 }
 function refreshDerived(dirty=true){
-  $('#dash-students').textContent=getPath(settings,'info.stats.0.value')||'-';$('#dash-staff').textContent=getPath(settings,'info.stats.1.value')||'-';$('#dash-teachers').textContent=(settings.teachers?.length||0)+(settings.executives?.length||0)+(settings.specialTeachers?.length||0);$('#dash-achievements').textContent=achievements.length;if(dirty)markDirty();
+  $('#dash-students').textContent=getPath(settings,'info.stats.0.value')||'-';$('#dash-staff').textContent=getPath(settings,'info.stats.1.value')||'-';$('#dash-teachers').textContent=(settings.teachers?.length||0)+(settings.executives?.length||0)+(settings.specialTeachers?.length||0);if($('#dash-news'))$('#dash-news').textContent=news.length;$('#dash-achievements').textContent=achievements.length;if(dirty)markDirty();
 }
 
 async function saveSettings(){
-  const btn=$('#save-btn');try{btn.disabled=true;$('#save-status').textContent='กำลังบันทึก...';const {error}=await db.from('site_settings').upsert({id:1,data:settings,updated_at:new Date().toISOString()},{onConflict:'id'});if(error)throw error;$('#save-status').textContent='บันทึกแล้ว '+new Date().toLocaleTimeString('th-TH',{hour:'2-digit',minute:'2-digit'});toast('บันทึกและเผยแพร่ข้อมูลเรียบร้อย')}
+  const btn=$('#save-btn');try{btn.disabled=true;$('#save-status').textContent='กำลังบันทึก...';const payload=clone(settings);delete payload.news;const {error}=await db.from('site_settings').upsert({id:1,data:payload,updated_at:new Date().toISOString()},{onConflict:'id'});if(error)throw error;$('#save-status').textContent='บันทึกแล้ว '+new Date().toLocaleTimeString('th-TH',{hour:'2-digit',minute:'2-digit'});toast('บันทึกและเผยแพร่ข้อมูลเรียบร้อย')}
   catch(e){$('#save-status').textContent='บันทึกไม่สำเร็จ';toast(e.message,true)}finally{btn.disabled=false}
 }
 
@@ -145,6 +172,88 @@ function openStaffEditor(index=null){
   const staffFile=$('#modal-staff-upload'),staffUrl=$('#editor-form [name="img"]');setImagePreview(staffFile,staffUrl.value,staffUrl.value?'ภาพปัจจุบัน':'ยังไม่ได้เลือกภาพ');staffUrl.addEventListener('input',()=>setImagePreview(staffFile,staffUrl.value,staffUrl.value?'ตัวอย่างจาก URL':'ยังไม่ได้เลือกภาพ'));
   $('#editor-form').onsubmit=e=>{e.preventDefault();const f=new FormData(e.currentTarget),value={name:f.get('name'),position:f.get('position'),department:f.get('department'),img:f.get('img')};settings[currentStaffKind]=settings[currentStaffKind]||[];if(editing)settings[currentStaffKind][index]=value;else settings[currentStaffKind].push(value);closeModal();renderStaff();refreshDerived();markDirty()};
   staffFile.onchange=async e=>{if(!e.target.files?.[0])return;const file=e.target.files[0];previewSelectedImage(staffFile,file);const url=await uploadFile(file,'staff');if(url){staffUrl.value=url;setImagePreview(staffFile,url,'อัปโหลดแล้ว • พร้อมบันทึกรายการ')}};openModal();
+}
+
+function renderNewsManager(){
+  const list=$('#news-list'),status=$('#news-db-status'),addBtn=$('#add-news');
+  if(!list)return;
+  if(!newsTableReady){
+    if(status){status.className='mb-4 rounded-2xl bg-red-50 text-red-700 px-4 py-3 text-xs font-bold';status.textContent='ยังไม่พบตาราง news ใน Supabase — กรุณารันไฟล์ supabase/news-section-upgrade.sql ก่อน';}
+    if(addBtn)addBtn.disabled=true;
+    list.innerHTML='<div class="rounded-2xl bg-red-50 p-6 text-center text-sm text-red-500">ระบบข่าวยังเชื่อมฐานข้อมูลไม่ได้</div>';
+    return;
+  }
+  if(status){status.className='mb-4 rounded-2xl bg-green-50 text-green-700 px-4 py-3 text-xs font-bold';status.textContent=`เชื่อมต่อ Supabase แล้ว • ข่าวทั้งหมด ${news.length} รายการ • บันทึกอัตโนมัติ`;}
+  if(addBtn)addBtn.disabled=false;
+  list.innerHTML=news.map((item,i)=>`<div class="flex flex-col sm:flex-row sm:items-center gap-3 rounded-2xl border border-white bg-white/60 p-4">
+    <div class="w-full sm:w-28 aspect-video rounded-xl overflow-hidden bg-slate-100 shrink-0">${item.image_url?`<img src="${esc(item.image_url)}" class="w-full h-full object-cover">`:'<div class="w-full h-full flex items-center justify-center text-slate-300"><i data-lucide="newspaper" class="w-7 h-7"></i></div>'}</div>
+    <div class="min-w-0 flex-1"><div class="flex flex-wrap items-center gap-2 mb-1"><span class="text-[10px] font-bold px-2 py-0.5 rounded-full ${item.category_color||'bg-orange-100 text-orange-600'}">${esc(item.category||'ข่าวสาร')}</span><span class="text-[10px] text-slate-400">${esc(item.date_text||'')} ${esc(item.month_year||'')}</span></div><p class="text-sm font-bold text-slate-800 line-clamp-2">${esc(item.title||'')}</p><p class="text-[10px] mt-1 ${item.published?'text-green-600':'text-slate-400'}">${item.published?'เผยแพร่บนเว็บไซต์':'ซ่อนจากเว็บไซต์'}</p></div>
+    <div class="flex gap-1 shrink-0"><button class="btn-secondary !px-2" data-news-up="${i}" ${i===0?'disabled':''} title="เลื่อนขึ้น">↑</button><button class="btn-secondary !px-2" data-news-down="${i}" ${i===news.length-1?'disabled':''} title="เลื่อนลง">↓</button><button class="p-2.5 rounded-xl bg-orange-50 text-orange-600" data-news-edit="${i}"><i data-lucide="pencil" class="w-4 h-4"></i></button><button class="p-2.5 rounded-xl bg-red-50 text-red-500" data-news-delete="${i}"><i data-lucide="trash-2" class="w-4 h-4"></i></button></div>
+  </div>`).join('')||'<div class="rounded-2xl bg-slate-50 p-6 text-center text-sm text-slate-400">ยังไม่มีข่าวสารใน Supabase</div>';
+  $$('[data-news-edit]').forEach(b=>b.addEventListener('click',()=>openNewsEditor(+b.dataset.newsEdit)));
+  $$('[data-news-delete]').forEach(b=>b.addEventListener('click',()=>deleteNews(+b.dataset.newsDelete)));
+  $$('[data-news-up]').forEach(b=>b.addEventListener('click',()=>moveNews(+b.dataset.newsUp,-1)));
+  $$('[data-news-down]').forEach(b=>b.addEventListener('click',()=>moveNews(+b.dataset.newsDown,1)));
+  if($('#dash-news'))$('#dash-news').textContent=news.length;
+  lucide.createIcons();
+}
+
+function openNewsEditor(index=null){
+  if(!newsTableReady)return toast('กรุณารัน news-section-upgrade.sql ก่อน',true);
+  const editing=index!==null,item=editing?clone(news[index]):clone(newsSchema.defaults);
+  $('#modal-title').textContent=editing?'แก้ไขข่าวสาร':'เพิ่มข่าวสาร';
+  $('#modal-help').textContent='เมื่อกดบันทึก ข่าวจะถูกบันทึกลง Supabase โดยตรง';
+  $('#editor-form').innerHTML=newsSchema.fields.map(f=>fieldHtml(f,item,'news')).join('')+`<button class="w-full bg-orange-500 hover:bg-orange-600 text-white rounded-2xl py-3 font-bold">${editing?'บันทึกการแก้ไข':'เผยแพร่ / บันทึกข่าว'}</button>`;
+  const imgFile=$('#editor-form [data-modal-file-upload]'),imgUrl=$('#editor-form [name="image_url"]');
+  if(imgFile&&imgUrl){
+    setImagePreview(imgFile,imgUrl.value,imgUrl.value?'ภาพปัจจุบัน':'ยังไม่ได้เลือกภาพ');
+    imgUrl.addEventListener('input',()=>setImagePreview(imgFile,imgUrl.value,imgUrl.value?'ตัวอย่างจาก URL':'ยังไม่ได้เลือกภาพ'));
+    imgFile.addEventListener('change',async()=>{if(!imgFile.files?.[0])return;const file=imgFile.files[0];previewSelectedImage(imgFile,file);const url=await uploadFile(file,'news');if(url){imgUrl.value=url;setImagePreview(imgFile,url,'อัปโหลดแล้ว • พร้อมบันทึกข่าว')}});
+  }
+  $('#editor-form').onsubmit=async e=>{
+    e.preventDefault();
+    const form=e.currentTarget;
+    const row={
+      date_text:form.elements.date_text.value.trim(),month_year:form.elements.month_year.value.trim(),
+      category:form.elements.category.value.trim()||'ข่าวสาร',category_color:form.elements.category_color.value,
+      title:form.elements.title.value.trim(),summary:form.elements.summary.value.trim(),image_url:form.elements.image_url.value.trim(),
+      url:form.elements.url.value.trim(),published:form.elements.published.checked
+    };
+    try{
+      let r;
+      if(editing){
+        r=await db.from('news').update(row).eq('id',item.id).select().single();
+      }else{
+        const minOrder=news.length?Math.min(...news.map(x=>Number(x.sort_order)||0)):10;
+        row.sort_order=minOrder-10;
+        r=await db.from('news').insert(row).select().single();
+      }
+      if(r.error)throw r.error;
+      if(editing)news[index]=r.data;else news.unshift(r.data);
+      closeModal();renderNewsManager();refreshDerived(false);toast('บันทึกข่าวสารลง Supabase แล้ว');
+    }catch(err){toast('บันทึกข่าวไม่สำเร็จ: '+err.message,true)}
+  };
+  openModal();
+}
+
+async function deleteNews(index){
+  if(!confirm('ลบข่าวนี้ออกจาก Supabase ถาวร?'))return;
+  const item=news[index];
+  const {error}=await db.from('news').delete().eq('id',item.id);
+  if(error)return toast(error.message,true);
+  news.splice(index,1);renderNewsManager();refreshDerived(false);toast('ลบข่าวแล้ว');
+}
+
+async function moveNews(index,dir){
+  const to=index+dir;if(to<0||to>=news.length)return;
+  const a=news[index],b=news[to];
+  let aOrder=Number(a.sort_order),bOrder=Number(b.sort_order);
+  if(!Number.isFinite(aOrder))aOrder=index*10;
+  if(!Number.isFinite(bOrder))bOrder=to*10;
+  if(aOrder===bOrder){aOrder=index*10;bOrder=to*10;}
+  const [ra,rb]=await Promise.all([db.from('news').update({sort_order:bOrder}).eq('id',a.id),db.from('news').update({sort_order:aOrder}).eq('id',b.id)]);
+  if(ra.error||rb.error)return toast((ra.error||rb.error).message,true);
+  a.sort_order=bOrder;b.sort_order=aOrder;[news[index],news[to]]=[news[to],news[index]];renderNewsManager();toast('อัปเดตลำดับข่าวแล้ว');
 }
 
 function collectionContainerId(path){return 'collection-'+path.replaceAll('.','-')}

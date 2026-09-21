@@ -12,6 +12,31 @@ const getPath = (obj,path) => path.split('.').reduce((o,k)=>o?.[k],obj);
 function setPath(obj,path,value){const keys=path.split('.');let o=obj;keys.slice(0,-1).forEach((k,i)=>{if(o[k]==null)o[k]=/^\d+$/.test(keys[i+1])?[]:{};o=o[k]});o[keys.at(-1)]=value}
 function toast(msg,bad=false){const el=$('#toast');el.textContent=msg;el.className=`fixed right-4 bottom-4 z-[120] max-w-sm px-5 py-3 rounded-2xl shadow-2xl text-sm ${bad?'bg-red-600':'bg-slate-900'} text-white`;el.classList.remove('hidden');setTimeout(()=>el.classList.add('hidden'),2800)}
 function markDirty(){if($('#save-status'))$('#save-status').textContent='มีการแก้ไข — กด “บันทึกเว็บไซต์” เพื่อเผยแพร่'}
+function formatBytes(bytes=0){if(!Number(bytes))return '';const units=['B','KB','MB','GB'];let n=Number(bytes),i=0;while(n>=1024&&i<units.length-1){n/=1024;i++}return `${n.toFixed(i?1:0)} ${units[i]}`}
+function ensureImagePreview(fileInput){
+  if(!fileInput)return null;if(fileInput._imagePreviewBox?.isConnected)return fileInput._imagePreviewBox;
+  const row=fileInput.closest('.flex')||fileInput.parentElement;if(!row)return null;
+  const box=document.createElement('div');box.className='mt-3 rounded-2xl border border-dashed border-slate-200 bg-slate-50/80 p-3';
+  box.innerHTML=`<div class="flex items-center justify-between gap-3 mb-2"><span class="text-[11px] font-bold text-slate-600 flex items-center gap-1.5"><i data-lucide="image" class="w-3.5 h-3.5 text-orange-500"></i> ตัวอย่างภาพ</span><span data-preview-meta class="text-[10px] text-slate-400 truncate max-w-[65%]">ยังไม่ได้เลือกภาพ</span></div><div class="relative min-h-32 max-h-72 rounded-xl overflow-hidden bg-white border border-slate-100 flex items-center justify-center"><img data-preview-image alt="ตัวอย่างภาพก่อนบันทึก" class="hidden w-full max-h-72 object-contain"><div data-preview-empty class="text-xs text-slate-400 flex flex-col items-center gap-2 py-8"><i data-lucide="image-plus" class="w-7 h-7 text-slate-300"></i><span>เมื่อเลือกภาพ ตัวอย่างจะแสดงตรงนี้</span></div></div>`;
+  row.insertAdjacentElement('afterend',box);fileInput._imagePreviewBox=box;lucide.createIcons();return box;
+}
+function setImagePreview(fileInput,url,meta='ภาพปัจจุบัน'){
+  const box=ensureImagePreview(fileInput);if(!box)return;const img=box.querySelector('[data-preview-image]'),empty=box.querySelector('[data-preview-empty]'),txt=box.querySelector('[data-preview-meta]');
+  if(!url){img.removeAttribute('src');img.classList.add('hidden');empty.classList.remove('hidden');txt.textContent='ยังไม่ได้เลือกภาพ';return}
+  img.onload=()=>{img.classList.remove('hidden');empty.classList.add('hidden');if(!txt.textContent||txt.textContent==='กำลังโหลดตัวอย่าง...')txt.textContent=meta};
+  img.onerror=()=>{img.classList.add('hidden');empty.classList.remove('hidden');txt.textContent='ไม่สามารถแสดงตัวอย่างจาก URL นี้ได้'};
+  txt.textContent=meta||'กำลังโหลดตัวอย่าง...';img.src=url;
+}
+function previewSelectedImage(fileInput,file){
+  if(!fileInput||!file?.type?.startsWith('image/'))return;
+  if(fileInput._previewObjectUrl)URL.revokeObjectURL(fileInput._previewObjectUrl);
+  const objectUrl=URL.createObjectURL(file);fileInput._previewObjectUrl=objectUrl;const box=ensureImagePreview(fileInput),img=box?.querySelector('[data-preview-image]'),empty=box?.querySelector('[data-preview-empty]'),txt=box?.querySelector('[data-preview-meta]');if(!img)return;
+  txt.textContent=`${file.name} • ${formatBytes(file.size)}`;img.onload=()=>{img.classList.remove('hidden');empty.classList.add('hidden');txt.textContent=`${file.name} • ${img.naturalWidth}×${img.naturalHeight}px • ${formatBytes(file.size)}`};img.onerror=()=>{txt.textContent='ไฟล์นี้ไม่สามารถแสดงตัวอย่างได้'};img.src=objectUrl;
+}
+function findStaticUploader(path){return $$('[data-upload-target]').find(x=>x.dataset.uploadTarget===path)}
+function refreshStaticImagePreviews(){
+  $$('[data-upload-target]').forEach(fileInput=>{const input=$$('[data-path]').find(x=>x.dataset.path===fileInput.dataset.uploadTarget);setImagePreview(fileInput,input?.value||getPath(settings,fileInput.dataset.uploadTarget)||'',input?.value?'ภาพที่ใช้อยู่บนเว็บไซต์':'ยังไม่ได้เลือกภาพ')});
+}
 async function loadDefault(){const r=await fetch('../assets/default-data.json');return r.json()}
 
 const iconOptions=[['users','ผู้คน'],['book-open','หนังสือ'],['calendar','ปฏิทิน'],['bell','ระฆัง'],['sun','ดวงอาทิตย์'],['moon','พระจันทร์'],['clock','นาฬิกา'],['graduation-cap','การศึกษา'],['monitor-play','สื่อการเรียน'],['book','ตำรา'],['scroll-text','คัมภีร์ / เอกสาร'],['file-text','ไฟล์เอกสาร'],['school','โรงเรียน'],['heart','หัวใจ'],['award','รางวัล'],['star','ดาว'],['link','ลิงก์'],['globe','เว็บไซต์'],['map','แผนที่'],['phone','โทรศัพท์'],['mail','อีเมล'],['languages','ภาษา']];
@@ -77,8 +102,8 @@ function bindUI(){
   $$('[data-close-modal]').forEach(x=>x.addEventListener('click',closeModal));
 }
 function bindPathInputs(){
-  $$('[data-path]').forEach(el=>{const event=el.type==='checkbox'?'change':'input';el.addEventListener(event,()=>{let v=el.type==='checkbox'?el.checked:el.value;if(el.type==='number'&&v!=='')v=Number(v);setPath(settings,el.dataset.path,v);refreshDerived();markDirty()})});
-  $$('[data-upload-target]').forEach(el=>el.addEventListener('change',async()=>{if(!el.files?.[0])return;const url=await uploadFile(el.files[0],el.dataset.uploadTarget.replaceAll('.','-'));if(url){setPath(settings,el.dataset.uploadTarget,url);const input=document.querySelector(`[data-path="${el.dataset.uploadTarget}"]`);if(input)input.value=url;markDirty()}}));
+  $$('[data-path]').forEach(el=>{const event=el.type==='checkbox'?'change':'input';el.addEventListener(event,()=>{let v=el.type==='checkbox'?el.checked:el.value;if(el.type==='number'&&v!=='')v=Number(v);setPath(settings,el.dataset.path,v);const uploader=findStaticUploader(el.dataset.path);if(uploader&&el.type!=='checkbox')setImagePreview(uploader,el.value,el.value?'ตัวอย่างจาก URL':'ยังไม่ได้เลือกภาพ');refreshDerived();markDirty()})});
+  $$('[data-upload-target]').forEach(el=>el.addEventListener('change',async()=>{if(!el.files?.[0])return;const file=el.files[0];previewSelectedImage(el,file);const path=el.dataset.uploadTarget,url=await uploadFile(file,path.replaceAll('.','-'));if(url){setPath(settings,path,url);const input=$$('[data-path]').find(x=>x.dataset.path===path);if(input)input.value=url;setImagePreview(el,url,'อัปโหลดแล้ว • พร้อมบันทึกเว็บไซต์');markDirty()}}));
 }
 
 function showView(name){
@@ -88,7 +113,7 @@ function showView(name){
 
 function renderAll(){
   $$('[data-path]').forEach(el=>{let v=getPath(settings,el.dataset.path);if(el.type==='checkbox')el.checked=!!v;else if(el.type==='datetime-local')el.value=String(v||'').slice(0,16);else el.value=v??''});
-  renderBanners();renderStaff();Object.keys(collectionSchemas).forEach(renderCollection);renderAchievements();refreshDerived(false);
+  refreshStaticImagePreviews();renderBanners();renderStaff();Object.keys(collectionSchemas).forEach(renderCollection);renderAchievements();refreshDerived(false);
 }
 function refreshDerived(dirty=true){
   $('#dash-students').textContent=getPath(settings,'info.stats.0.value')||'-';$('#dash-staff').textContent=getPath(settings,'info.stats.1.value')||'-';$('#dash-teachers').textContent=(settings.teachers?.length||0)+(settings.executives?.length||0)+(settings.specialTeachers?.length||0);$('#dash-achievements').textContent=achievements.length;if(dirty)markDirty();
@@ -104,7 +129,7 @@ function renderBanners(){
   list.innerHTML=arr.map((url,i)=>`<div class="flex flex-col sm:flex-row sm:items-center gap-3 p-3 rounded-2xl bg-white/60 border border-white"><div class="w-full sm:w-28 aspect-video bg-slate-100 rounded-xl overflow-hidden shrink-0">${url?`<img src="${esc(url)}" class="w-full h-full object-cover">`:''}</div><input class="field flex-1" value="${esc(url)}" data-banner-index="${i}" placeholder="URL รูป หรือกดอัปโหลด"><label class="cursor-pointer px-3 py-3 rounded-xl bg-slate-100 text-xs font-bold text-center"><input type="file" accept="image/*" class="hidden" data-banner-upload="${i}">อัปโหลด</label><div class="flex gap-2"><button class="btn-secondary" data-banner-up="${i}" ${i===0?'disabled':''}>↑</button><button class="btn-secondary" data-banner-down="${i}" ${i===arr.length-1?'disabled':''}>↓</button><button class="px-3 py-2 rounded-xl bg-red-50 text-red-500" data-banner-delete="${i}"><i data-lucide="trash-2" class="w-4 h-4"></i></button></div></div>`).join('')||'<div class="rounded-2xl bg-slate-50 p-6 text-center text-sm text-slate-400">ยังไม่มีแบนเนอร์</div>';
   $$('[data-banner-index]').forEach(el=>el.addEventListener('input',()=>{settings.promoBanners[+el.dataset.bannerIndex]=el.value;markDirty()}));$$('[data-banner-delete]').forEach(b=>b.addEventListener('click',()=>{if(confirm('ลบแบนเนอร์นี้?')){settings.promoBanners.splice(+b.dataset.bannerDelete,1);renderBanners();markDirty()}}));
   $$('[data-banner-up]').forEach(b=>b.addEventListener('click',()=>moveArrayItem(settings.promoBanners,+b.dataset.bannerUp,-1,renderBanners)));$$('[data-banner-down]').forEach(b=>b.addEventListener('click',()=>moveArrayItem(settings.promoBanners,+b.dataset.bannerDown,1,renderBanners)));
-  $$('[data-banner-upload]').forEach(el=>el.addEventListener('change',async()=>{if(!el.files?.[0])return;const i=+el.dataset.bannerUpload,url=await uploadFile(el.files[0],'banner');if(url){settings.promoBanners[i]=url;renderBanners();markDirty()}}));lucide.createIcons();
+  $$('[data-banner-upload]').forEach(el=>el.addEventListener('change',async()=>{if(!el.files?.[0])return;const i=+el.dataset.bannerUpload,file=el.files[0],card=el.closest('.flex.flex-col');if(card){const frame=card.querySelector('.aspect-video');if(frame){const objectUrl=URL.createObjectURL(file);frame.innerHTML=`<img src="${objectUrl}" class="w-full h-full object-cover"><span class="absolute"></span>`}}const url=await uploadFile(file,'banner');if(url){settings.promoBanners[i]=url;renderBanners();markDirty()}}));lucide.createIcons();
 }
 function moveArrayItem(arr,index,dir,rerender){const to=index+dir;if(to<0||to>=arr.length)return;[arr[index],arr[to]]=[arr[to],arr[index]];rerender();markDirty()}
 
@@ -116,8 +141,9 @@ function renderStaff(){
 function openStaffEditor(index=null){
   const editing=index!==null,item=editing?clone(settings[currentStaffKind][index]):{name:'',department:'',position:'',img:''};$('#modal-title').textContent=editing?'แก้ไขบุคลากร':'เพิ่มบุคลากร';$('#modal-help').textContent='กรอกข้อมูลแล้วกดบันทึกรายการ จากนั้นกด “บันทึกเว็บไซต์” ด้านบนอีกครั้งเพื่อเผยแพร่';
   $('#editor-form').innerHTML=`<div><label class="label">ชื่อ-นามสกุล</label><input name="name" class="field" value="${esc(item.name)}" required></div><div><label class="label">ตำแหน่ง</label><input name="position" class="field" value="${esc(item.position||'')}"></div><div><label class="label">กลุ่มสาระ / หน้าที่</label><input name="department" class="field" value="${esc(item.department||'')}"></div><div><label class="label">รูปภาพ</label><div class="flex gap-2"><input name="img" class="field" value="${esc(item.img||'')}" placeholder="URL รูป หรือกดอัปโหลด"><label class="cursor-pointer px-4 py-3 rounded-2xl bg-slate-100 text-xs font-bold"><input id="modal-staff-upload" type="file" accept="image/*" class="hidden">อัปโหลด</label></div></div><button class="w-full bg-orange-500 text-white rounded-2xl py-3 font-bold">บันทึกรายการ</button>`;
+  const staffFile=$('#modal-staff-upload'),staffUrl=$('#editor-form [name="img"]');setImagePreview(staffFile,staffUrl.value,staffUrl.value?'ภาพปัจจุบัน':'ยังไม่ได้เลือกภาพ');staffUrl.addEventListener('input',()=>setImagePreview(staffFile,staffUrl.value,staffUrl.value?'ตัวอย่างจาก URL':'ยังไม่ได้เลือกภาพ'));
   $('#editor-form').onsubmit=e=>{e.preventDefault();const f=new FormData(e.currentTarget),value={name:f.get('name'),position:f.get('position'),department:f.get('department'),img:f.get('img')};settings[currentStaffKind]=settings[currentStaffKind]||[];if(editing)settings[currentStaffKind][index]=value;else settings[currentStaffKind].push(value);closeModal();renderStaff();refreshDerived();markDirty()};
-  $('#modal-staff-upload').onchange=async e=>{if(!e.target.files?.[0])return;const url=await uploadFile(e.target.files[0],'staff');if(url)$('#editor-form [name="img"]').value=url};openModal();
+  staffFile.onchange=async e=>{if(!e.target.files?.[0])return;const file=e.target.files[0];previewSelectedImage(staffFile,file);const url=await uploadFile(file,'staff');if(url){staffUrl.value=url;setImagePreview(staffFile,url,'อัปโหลดแล้ว • พร้อมบันทึกรายการ')}};openModal();
 }
 
 function collectionContainerId(path){return 'collection-'+path.replaceAll('.','-')}
@@ -152,8 +178,9 @@ function renderAchievements(){
 function openAchievementEditor(index=null){
   const editing=index!==null,item=editing?clone(achievements[index]):{title:'',year:String(new Date().getFullYear()+543),image_url:'',description:'',published:true};$('#modal-title').textContent=editing?'แก้ไขผลงาน':'เพิ่มผลงาน';$('#modal-help').textContent='ผลงานที่เผยแพร่ล่าสุดจะถูกนำไปแสดงหน้าแรก 3 รายการ';
   $('#editor-form').innerHTML=`<div><label class="label">ชื่อผลงาน</label><input name="title" class="field" value="${esc(item.title)}" required></div><div><label class="label">ปี</label><input name="year" class="field" value="${esc(item.year||'')}"></div><div><label class="label">รายละเอียด</label><textarea name="description" class="field min-h-24">${esc(item.description||'')}</textarea></div><div><label class="label">รูปภาพ</label><div class="flex gap-2"><input name="image_url" class="field" value="${esc(item.image_url||'')}" placeholder="URL รูป หรือกดอัปโหลด"><label class="cursor-pointer px-4 py-3 rounded-2xl bg-slate-100 text-xs font-bold"><input id="modal-ach-upload" type="file" accept="image/*" class="hidden">อัปโหลด</label></div></div><label class="flex items-center gap-3 p-4 rounded-2xl bg-slate-50"><input name="published" type="checkbox" class="w-5 h-5 accent-orange-500" ${item.published!==false?'checked':''}><span class="text-sm font-bold">เผยแพร่บนเว็บไซต์</span></label><button class="w-full bg-orange-500 text-white rounded-2xl py-3 font-bold">บันทึกผลงาน</button>`;
+  const achFile=$('#modal-ach-upload'),achUrl=$('#editor-form [name="image_url"]');setImagePreview(achFile,achUrl.value,achUrl.value?'ภาพปัจจุบัน':'ยังไม่ได้เลือกภาพ');achUrl.addEventListener('input',()=>setImagePreview(achFile,achUrl.value,achUrl.value?'ตัวอย่างจาก URL':'ยังไม่ได้เลือกภาพ'));
   $('#editor-form').onsubmit=async e=>{e.preventDefault();const f=new FormData(e.currentTarget),row={title:f.get('title'),year:f.get('year'),description:f.get('description'),image_url:f.get('image_url'),published:f.get('published')==='on'};try{let r;if(editing)r=await db.from('achievements').update(row).eq('id',item.id).select().single();else r=await db.from('achievements').insert(row).select().single();if(r.error)throw r.error;if(editing)achievements[index]=r.data;else achievements.unshift(r.data);closeModal();renderAchievements();toast('บันทึกผลงานแล้ว')}catch(err){toast(err.message,true)}};
-  $('#modal-ach-upload').onchange=async e=>{if(!e.target.files?.[0])return;const url=await uploadFile(e.target.files[0],'achievement');if(url)$('#editor-form [name="image_url"]').value=url};openModal();
+  achFile.onchange=async e=>{if(!e.target.files?.[0])return;const file=e.target.files[0];previewSelectedImage(achFile,file);const url=await uploadFile(file,'achievement');if(url){achUrl.value=url;setImagePreview(achFile,url,'อัปโหลดแล้ว • พร้อมบันทึกผลงาน')}};openModal();
 }
 async function deleteAchievement(index){if(!confirm('ลบผลงานรายการนี้ถาวร?'))return;const item=achievements[index],{error}=await db.from('achievements').delete().eq('id',item.id);if(error)return toast(error.message,true);achievements.splice(index,1);renderAchievements();toast('ลบผลงานแล้ว')}
 

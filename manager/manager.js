@@ -164,10 +164,10 @@ function moveArrayItem(arr,index,dir,rerender){const to=index+dir;if(to<0||to>=a
 function renderStaff(){
   const list=$('#staff-list'),arr=settings[currentStaffKind]||[],isExec=currentStaffKind==='executives';
   list.innerHTML=arr.map((p,i)=>`<article class="glass rounded-3xl p-5 flex gap-4 items-center"><img src="${esc(p.img||'')}" class="w-20 h-20 rounded-2xl object-cover bg-slate-100"><div class="min-w-0 flex-1"><div class="flex items-center gap-2 flex-wrap"><h4 class="font-bold truncate">${esc(p.name||'-')}</h4>${p.isAlumni?`<span class="text-[10px] font-bold bg-amber-50 text-amber-700 border border-amber-200 px-2 py-0.5 rounded-full">ศิษย์เก่า${p.alumniBatch?' • '+esc(p.alumniBatch):''}</span>`:''}</div><p class="text-xs text-slate-500 mt-1 line-clamp-2">${esc(isExec?(p.position||''):(p.position||p.department||''))}</p><p class="text-[10px] text-slate-400 mt-1">${p.phone?'☎ '+esc(p.phone):''}${p.phone&&p.email?' • ':''}${p.email?'✉ '+esc(p.email):''}</p></div><div class="flex flex-col gap-2"><button class="p-2.5 rounded-xl bg-orange-50 text-orange-600" data-edit-staff="${i}"><i data-lucide="pencil" class="w-4 h-4"></i></button><button class="p-2.5 rounded-xl bg-red-50 text-red-500" data-delete-staff="${i}"><i data-lucide="trash-2" class="w-4 h-4"></i></button></div></article>`).join('')||'<div class="md:col-span-2 xl:col-span-3 glass rounded-3xl p-10 text-center text-slate-400">ยังไม่มีบุคลากรในหมวดนี้</div>';
-  $$('[data-edit-staff]').forEach(b=>b.addEventListener('click',()=>openStaffEditor(+b.dataset.editStaff)));$$('[data-delete-staff]').forEach(b=>b.addEventListener('click',()=>{if(confirm('ลบบุคลากรรายการนี้?')){settings[currentStaffKind].splice(+b.dataset.deleteStaff,1);renderStaff();refreshDerived();markDirty()}}));lucide.createIcons();
+  $$('[data-edit-staff]').forEach(b=>b.addEventListener('click',()=>openStaffEditor(+b.dataset.editStaff)));$$('[data-delete-staff]').forEach(b=>b.addEventListener('click',async()=>{if(confirm('ลบบุคลากรรายการนี้?')){settings[currentStaffKind].splice(+b.dataset.deleteStaff,1);renderStaff();refreshDerived(false);await saveSettings()}}));lucide.createIcons();
 }
 function openStaffEditor(index=null){
-  const editing=index!==null,item=editing?clone(settings[currentStaffKind][index]):{name:'',department:'',position:'',img:'',education:'',phone:'',email:'',isAlumni:false,alumniBatch:''};$('#modal-title').textContent=editing?'แก้ไขบุคลากร':'เพิ่มบุคลากร';$('#modal-help').textContent='ข้อมูลนี้จะแสดงในทำเนียบบุคลากร หากเป็นศิษย์เก่าให้ติ๊กและระบุรุ่น จากนั้นกด “บันทึกเว็บไซต์” เพื่อเผยแพร่';
+  const editing=index!==null,item=editing?clone(settings[currentStaffKind][index]):{name:'',department:'',position:'',img:'',education:'',phone:'',email:'',isAlumni:false,alumniBatch:''};$('#modal-title').textContent=editing?'แก้ไขบุคลากร':'เพิ่มบุคลากร';$('#modal-help').textContent='ข้อมูลนี้จะแสดงในทำเนียบบุคลากรทันทีหลังบันทึกรายการ หากเป็นศิษย์เก่าให้ติ๊กและระบุรุ่น';
   $('#editor-form').innerHTML=`
     <div><label class="label">ชื่อ-นามสกุล</label><input name="name" class="field" value="${esc(item.name)}" required></div>
     <div><label class="label">ตำแหน่ง</label><input name="position" class="field" value="${esc(item.position||'')}"></div>
@@ -192,7 +192,7 @@ function openStaffEditor(index=null){
   alumniInput.addEventListener('input',()=>alumniInput.setCustomValidity(alumniCheck.checked&&!alumniInput.value.trim()?'กรุณาระบุศิษย์เก่ารุ่นที่':''));
   toggleAlumni();
   setImagePreview(staffFile,staffUrl.value,staffUrl.value?'ภาพปัจจุบัน':'ยังไม่ได้เลือกภาพ');staffUrl.addEventListener('input',()=>setImagePreview(staffFile,staffUrl.value,staffUrl.value?'ตัวอย่างจาก URL':'ยังไม่ได้เลือกภาพ'));
-  $('#editor-form').onsubmit=e=>{
+  $('#editor-form').onsubmit=async e=>{
     e.preventDefault();
     const f=new FormData(e.currentTarget),isAlumni=f.get('isAlumni')==='on';
     if(isAlumni&&!String(f.get('alumniBatch')||'').trim()){
@@ -205,7 +205,8 @@ function openStaffEditor(index=null){
     const value={name:f.get('name'),position:f.get('position'),department:f.get('department'),education:f.get('education'),phone:f.get('phone'),email:f.get('email'),isAlumni,alumniBatch:isAlumni?String(f.get('alumniBatch')||'').trim():'',img:f.get('img')};
     settings[currentStaffKind]=settings[currentStaffKind]||[];
     if(editing)settings[currentStaffKind][index]=value;else settings[currentStaffKind].push(value);
-    closeModal();renderStaff();refreshDerived();markDirty()
+    closeModal();renderStaff();refreshDerived(false);
+    await saveSettings();
   };
   staffFile.onchange=async e=>{if(!e.target.files?.[0])return;const file=e.target.files[0];previewSelectedImage(staffFile,file);const url=await uploadFile(file,'staff');if(url){staffUrl.value=url;setImagePreview(staffFile,url,'อัปโหลดแล้ว • พร้อมบันทึกรายการ')}};openModal();
 }

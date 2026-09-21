@@ -48,14 +48,47 @@ function renderStaff(){const box=$('#staff-alumni-list');box.innerHTML=staffAlum
 
 function openEditor(id=null){
   editingId=id;pendingFile=null;const x=id?rows.find(r=>r.id===id):null;$('#editor-title').textContent=x?'แก้ไขศิษย์เก่า':'เพิ่มศิษย์เก่า';const f=$('#editor-form');f.reset();
-  f.elements.id.value=x?.id||'';f.elements.full_name.value=x?.full_name||'';f.elements.photo_url.value=x?.photo_url||'';f.elements.batch.value=x?.batch||'';f.elements.graduation_year.value=x?.graduation_year||'';f.elements.graduation_level.value=x?.graduation_level||'';f.elements.current_position.value=x?.current_position||'';f.elements.occupation.value=x?.occupation||'';f.elements.organization.value=x?.organization||'';f.elements.education.value=x?.education||'';f.elements.bio.value=x?.bio||'';f.elements.phone.value=x?.phone||'';f.elements.email.value=x?.email||'';f.elements.facebook_url.value=x?.facebook_url||'';f.elements.show_contact.checked=!!x?.show_contact;f.elements.featured.checked=!!x?.featured;f.elements.published.checked=x?!!x.published:true;f.elements.sort_order.value=x?.sort_order??0;
+  f.elements.id.value=x?.id||'';f.elements.full_name.value=x?.full_name||'';f.elements.photo_url.value=x?.photo_url||'';$('#photo-file').value='';f.elements.batch.value=x?.batch||'';f.elements.graduation_year.value=x?.graduation_year||'';f.elements.graduation_level.value=x?.graduation_level||'';f.elements.current_position.value=x?.current_position||'';f.elements.occupation.value=x?.occupation||'';f.elements.organization.value=x?.organization||'';f.elements.education.value=x?.education||'';f.elements.bio.value=x?.bio||'';f.elements.phone.value=x?.phone||'';f.elements.email.value=x?.email||'';f.elements.facebook_url.value=x?.facebook_url||'';f.elements.show_contact.checked=!!x?.show_contact;f.elements.featured.checked=!!x?.featured;f.elements.published.checked=x?!!x.published:true;f.elements.sort_order.value=x?.sort_order??0;
   setPreview(x?.photo_url||'');$('#form-status').classList.add('hidden');const m=$('#editor-modal');m.classList.remove('hidden');m.classList.add('flex');lucide.createIcons();
 }
 function closeEditor(){const m=$('#editor-modal');m.classList.add('hidden');m.classList.remove('flex');pendingFile=null}
 $$('[data-close]').forEach(b=>b.addEventListener('click',closeEditor));$('#add-btn').addEventListener('click',()=>openEditor());
-function setPreview(url){const img=$('#photo-preview'),ph=$('#photo-placeholder');if(url){img.src=url;img.classList.remove('hidden');ph.classList.add('hidden')}else{img.src='';img.classList.add('hidden');ph.classList.remove('hidden')}}
-$('#photo-file').addEventListener('change',e=>{pendingFile=e.target.files?.[0]||null;if(pendingFile)setPreview(URL.createObjectURL(pendingFile))});
-async function uploadPhoto(file){if(!file)return $('#editor-form').elements.photo_url.value||'';const ext=(file.name.split('.').pop()||'jpg').toLowerCase();const path=`alumni/${new Date().toISOString().slice(0,10)}/${crypto.randomUUID()}.${ext}`;const bucket=window.SCHOOL_APP_CONFIG?.STORAGE_BUCKET||'site-media';const {error}=await db.storage.from(bucket).upload(path,file,{upsert:false,contentType:file.type||undefined});if(error)throw error;return db.storage.from(bucket).getPublicUrl(path).data.publicUrl}
+function setPreview(url){
+  const img=$('#photo-preview'),ph=$('#photo-placeholder'),note=$('#photo-source-note');
+  if(url){
+    img.src=url;img.classList.remove('hidden');ph.classList.add('hidden');
+    img.onerror=()=>{img.classList.add('hidden');ph.classList.remove('hidden');if(note)note.textContent='ไม่สามารถโหลดตัวอย่างจากลิงก์นี้ได้ กรุณาตรวจสอบ URL'};
+    img.onload=()=>{if(note && !pendingFile)note.textContent='กำลังใช้รูปจากลิงก์ • แสดงตัวอย่างแล้ว'};
+  }else{
+    img.src='';img.classList.add('hidden');ph.classList.remove('hidden');if(note)note.textContent='รองรับทั้งอัปโหลดจากเครื่องและลิงก์รูปภาพ';
+  }
+}
+$('#photo-file').addEventListener('change',e=>{
+  pendingFile=e.target.files?.[0]||null;
+  if(pendingFile){
+    setPreview(URL.createObjectURL(pendingFile));
+    const note=$('#photo-source-note');if(note)note.textContent=`เลือกไฟล์แล้ว: ${pendingFile.name} • ไฟล์นี้จะถูกใช้เมื่อบันทึก`;
+  }
+});
+$('#photo-url-input').addEventListener('input',e=>{
+  const url=e.target.value.trim();
+  if(url){ pendingFile=null; $('#photo-file').value=''; setPreview(url); }
+  else setPreview('');
+});
+$('#photo-url-open').addEventListener('click',()=>{
+  const url=$('#photo-url-input').value.trim();
+  if(!url)return toast('กรุณาวางลิงก์รูปภาพก่อน',false);
+  try{const u=new URL(url);window.open(u.href,'_blank','noopener,noreferrer')}catch{toast('ลิงก์รูปภาพไม่ถูกต้อง',false)}
+});
+async function uploadPhoto(file){
+  if(!file)return $('#editor-form').elements.photo_url.value.trim()||'';
+  const ext=(file.name.split('.').pop()||'jpg').toLowerCase();
+  const path=`alumni/${new Date().toISOString().slice(0,10)}/${crypto.randomUUID()}.${ext}`;
+  const bucket=window.SCHOOL_APP_CONFIG?.STORAGE_BUCKET||'site-media';
+  const {error}=await db.storage.from(bucket).upload(path,file,{upsert:false,contentType:file.type||undefined});
+  if(error)throw error;
+  return db.storage.from(bucket).getPublicUrl(path).data.publicUrl
+}
 $('#editor-form').addEventListener('submit',async e=>{e.preventDefault();const status=$('#form-status');status.className='text-xs rounded-xl p-3 bg-orange-50 text-orange-700';status.textContent='กำลังบันทึก...';status.classList.remove('hidden');try{const f=e.currentTarget;const photo=await uploadPhoto(pendingFile);const payload={full_name:f.elements.full_name.value.trim(),photo_url:photo,batch:f.elements.batch.value.trim(),graduation_year:f.elements.graduation_year.value.trim(),graduation_level:f.elements.graduation_level.value.trim(),current_position:f.elements.current_position.value.trim(),occupation:f.elements.occupation.value.trim(),organization:f.elements.organization.value.trim(),education:f.elements.education.value.trim(),phone:f.elements.phone.value.trim(),email:f.elements.email.value.trim(),facebook_url:f.elements.facebook_url.value.trim(),bio:f.elements.bio.value.trim(),show_contact:f.elements.show_contact.checked,featured:f.elements.featured.checked,published:f.elements.published.checked,sort_order:Number(f.elements.sort_order.value||0)};let error;if(editingId){({error}=await db.from('alumni').update(payload).eq('id',editingId))}else{({error}=await db.from('alumni').insert(payload))}if(error)throw error;await loadRows();renderAll();closeEditor();toast('บันทึกข้อมูลศิษย์เก่าแล้ว')}catch(err){console.error(err);status.className='text-xs rounded-xl p-3 bg-red-50 text-red-600';status.textContent='บันทึกไม่สำเร็จ: '+(err.message||err)}});
 
 async function togglePublish(id){const x=rows.find(r=>r.id===id);if(!x)return;const {error}=await db.from('alumni').update({published:!x.published}).eq('id',id);if(error)return toast(error.message,false);await loadRows();renderAll();toast(x.published?'ซ่อนจากทำเนียบแล้ว':'เผยแพร่แล้ว')}

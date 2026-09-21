@@ -128,3 +128,12 @@ Intro/หน้ารำลึกจะแสดงตั้งแต่ first p
 ฟิลด์ในตารางประกอบด้วย ชื่อ, ประเภทบุคลากร, ตำแหน่ง, กลุ่มสาระ/หน้าที่, รูป, ประวัติการศึกษา, โทรศัพท์, Email, สถานะศิษย์เก่า, รุ่นศิษย์เก่า, สถานะเผยแพร่ และลำดับการแสดงผล
 
 หลังอัปเกรด การเพิ่ม/แก้ไข/ลบบุคลากรใน Website Manager จะบันทึกลง `public.personnel` ทันที ไม่ต้องกด “บันทึกเว็บไซต์” ซ้ำสำหรับบุคลากร และหน้าเว็บหลัก/ทำเนียบศิษย์เก่าจะอ่านข้อมูลจากตารางนี้โดยตรง
+
+
+## University Admission PR Subweb
+
+- Public: `/university-admission/`
+- Manager: `/university-admission/manager/`
+- Database: `public.university_admissions`
+- Run `supabase/university-admissions.sql` once in Supabase SQL Editor.
+- Supports university logo URL or image upload, poster URL/upload, application link, announcement link, university website link, dates, status, filters, featured items, publish/hide, and CSV export.

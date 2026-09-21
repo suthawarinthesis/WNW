@@ -134,6 +134,7 @@
                     <a href="#history-section" class="text-slate-600 hover:text-orange-600 font-medium transition-colors">ประวัติโรงเรียน</a>
                     <a href="#staff-section" class="text-slate-600 hover:text-orange-600 font-medium transition-colors">ทำเนียบบุคลากร</a>
                     <a href="./alumni/" class="text-slate-600 hover:text-orange-600 font-medium transition-colors">ศิษย์เก่า</a>
+                    <a href="./university-admission/" class="text-slate-600 hover:text-orange-600 font-medium transition-colors">ศึกษาต่อ</a>
                     <a href="#stats-section" class="text-slate-600 hover:text-orange-600 font-medium transition-colors">สถิติผลการสอบ</a>
                     <a href="#news-section" class="text-slate-600 hover:text-orange-600 font-medium transition-colors">ข่าวสาร</a>
                     <a href="./admission/" class="bg-orange-500 hover:bg-orange-600 text-white px-5 py-2.5 rounded-full font-medium transition-all shadow-md shadow-orange-200 hover:shadow-lg hover:-translate-y-0.5 flex items-center gap-2">
@@ -154,6 +155,7 @@
                 <a href="#history-section" class="block px-3 py-3 rounded-xl text-slate-700 hover:bg-orange-50 hover:text-orange-600 font-medium">ประวัติโรงเรียน</a>
                 <a href="#staff-section" class="block px-3 py-3 rounded-xl text-slate-700 hover:bg-orange-50 hover:text-orange-600 font-medium">ทำเนียบบุคลากร</a>
                 <a href="./alumni/" class="block px-3 py-3 rounded-xl text-slate-700 hover:bg-orange-50 hover:text-orange-600 font-medium">ทำเนียบศิษย์เก่า</a>
+                <a href="./university-admission/" class="block px-3 py-3 rounded-xl text-slate-700 hover:bg-orange-50 hover:text-orange-600 font-medium">ประชาสัมพันธ์ศึกษาต่อมหาวิทยาลัย</a>
                 <a href="#stats-section" class="block px-3 py-3 rounded-xl text-slate-700 hover:bg-orange-50 hover:text-orange-600 font-medium">สถิติผลการสอบ</a>
                 <a href="#news-section" class="block px-3 py-3 rounded-xl text-slate-700 hover:bg-orange-50 hover:text-orange-600 font-medium">ข่าวสาร</a>
                 <a href="./admission/" class="flex items-center justify-center gap-2 w-full mt-4 bg-orange-500 text-white px-5 py-3 rounded-xl font-medium shadow-md">
@@ -562,6 +564,7 @@
                     <li><a href="#" class="hover:text-orange-400 transition-colors">กระทรวงศึกษาธิการ</a></li>
                     <li><a href="./admission/" class="hover:text-orange-400 transition-colors text-orange-400">ระบบรับสมัครนักเรียน (ออนไลน์)</a></li>
                     <li><a href="./alumni/" class="hover:text-orange-400 transition-colors">ทำเนียบศิษย์เก่า</a></li>
+                    <li><a href="./university-admission/" class="hover:text-orange-400 transition-colors">ประชาสัมพันธ์รับสมัครมหาวิทยาลัย</a></li>
                 </ul>
             </div>
             <div>
@@ -607,16 +610,32 @@
                         <h3 id="staff-modal-name" class="text-2xl font-bold text-slate-900"></h3>
                         <p id="staff-modal-position" class="text-sm font-semibold text-orange-600 mt-1"></p>
                         <p id="staff-modal-department" class="text-sm text-slate-500 mt-1"></p>
-                        <div class="flex flex-wrap gap-2 justify-center sm:justify-start mt-4">
-                            <a id="staff-modal-phone-link" href="#" class="hidden items-center gap-2 px-3 py-2 rounded-xl bg-orange-50 text-orange-700 text-xs font-bold"><i data-lucide="phone" class="w-4 h-4"></i><span id="staff-modal-phone"></span></a>
-                            <a id="staff-modal-email-link" href="#" class="hidden items-center gap-2 px-3 py-2 rounded-xl bg-blue-50 text-blue-700 text-xs font-bold"><i data-lucide="mail" class="w-4 h-4"></i><span id="staff-modal-email"></span></a>
-                        </div>
+
                     </div>
                 </div>
-                <div id="staff-modal-education-wrap" class="mt-7 rounded-2xl bg-slate-50 border border-slate-100 p-5 hidden">
-                    <h4 class="font-bold text-slate-800 flex items-center gap-2 mb-3"><i data-lucide="graduation-cap" class="w-4 h-4 text-orange-500"></i> ประวัติการศึกษา</h4>
-                    <div id="staff-modal-education" class="space-y-2 text-sm text-slate-600 leading-relaxed"></div>
+                <div class="mt-7 grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div class="sm:col-span-2 rounded-2xl bg-slate-50 border border-slate-100 p-5">
+                        <h4 class="font-bold text-slate-800 flex items-center gap-2 mb-3"><i data-lucide="graduation-cap" class="w-4 h-4 text-orange-500"></i> ประวัติการศึกษา</h4>
+                        <div id="staff-modal-education" class="space-y-2 text-sm text-slate-600 leading-relaxed"><p>–</p></div>
+                    </div>
+                    <div class="rounded-2xl bg-orange-50/60 border border-orange-100 p-4">
+                        <p class="text-[11px] font-bold text-slate-400 mb-1">เบอร์โทรศัพท์</p>
+                        <a id="staff-modal-phone-link" href="#" class="text-sm font-semibold text-orange-700 hover:underline break-all"><span id="staff-modal-phone">–</span></a>
+                    </div>
+                    <div class="rounded-2xl bg-blue-50/60 border border-blue-100 p-4">
+                        <p class="text-[11px] font-bold text-slate-400 mb-1">Email</p>
+                        <a id="staff-modal-email-link" href="#" class="text-sm font-semibold text-blue-700 hover:underline break-all"><span id="staff-modal-email">–</span></a>
+                    </div>
+                    <div class="rounded-2xl bg-amber-50/60 border border-amber-100 p-4">
+                        <p class="text-[11px] font-bold text-slate-400 mb-1">สถานะศิษย์เก่า</p>
+                        <p id="staff-modal-alumni-status" class="text-sm font-semibold text-amber-800">–</p>
+                    </div>
+                    <div class="rounded-2xl bg-amber-50/60 border border-amber-100 p-4">
+                        <p class="text-[11px] font-bold text-slate-400 mb-1">รุ่นศิษย์เก่า</p>
+                        <p id="staff-modal-alumni-batch" class="text-sm font-semibold text-amber-800">–</p>
+                    </div>
                 </div>
+                <div id="staff-modal-live-status" class="mt-4 text-[11px] text-slate-400 text-center"></div>
             </div>
         </div>
     </div>
@@ -1292,11 +1311,7 @@
             });
         }
 
-        function openStaffProfileModal(kind, index) {
-            const group = SCHOOL_DATA[kind] || [];
-            const rawPerson = group[index];
-            if (!rawPerson) return;
-            const person = normalizeStaffPerson(rawPerson);
+        function populateStaffProfileModal(person, kind, sourceLabel = '') {
             const modal = document.getElementById('staff-profile-modal');
             const img = document.getElementById('staff-modal-img');
             img.src = person.img || '';
@@ -1304,6 +1319,7 @@
             document.getElementById('staff-modal-name').textContent = person.name || '-';
             document.getElementById('staff-modal-position').textContent = person.position || '';
             document.getElementById('staff-modal-department').textContent = person.department || '';
+
             const badges = document.getElementById('staff-modal-badges');
             badges.innerHTML = '';
             const kindLabel = kind === 'executives' ? 'คณะผู้บริหาร' : kind === 'specialTeachers' ? 'ครูพิเศษ' : 'ครูและบุคลากร';
@@ -1317,27 +1333,89 @@
                 alumniBadge.textContent = `ศิษย์เก่า${person.alumniBatch ? ' • ' + person.alumniBatch : ''}`;
                 badges.appendChild(alumniBadge);
             }
+
+            const phone = String(person.phone || '').trim();
+            const email = String(person.email || '').trim();
             const phoneLink = document.getElementById('staff-modal-phone-link');
             const emailLink = document.getElementById('staff-modal-email-link');
-            if (person.phone) {
-                document.getElementById('staff-modal-phone').textContent = person.phone;
-                phoneLink.href = `tel:${String(person.phone).replace(/[^0-9+]/g,'')}`;
-                phoneLink.classList.remove('hidden'); phoneLink.classList.add('inline-flex');
-            } else { phoneLink.classList.add('hidden'); phoneLink.classList.remove('inline-flex'); }
-            if (person.email) {
-                document.getElementById('staff-modal-email').textContent = person.email;
-                emailLink.href = `mailto:${person.email}`;
-                emailLink.classList.remove('hidden'); emailLink.classList.add('inline-flex');
-            } else { emailLink.classList.add('hidden'); emailLink.classList.remove('inline-flex'); }
-            const educationWrap = document.getElementById('staff-modal-education-wrap');
+            document.getElementById('staff-modal-phone').textContent = phone || '–';
+            document.getElementById('staff-modal-email').textContent = email || '–';
+            phoneLink.href = phone ? `tel:${phone.replace(/[^0-9+]/g,'')}` : '#';
+            emailLink.href = email ? `mailto:${email}` : '#';
+            phoneLink.classList.toggle('pointer-events-none', !phone);
+            emailLink.classList.toggle('pointer-events-none', !email);
+
             const education = document.getElementById('staff-modal-education');
             education.innerHTML = '';
             const lines = String(person.education || '').split(/\n+/).map(x => x.trim()).filter(Boolean);
             if (lines.length) {
-                lines.forEach(line => { const p = document.createElement('p'); p.textContent = line; education.appendChild(p); });
-                educationWrap.classList.remove('hidden');
-            } else { educationWrap.classList.add('hidden'); }
-            modal.classList.remove('hidden'); modal.classList.add('flex'); document.body.style.overflow = 'hidden'; lucide.createIcons();
+                lines.forEach(line => {
+                    const p = document.createElement('p');
+                    p.className = 'flex gap-2';
+                    const bullet = document.createElement('span');
+                    bullet.className = 'text-orange-500 shrink-0'; bullet.textContent = '•';
+                    const txt = document.createElement('span'); txt.textContent = line;
+                    p.appendChild(bullet); p.appendChild(txt); education.appendChild(p);
+                });
+            } else {
+                const p = document.createElement('p'); p.textContent = '–'; education.appendChild(p);
+            }
+
+            document.getElementById('staff-modal-alumni-status').textContent = person.isAlumni ? 'เคยเป็นศิษย์เก่าโรงเรียน' : 'ไม่ได้ระบุว่าเป็นศิษย์เก่า';
+            document.getElementById('staff-modal-alumni-batch').textContent = person.isAlumni ? (person.alumniBatch || '–') : '–';
+            const status = document.getElementById('staff-modal-live-status');
+            if (status) status.textContent = sourceLabel;
+            lucide.createIcons();
+        }
+
+        async function openStaffProfileModal(kind, index) {
+            const group = SCHOOL_DATA[kind] || [];
+            const rawPerson = group[index];
+            if (!rawPerson) return;
+            const person = normalizeStaffPerson(rawPerson);
+            const modal = document.getElementById('staff-profile-modal');
+
+            // เปิด Modal จากข้อมูลที่มีอยู่ก่อน เพื่อให้ตอบสนองทันที
+            populateStaffProfileModal(person, kind, person.id ? 'กำลังตรวจสอบข้อมูลล่าสุดจากฐานข้อมูล…' : '');
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+            document.body.style.overflow = 'hidden';
+
+            // ถ้ามี id ให้ดึงรายละเอียดล่าสุดจาก Supabase โดยตรง
+            if (person.id && window.SCHOOL_SUPABASE) {
+                try {
+                    const { data, error } = await window.SCHOOL_SUPABASE
+                        .from('personnel')
+                        .select('id,staff_type,full_name,position,department,image_url,education,phone,email,is_alumni,alumni_batch,published,sort_order,created_at')
+                        .eq('id', person.id)
+                        .maybeSingle();
+                    if (error) throw error;
+                    if (data) {
+                        const fresh = normalizeStaffPerson({
+                            id: data.id,
+                            name: data.full_name || '',
+                            position: data.position || '',
+                            department: data.department || '',
+                            img: data.image_url || '',
+                            education: data.education || '',
+                            phone: data.phone || '',
+                            email: data.email || '',
+                            isAlumni: !!data.is_alumni,
+                            alumniBatch: data.alumni_batch || ''
+                        });
+                        // อัปเดต object ในหน้าเว็บด้วย เพื่อ click ครั้งถัดไปเห็นข้อมูลล่าสุดทันที
+                        Object.assign(rawPerson, fresh);
+                        populateStaffProfileModal(fresh, kind, 'ข้อมูลล่าสุดจาก Supabase');
+                    } else {
+                        const status = document.getElementById('staff-modal-live-status');
+                        if (status) status.textContent = 'ไม่พบรายการนี้ในตาราง personnel — กำลังแสดงข้อมูลที่หน้าเว็บมีอยู่';
+                    }
+                } catch (err) {
+                    console.warn('Cannot fetch fresh personnel detail', err);
+                    const status = document.getElementById('staff-modal-live-status');
+                    if (status) status.textContent = 'โหลดรายละเอียดล่าสุดจาก Supabase ไม่สำเร็จ — กำลังแสดงข้อมูลที่หน้าเว็บมีอยู่';
+                }
+            }
         }
 
         function closeStaffProfileModal() {

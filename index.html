@@ -129,20 +129,84 @@
                         <p class="text-sm text-orange-600 font-medium" id="nav-school-name-en">School Name</p>
                     </div>
                 </div>
-                <div class="hidden md:flex items-center space-x-6">
-                    <a href="#" class="text-slate-600 hover:text-orange-600 font-medium transition-colors">หน้าแรก</a>
-                    <a href="#history-section" class="text-slate-600 hover:text-orange-600 font-medium transition-colors">ประวัติโรงเรียน</a>
-                    <a href="#staff-section" class="text-slate-600 hover:text-orange-600 font-medium transition-colors">ทำเนียบบุคลากร</a>
-                    <a href="./alumni/" class="text-slate-600 hover:text-orange-600 font-medium transition-colors">ศิษย์เก่า</a>
-                    <a href="./student-portal/" class="text-slate-600 hover:text-orange-600 font-medium transition-colors">Student Portal</a>
-                    <a href="./university-admission/" class="text-slate-600 hover:text-orange-600 font-medium transition-colors">ศึกษาต่อ</a>
-                    <a href="#stats-section" class="text-slate-600 hover:text-orange-600 font-medium transition-colors">สถิติผลการสอบ</a>
-                    <a href="#news-section" class="text-slate-600 hover:text-orange-600 font-medium transition-colors">ข่าวสาร</a>
-                    <a href="./admission/" class="bg-orange-500 hover:bg-orange-600 text-white px-5 py-2.5 rounded-full font-medium transition-all shadow-md shadow-orange-200 hover:shadow-lg hover:-translate-y-0.5 flex items-center gap-2">
+                <div class="hidden lg:flex items-center gap-2 xl:gap-3">
+                    <a href="#" class="px-3 py-2 rounded-xl text-slate-700 hover:bg-orange-50 hover:text-orange-600 font-semibold transition-colors">หน้าแรก</a>
+
+                    <div class="relative group">
+                        <button type="button" class="px-3 py-2 rounded-xl text-slate-700 hover:bg-orange-50 hover:text-orange-600 font-semibold transition-colors flex items-center gap-1.5">
+                            เกี่ยวกับโรงเรียน <i data-lucide="chevron-down" class="w-4 h-4"></i>
+                        </button>
+                        <div class="absolute left-0 top-full pt-3 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200">
+                            <div class="w-72 rounded-2xl border border-orange-100 bg-white/95 backdrop-blur-xl shadow-2xl shadow-orange-100/50 p-3 space-y-1">
+                                <a href="#history-section" class="flex items-start gap-3 px-3 py-3 rounded-xl hover:bg-orange-50 transition-colors">
+                                    <i data-lucide="landmark" class="w-5 h-5 text-orange-500 mt-0.5"></i>
+                                    <div><p class="font-semibold text-slate-800">ประวัติโรงเรียน</p><p class="text-xs text-slate-500">ข้อมูลและความเป็นมาของโรงเรียน</p></div>
+                                </a>
+                                <a href="#staff-section" class="flex items-start gap-3 px-3 py-3 rounded-xl hover:bg-orange-50 transition-colors">
+                                    <i data-lucide="users" class="w-5 h-5 text-orange-500 mt-0.5"></i>
+                                    <div><p class="font-semibold text-slate-800">ทำเนียบบุคลากร</p><p class="text-xs text-slate-500">คณะผู้บริหาร ครู และบุคลากร</p></div>
+                                </a>
+                                <a href="#stats-section" class="flex items-start gap-3 px-3 py-3 rounded-xl hover:bg-orange-50 transition-colors">
+                                    <i data-lucide="bar-chart-3" class="w-5 h-5 text-orange-500 mt-0.5"></i>
+                                    <div><p class="font-semibold text-slate-800">สถิติผลการสอบ</p><p class="text-xs text-slate-500">ผลการสอบนักธรรมและบาลี</p></div>
+                                </a>
+                                <a href="#news-section" class="flex items-start gap-3 px-3 py-3 rounded-xl hover:bg-orange-50 transition-colors">
+                                    <i data-lucide="newspaper" class="w-5 h-5 text-orange-500 mt-0.5"></i>
+                                    <div><p class="font-semibold text-slate-800">ข่าวสาร</p><p class="text-xs text-slate-500">ประกาศและความเคลื่อนไหวล่าสุด</p></div>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="relative group">
+                        <button type="button" class="px-3 py-2 rounded-xl text-slate-700 hover:bg-orange-50 hover:text-orange-600 font-semibold transition-colors flex items-center gap-1.5">
+                            ระบบนักเรียน <i data-lucide="chevron-down" class="w-4 h-4"></i>
+                        </button>
+                        <div class="absolute left-0 top-full pt-3 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200">
+                            <div class="w-72 rounded-2xl border border-orange-100 bg-white/95 backdrop-blur-xl shadow-2xl shadow-orange-100/50 p-3 space-y-1">
+                                <a href="./student-portal/" class="flex items-start gap-3 px-3 py-3 rounded-xl hover:bg-orange-50 transition-colors">
+                                    <i data-lucide="school" class="w-5 h-5 text-orange-500 mt-0.5"></i>
+                                    <div><p class="font-semibold text-slate-800">Student Portal</p><p class="text-xs text-slate-500">ข้อมูลส่วนตัว เกรด ตารางเรียน และวันสอบ</p></div>
+                                </a>
+                                <a href="./admission/" class="flex items-start gap-3 px-3 py-3 rounded-xl hover:bg-orange-50 transition-colors">
+                                    <i data-lucide="graduation-cap" class="w-5 h-5 text-orange-500 mt-0.5"></i>
+                                    <div><p class="font-semibold text-slate-800">สมัครเรียน</p><p class="text-xs text-slate-500">ระบบรับสมัครนักเรียนใหม่ของโรงเรียน</p></div>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="relative group">
+                        <button type="button" class="px-3 py-2 rounded-xl text-slate-700 hover:bg-orange-50 hover:text-orange-600 font-semibold transition-colors flex items-center gap-1.5">
+                            ศิษย์เก่า & ศึกษาต่อ <i data-lucide="chevron-down" class="w-4 h-4"></i>
+                        </button>
+                        <div class="absolute right-0 top-full pt-3 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200">
+                            <div class="w-80 rounded-2xl border border-orange-100 bg-white/95 backdrop-blur-xl shadow-2xl shadow-orange-100/50 p-3 space-y-1">
+                                <a href="./alumni/" class="flex items-start gap-3 px-3 py-3 rounded-xl hover:bg-orange-50 transition-colors">
+                                    <i data-lucide="badge-check" class="w-5 h-5 text-orange-500 mt-0.5"></i>
+                                    <div><p class="font-semibold text-slate-800">ทำเนียบศิษย์เก่า</p><p class="text-xs text-slate-500">ค้นหาศิษย์เก่าและกรองตามรุ่น</p></div>
+                                </a>
+                                <a href="./alumni/register/" class="flex items-start gap-3 px-3 py-3 rounded-xl hover:bg-orange-50 transition-colors">
+                                    <i data-lucide="file-signature" class="w-5 h-5 text-orange-500 mt-0.5"></i>
+                                    <div><p class="font-semibold text-slate-800">ส่งข้อมูลศิษย์เก่า</p><p class="text-xs text-slate-500">กรอกแบบฟอร์มส่งข้อมูลให้แอดมินตรวจสอบ</p></div>
+                                </a>
+                                <a href="./university-admission/" class="flex items-start gap-3 px-3 py-3 rounded-xl hover:bg-orange-50 transition-colors">
+                                    <i data-lucide="briefcase-business" class="w-5 h-5 text-orange-500 mt-0.5"></i>
+                                    <div><p class="font-semibold text-slate-800">ประชาสัมพันธ์ศึกษาต่อ</p><p class="text-xs text-slate-500">รวมข่าวรับสมัครมหาวิทยาลัยและลิงก์สมัคร</p></div>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+
+                    <a href="./admission/" class="ml-2 bg-orange-500 hover:bg-orange-600 text-white px-5 py-2.5 rounded-full font-semibold transition-all shadow-md shadow-orange-200 hover:shadow-lg hover:-translate-y-0.5 flex items-center gap-2">
                         <i data-lucide="graduation-cap" class="w-4 h-4"></i> สมัครเรียน
                     </a>
                 </div>
-                <div class="md:hidden flex items-center">
+                <div class="hidden md:flex lg:hidden items-center gap-3">
+                    <a href="./student-portal/" class="px-4 py-2 rounded-full bg-orange-50 text-orange-700 font-semibold hover:bg-orange-100 transition-colors">Portal</a>
+                    <a href="./admission/" class="px-4 py-2 rounded-full bg-orange-500 text-white font-semibold shadow-md shadow-orange-200 hover:bg-orange-600 transition-colors">สมัครเรียน</a>
+                </div>
+                <div class="lg:hidden flex items-center">
                     <button id="mobile-menu-btn" class="text-slate-600 hover:text-orange-600 p-2">
                         <i data-lucide="menu" id="menu-icon-open" class="w-6 h-6 block"></i>
                         <i data-lucide="x" id="menu-icon-close" class="w-6 h-6 hidden"></i>
@@ -150,19 +214,54 @@
                 </div>
             </div>
         </div>
-        <div id="mobile-menu" class="hidden md:hidden glass-panel border-t border-orange-50 absolute w-full shadow-xl">
-            <div class="px-4 pt-2 pb-6 space-y-2">
-                <a href="#" class="block px-3 py-3 rounded-xl text-slate-700 hover:bg-orange-50 hover:text-orange-600 font-medium">หน้าแรก</a>
-                <a href="#history-section" class="block px-3 py-3 rounded-xl text-slate-700 hover:bg-orange-50 hover:text-orange-600 font-medium">ประวัติโรงเรียน</a>
-                <a href="#staff-section" class="block px-3 py-3 rounded-xl text-slate-700 hover:bg-orange-50 hover:text-orange-600 font-medium">ทำเนียบบุคลากร</a>
-                <a href="./alumni/" class="block px-3 py-3 rounded-xl text-slate-700 hover:bg-orange-50 hover:text-orange-600 font-medium">ทำเนียบศิษย์เก่า</a>
-                <a href="./student-portal/" class="block px-3 py-3 rounded-xl text-slate-700 hover:bg-orange-50 hover:text-orange-600 font-medium">Student Portal</a>
-                <a href="./university-admission/" class="block px-3 py-3 rounded-xl text-slate-700 hover:bg-orange-50 hover:text-orange-600 font-medium">ประชาสัมพันธ์ศึกษาต่อมหาวิทยาลัย</a>
-                <a href="#stats-section" class="block px-3 py-3 rounded-xl text-slate-700 hover:bg-orange-50 hover:text-orange-600 font-medium">สถิติผลการสอบ</a>
-                <a href="#news-section" class="block px-3 py-3 rounded-xl text-slate-700 hover:bg-orange-50 hover:text-orange-600 font-medium">ข่าวสาร</a>
-                <a href="./admission/" class="flex items-center justify-center gap-2 w-full mt-4 bg-orange-500 text-white px-5 py-3 rounded-xl font-medium shadow-md">
-                    <i data-lucide="graduation-cap" class="w-5 h-5"></i> สมัครเรียน
-                </a>
+        <div id="mobile-menu" class="hidden lg:hidden glass-panel border-t border-orange-50 absolute w-full shadow-xl">
+            <div class="px-4 pt-3 pb-6 space-y-3">
+                <a href="#" class="block px-4 py-3 rounded-2xl text-slate-800 bg-white/80 hover:bg-orange-50 hover:text-orange-600 font-semibold shadow-sm">หน้าแรก</a>
+
+                <details class="bg-white/80 rounded-2xl border border-orange-100 overflow-hidden group">
+                    <summary class="list-none cursor-pointer px-4 py-3 font-semibold text-slate-800 flex items-center justify-between">
+                        <span class="flex items-center gap-2"><i data-lucide="building-2" class="w-4 h-4 text-orange-500"></i>เกี่ยวกับโรงเรียน</span>
+                        <i data-lucide="chevron-down" class="w-4 h-4 text-slate-400 group-open:rotate-180 transition-transform"></i>
+                    </summary>
+                    <div class="px-3 pb-3 space-y-1">
+                        <a href="#history-section" class="block px-3 py-2.5 rounded-xl text-slate-700 hover:bg-orange-50">ประวัติโรงเรียน</a>
+                        <a href="#staff-section" class="block px-3 py-2.5 rounded-xl text-slate-700 hover:bg-orange-50">ทำเนียบบุคลากร</a>
+                        <a href="#stats-section" class="block px-3 py-2.5 rounded-xl text-slate-700 hover:bg-orange-50">สถิติผลการสอบ</a>
+                        <a href="#news-section" class="block px-3 py-2.5 rounded-xl text-slate-700 hover:bg-orange-50">ข่าวสาร</a>
+                    </div>
+                </details>
+
+                <details class="bg-white/80 rounded-2xl border border-orange-100 overflow-hidden group">
+                    <summary class="list-none cursor-pointer px-4 py-3 font-semibold text-slate-800 flex items-center justify-between">
+                        <span class="flex items-center gap-2"><i data-lucide="school" class="w-4 h-4 text-orange-500"></i>ระบบนักเรียน</span>
+                        <i data-lucide="chevron-down" class="w-4 h-4 text-slate-400 group-open:rotate-180 transition-transform"></i>
+                    </summary>
+                    <div class="px-3 pb-3 space-y-1">
+                        <a href="./student-portal/" class="block px-3 py-2.5 rounded-xl text-slate-700 hover:bg-orange-50">Student Portal</a>
+                        <a href="./admission/" class="block px-3 py-2.5 rounded-xl text-slate-700 hover:bg-orange-50">สมัครเรียน</a>
+                    </div>
+                </details>
+
+                <details class="bg-white/80 rounded-2xl border border-orange-100 overflow-hidden group">
+                    <summary class="list-none cursor-pointer px-4 py-3 font-semibold text-slate-800 flex items-center justify-between">
+                        <span class="flex items-center gap-2"><i data-lucide="badge-check" class="w-4 h-4 text-orange-500"></i>ศิษย์เก่า & ศึกษาต่อ</span>
+                        <i data-lucide="chevron-down" class="w-4 h-4 text-slate-400 group-open:rotate-180 transition-transform"></i>
+                    </summary>
+                    <div class="px-3 pb-3 space-y-1">
+                        <a href="./alumni/" class="block px-3 py-2.5 rounded-xl text-slate-700 hover:bg-orange-50">ทำเนียบศิษย์เก่า</a>
+                        <a href="./alumni/register/" class="block px-3 py-2.5 rounded-xl text-slate-700 hover:bg-orange-50">ส่งข้อมูลศิษย์เก่า</a>
+                        <a href="./university-admission/" class="block px-3 py-2.5 rounded-xl text-slate-700 hover:bg-orange-50">ประชาสัมพันธ์ศึกษาต่อมหาวิทยาลัย</a>
+                    </div>
+                </details>
+
+                <div class="grid grid-cols-2 gap-3 pt-1">
+                    <a href="./student-portal/" class="flex items-center justify-center gap-2 w-full bg-orange-50 text-orange-700 px-4 py-3 rounded-2xl font-semibold border border-orange-100">
+                        <i data-lucide="layout-dashboard" class="w-4 h-4"></i> Portal
+                    </a>
+                    <a href="./admission/" class="flex items-center justify-center gap-2 w-full bg-orange-500 text-white px-4 py-3 rounded-2xl font-semibold shadow-md shadow-orange-200">
+                        <i data-lucide="graduation-cap" class="w-4 h-4"></i> สมัครเรียน
+                    </a>
+                </div>
             </div>
         </div>
     </nav>

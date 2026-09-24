@@ -895,8 +895,7 @@
             // 📌 13. ปฏิทินกิจกรรม
             events: [
                 { date: "15 มีนาคม", title: "วันสถาปนาโรงเรียน", time: "08:00 - 12:00" },
-                { date: "20-24 กรกฎาคม", title: "สอบกลางภาคเรียนที่ 1", time: "ตลอดวัน" },
-                { date: "10-12 สิงหาคม", title: "กิจกรรมกีฬาสี 'แสด-ขาว เกมส์'", time: "08:00 - 16:00" }
+                { date: "20-24 กรกฎาคม", title: "สอบกลางภาคเรียนที่ 1", time: "ตลอดวัน" }
             ],
 
             // 📌 14. ทำเนียบผู้บริหาร
@@ -1401,7 +1400,12 @@
 
         function renderEvents() {
             const container = document.getElementById('events-container');
-            SCHOOL_DATA.events.filter(event => event.published !== false).forEach((event, idx, visibleEvents) => {
+            const visibleEvents = SCHOOL_DATA.events.filter(event => {
+                const title = String(event?.title || '');
+                const isSportsDay = /กีฬาสี|แสด-ขาว\s*เกมส์/i.test(title);
+                return event.published !== false && !isSportsDay;
+            });
+            visibleEvents.forEach((event, idx) => {
                 const borderClass = idx === visibleEvents.length - 1 ? 'border-transparent' : 'border-slate-700';
                 container.innerHTML += `
                     <div class="relative pl-6 pb-4 border-l-2 ${borderClass}">

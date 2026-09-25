@@ -86,3 +86,11 @@ for each row execute function public.set_updated_at();
 
 comment on table public.alumni is
 'Alumni directory records. Staff marked isAlumni remain in site_settings and are merged by the alumni subweb automatically.';
+
+
+-- structured alumni fields 2026-09-25
+alter table public.alumni add column if not exists naktham_level text not null default '';
+alter table public.alumni add column if not exists pali_level text not null default '';
+alter table public.alumni add column if not exists is_royal_scholarship boolean not null default false;
+alter table public.alumni add column if not exists royal_scholarship_batch text not null default '';
+alter table public.alumni add column if not exists royal_scholarship_phase text not null default '';

@@ -71,6 +71,23 @@
         .ba-slider .img-after img { width: 200%; max-width: none; } 
         .ba-slider input[type="range"] { position: absolute; inset: 0; width: 100%; height: 100%; z-index: 20; opacity: 0; cursor: ew-resize; }
         .slider-button { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); z-index: 15; pointer-events: none; width: 40px; height: 40px; background: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 0 15px rgba(0,0,0,0.3); color: #f97316; }
+
+        /* --- Home Alumni Auto Slider --- */
+        .alumni-home-viewport {
+            overflow-x: auto; overflow-y: hidden; scrollbar-width: none; -ms-overflow-style: none;
+            scroll-behavior: auto; overscroll-behavior-x: contain;
+            -webkit-mask-image: linear-gradient(to right, transparent 0, #000 4%, #000 96%, transparent 100%);
+            mask-image: linear-gradient(to right, transparent 0, #000 4%, #000 96%, transparent 100%);
+        }
+        .alumni-home-viewport::-webkit-scrollbar { display: none; }
+        .alumni-home-track { display: flex; width: max-content; gap: 1rem; padding: .5rem 2rem 1rem; }
+        .alumni-home-card { width: 285px; flex: 0 0 285px; }
+        @media (max-width: 640px) {
+            .alumni-home-card { width: 245px; flex-basis: 245px; }
+            .alumni-home-track { padding-left: 1rem; padding-right: 1rem; }
+            .alumni-home-viewport { -webkit-mask-image: none; mask-image: none; }
+        }
+        @media (prefers-reduced-motion: reduce) { .alumni-home-viewport { scroll-behavior: smooth; } }
     </style>
 </head>
 <body class="intro-boot min-h-screen text-slate-800 selection:bg-orange-200 selection:text-orange-900 relative overflow-x-hidden pt-10">
@@ -585,6 +602,33 @@
             <div class="grid grid-cols-1 sm:grid-cols-3 gap-6" id="achievements-container"></div>
         </section>
 
+        <!-- ศิษย์เก่าของเรา: Auto-scrolling Alumni Showcase -->
+        <section id="home-alumni-section" class="hidden scroll-mt-32">
+            <div class="relative overflow-hidden rounded-[2.5rem] bg-slate-950 text-white shadow-2xl shadow-slate-300/40 border border-white/10">
+                <div class="absolute -top-24 -left-24 w-72 h-72 rounded-full bg-orange-500/20 blur-[90px] pointer-events-none"></div>
+                <div class="absolute -bottom-28 right-8 w-80 h-80 rounded-full bg-amber-400/10 blur-[100px] pointer-events-none"></div>
+                <div class="relative z-10 p-6 sm:p-8 pb-3 flex flex-col lg:flex-row lg:items-end justify-between gap-5">
+                    <div>
+                        <div class="inline-flex items-center gap-2 text-[11px] font-black tracking-[0.18em] uppercase text-orange-300 bg-orange-400/10 border border-orange-300/20 px-3 py-1.5 rounded-full mb-4">
+                            <i data-lucide="sparkles" class="w-3.5 h-3.5"></i> Alumni Network
+                        </div>
+                        <h2 class="text-2xl sm:text-3xl font-black leading-tight">ศิษย์เก่าของเรา</h2>
+                        <p class="text-sm text-slate-300 mt-2 max-w-2xl leading-relaxed">สายใยจากรั้วแสด–ขาว สู่เส้นทางการศึกษา การทำงาน และการรับใช้สังคม พบกับศิษย์เก่าจากหลากหลายรุ่นในสมุดทำเนียบออนไลน์</p>
+                    </div>
+                    <div class="flex items-center gap-2 shrink-0">
+                        <button id="alumni-auto-toggle" type="button" onclick="toggleHomeAlumniAutoScroll()" class="w-10 h-10 rounded-full bg-white/10 hover:bg-white/20 border border-white/10 flex items-center justify-center transition-colors" title="หยุด/เล่นการเลื่อนอัตโนมัติ" aria-label="หยุดหรือเล่นการเลื่อนอัตโนมัติ">
+                            <i id="alumni-auto-toggle-icon" data-lucide="pause" class="w-4 h-4"></i>
+                        </button>
+                        <a href="./alumni/" class="inline-flex items-center gap-2 bg-white text-slate-900 hover:bg-orange-50 px-4 py-2.5 rounded-full text-sm font-bold transition-all shadow-lg">ดูทำเนียบทั้งหมด <i data-lucide="arrow-up-right" class="w-4 h-4"></i></a>
+                    </div>
+                </div>
+                <div id="home-alumni-empty" class="hidden relative z-10 px-8 pb-8 text-sm text-slate-400">ยังไม่มีข้อมูลศิษย์เก่าที่เผยแพร่</div>
+                <div id="home-alumni-viewport" class="alumni-home-viewport relative z-10 pb-4" aria-label="รายชื่อศิษย์เก่าแบบเลื่อนอัตโนมัติ">
+                    <div id="home-alumni-track" class="alumni-home-track"></div>
+                </div>
+            </div>
+        </section>
+
         <!-- เอกสาร และ Facebook -->
         <section class="grid grid-cols-1 lg:grid-cols-3 gap-8">
             <div class="col-span-1 glass-panel rounded-[2rem] p-6">
@@ -970,6 +1014,10 @@
     <!-- ⚠️ ไม่แนะนำให้แก้ไขส่วนนี้ หากไม่มีความรู้ด้าน JavaScript ⚠️ -->
     <!-- ████████████████████████████████████████████████████████████████████████████████ -->
     <script id="system-logic">
+        let HOME_ALUMNI = [];
+        let homeAlumniAnimationFrame = null;
+        let homeAlumniPaused = false;
+
         document.addEventListener('DOMContentLoaded', async () => {
             await loadRemoteData();
             initIntroPage(); // Initialize Intro Page
@@ -983,6 +1031,7 @@
             renderStaff();
             renderCurriculums();
             renderAchievements();
+            renderHomeAlumni();
             renderDocuments();
             renderDhammaQuote();
             renderPaliWord();
@@ -1015,7 +1064,7 @@
             return target;
         }
 
-        function applyRemoteResults(settingsResult, achievementsResult, newsResult, personnelResult) {
+        function applyRemoteResults(settingsResult, achievementsResult, newsResult, personnelResult, alumniResult) {
             if (settingsResult?.data?.data) deepMerge(SCHOOL_DATA, settingsResult.data.data);
             if (Array.isArray(achievementsResult?.data)) {
                 SCHOOL_DATA.achievements = achievementsResult.data.map(item => ({
@@ -1046,6 +1095,26 @@
                     });
                 });
             }
+
+            const alumniFromDirectory = (!alumniResult?.error && Array.isArray(alumniResult?.data) ? alumniResult.data : []).map(row => ({
+                id: row.id, source: 'alumni', name: row.full_name || '', photo: row.photo_url || '',
+                batch: row.batch || '', career: row.current_position || row.occupation || '', organization: row.organization || '',
+                featured: !!row.featured, isRoyalScholarship: !!row.is_royal_scholarship,
+                scholarshipBatch: row.royal_scholarship_batch || '', scholarshipPhase: row.royal_scholarship_phase || ''
+            }));
+            const alumniFromPersonnel = (!personnelResult?.error && Array.isArray(personnelResult?.data) ? personnelResult.data : [])
+                .filter(row => !!row.is_alumni)
+                .map(row => ({
+                    id: `staff-${row.id}`, source: 'staff', name: row.full_name || '', photo: row.image_url || '',
+                    batch: row.alumni_batch || '', career: row.position || '', organization: row.department || '',
+                    featured: false, isRoyalScholarship: false, scholarshipBatch: '', scholarshipPhase: ''
+                }));
+            const alumniSeen = new Set();
+            HOME_ALUMNI = [...alumniFromDirectory, ...alumniFromPersonnel].filter(item => {
+                const key = `${String(item.name).trim().toLowerCase()}|${String(item.batch).trim().toLowerCase()}`;
+                if (!item.name || alumniSeen.has(key)) return false;
+                alumniSeen.add(key); return true;
+            }).sort((a,b) => Number(b.featured) - Number(a.featured)).slice(0, 16);
         }
 
         function refreshRemoteSectionsAfterLateLoad() {
@@ -1054,6 +1123,7 @@
             try { renderStaff(); } catch (_) {}
             try { renderNews(); } catch (_) {}
             try { renderAchievements(); } catch (_) {}
+            try { renderHomeAlumni(); } catch (_) {}
             try { lucide.createIcons(); } catch (_) {}
         }
 
@@ -1064,18 +1134,19 @@
                 db.from('site_settings').select('data').eq('id', 1).maybeSingle(),
                 db.from('achievements').select('id,title,year,image_url,description,created_at').eq('published', true).order('created_at', { ascending: false }).limit(3),
                 db.from('news').select('id,title,summary,image_url,category,category_color,date_text,month_year,url,sort_order,created_at').eq('published', true).order('sort_order', { ascending: true }).order('created_at', { ascending: false }),
-                db.from('personnel').select('id,staff_type,full_name,position,department,image_url,education,phone,email,is_alumni,alumni_batch,published,sort_order,created_at').eq('published', true).order('staff_type', { ascending: true }).order('sort_order', { ascending: true }).order('created_at', { ascending: true })
+                db.from('personnel').select('id,staff_type,full_name,position,department,image_url,education,phone,email,is_alumni,alumni_batch,published,sort_order,created_at').eq('published', true).order('staff_type', { ascending: true }).order('sort_order', { ascending: true }).order('created_at', { ascending: true }),
+                db.from('alumni').select('*').eq('published', true).order('featured', { ascending: false }).order('sort_order', { ascending: true }).order('created_at', { ascending: false }).limit(16)
             ]);
             let timedOut = false;
             try {
                 const timeout = new Promise((_, reject) => setTimeout(() => { timedOut = true; reject(new Error('Supabase load timeout')); }, 4500));
-                const [settingsResult, achievementsResult, newsResult, personnelResult] = await Promise.race([remoteQuery, timeout]);
-                applyRemoteResults(settingsResult, achievementsResult, newsResult, personnelResult);
+                const [settingsResult, achievementsResult, newsResult, personnelResult, alumniResult] = await Promise.race([remoteQuery, timeout]);
+                applyRemoteResults(settingsResult, achievementsResult, newsResult, personnelResult, alumniResult);
             } catch (error) {
                 console.warn('Supabase initial load is slow — page will refresh remote sections when data arrives.', error);
                 if (timedOut) {
-                    remoteQuery.then(([settingsResult, achievementsResult, newsResult, personnelResult]) => {
-                        applyRemoteResults(settingsResult, achievementsResult, newsResult, personnelResult);
+                    remoteQuery.then(([settingsResult, achievementsResult, newsResult, personnelResult, alumniResult]) => {
+                        applyRemoteResults(settingsResult, achievementsResult, newsResult, personnelResult, alumniResult);
                         refreshRemoteSectionsAfterLateLoad();
                     }).catch(err => console.warn('Late Supabase refresh failed.', err));
                 }
@@ -1629,6 +1700,99 @@
         
         function openDonationModal() { const modal = document.getElementById('donation-modal'), content = document.getElementById('donation-modal-content'); modal.classList.remove('hidden'); modal.classList.add('flex'); document.body.style.overflow = 'hidden'; setTimeout(() => { content.classList.remove('scale-95', 'opacity-0'); content.classList.add('scale-100', 'opacity-100'); }, 10); lucide.createIcons(); }
         function closeDonationModal() { const modal = document.getElementById('donation-modal'), content = document.getElementById('donation-modal-content'); content.classList.remove('scale-100', 'opacity-100'); content.classList.add('scale-95', 'opacity-0'); setTimeout(() => { modal.classList.add('hidden'); modal.classList.remove('flex'); document.body.style.overflow = 'auto'; }, 300); }
+
+        function homeAlumniPlaceholder(name='ศิษย์เก่า') {
+            const initials = String(name).trim().split(/\s+/).slice(0,2).map(x => x[0] || '').join('');
+            const safeInitials = escapeStaffHtml(initials || 'ศ');
+            const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="400" height="400"><rect width="100%" height="100%" rx="64" fill="#1e293b"/><circle cx="200" cy="145" r="70" fill="#fb923c"/><rect x="80" y="235" width="240" height="120" rx="60" fill="#f97316"/><text x="200" y="390" text-anchor="middle" font-family="sans-serif" font-size="30" fill="#fed7aa">${safeInitials}</text></svg>`;
+            return 'data:image/svg+xml;charset=UTF-8,' + encodeURIComponent(svg);
+        }
+
+        function homeAlumniCardHtml(item) {
+            const photo = item.photo || homeAlumniPlaceholder(item.name);
+            const profileHref = `./alumni/?profile=${encodeURIComponent(item.id)}`;
+            const career = item.career || (item.source === 'staff' ? 'บุคลากรปัจจุบัน' : 'ศิษย์เก่าโรงเรียนวัดหนองแวงวิทยา');
+            const batch = item.batch || 'ไม่ระบุรุ่น';
+            return `<a href="${profileHref}" class="alumni-home-card group relative overflow-hidden rounded-[1.75rem] border border-white/10 bg-white/[0.07] hover:bg-white/[0.12] p-4 backdrop-blur-xl transition-all duration-300 hover:-translate-y-1 hover:border-orange-300/30 hover:shadow-xl hover:shadow-orange-950/20">
+                <div class="flex items-start gap-4">
+                    <div class="relative shrink-0">
+                        <img src="${escapeStaffHtml(photo)}" alt="${escapeStaffHtml(item.name)}" class="w-20 h-20 rounded-2xl object-cover bg-slate-800 border border-white/10 shadow-lg" loading="lazy" onerror="this.src='${homeAlumniPlaceholder(item.name)}'">
+                        ${item.featured ? '<span class="absolute -top-2 -right-2 w-7 h-7 rounded-full bg-amber-400 text-amber-950 flex items-center justify-center shadow-lg" title="ศิษย์เก่าเด่น"><i data-lucide="star" class="w-3.5 h-3.5"></i></span>' : ''}
+                    </div>
+                    <div class="min-w-0 flex-1 pt-1">
+                        <div class="flex flex-wrap gap-1.5 mb-2">
+                            <span class="text-[10px] font-black bg-orange-400/15 text-orange-200 border border-orange-300/20 px-2.5 py-1 rounded-full">${escapeStaffHtml(batch)}</span>
+                            ${item.source === 'staff' ? '<span class="text-[10px] font-bold bg-white/10 text-slate-200 px-2.5 py-1 rounded-full">บุคลากรปัจจุบัน</span>' : ''}
+                        </div>
+                        <h3 class="font-bold text-white leading-snug line-clamp-2 group-hover:text-orange-200 transition-colors">${escapeStaffHtml(item.name)}</h3>
+                        <p class="text-xs text-slate-300 mt-1.5 line-clamp-1">${escapeStaffHtml(career)}</p>
+                        ${item.organization ? `<p class="text-[11px] text-slate-500 mt-1 line-clamp-1">${escapeStaffHtml(item.organization)}</p>` : ''}
+                    </div>
+                </div>
+                ${item.isRoyalScholarship ? `<div class="mt-4 flex items-center gap-2 text-[10px] font-bold text-fuchsia-200 bg-fuchsia-500/10 border border-fuchsia-400/15 rounded-xl px-3 py-2"><i data-lucide="award" class="w-3.5 h-3.5"></i><span class="line-clamp-1">ทุนเฉลิมราชกุมารี${item.scholarshipBatch ? ' • '+escapeStaffHtml(item.scholarshipBatch) : ''}${item.scholarshipPhase ? ' • '+escapeStaffHtml(item.scholarshipPhase) : ''}</span></div>` : ''}
+                <div class="mt-4 pt-3 border-t border-white/10 flex items-center justify-between text-[11px] text-slate-400">
+                    <span>เปิดดูประวัติ</span><i data-lucide="arrow-right" class="w-3.5 h-3.5 group-hover:translate-x-1 transition-transform"></i>
+                </div>
+            </a>`;
+        }
+
+        function renderHomeAlumni() {
+            const section = document.getElementById('home-alumni-section');
+            const track = document.getElementById('home-alumni-track');
+            const empty = document.getElementById('home-alumni-empty');
+            if (!section || !track) return;
+            if (!Array.isArray(HOME_ALUMNI) || !HOME_ALUMNI.length) {
+                section.classList.add('hidden');
+                track.innerHTML = '';
+                if (empty) empty.classList.remove('hidden');
+                return;
+            }
+            section.classList.remove('hidden');
+            if (empty) empty.classList.add('hidden');
+            const repeated = HOME_ALUMNI.length > 1 ? [...HOME_ALUMNI, ...HOME_ALUMNI] : HOME_ALUMNI;
+            track.innerHTML = repeated.map(homeAlumniCardHtml).join('');
+            try { lucide.createIcons(); } catch (_) {}
+            requestAnimationFrame(startHomeAlumniAutoScroll);
+        }
+
+        function startHomeAlumniAutoScroll() {
+            const viewport = document.getElementById('home-alumni-viewport');
+            if (!viewport) return;
+            if (homeAlumniAnimationFrame) cancelAnimationFrame(homeAlumniAnimationFrame);
+            if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+
+            if (!viewport.dataset.alumniBound) {
+                viewport.dataset.alumniBound = '1';
+                viewport.addEventListener('mouseenter', () => homeAlumniPaused = true);
+                viewport.addEventListener('mouseleave', () => homeAlumniPaused = false);
+                viewport.addEventListener('touchstart', () => homeAlumniPaused = true, { passive: true });
+                viewport.addEventListener('touchend', () => { setTimeout(() => homeAlumniPaused = false, 1200); }, { passive: true });
+                viewport.addEventListener('focusin', () => homeAlumniPaused = true);
+                viewport.addEventListener('focusout', () => homeAlumniPaused = false);
+            }
+
+            let last = performance.now();
+            const tick = (now) => {
+                if (!homeAlumniPaused && HOME_ALUMNI.length > 1) {
+                    const dt = Math.min(now - last, 50);
+                    viewport.scrollLeft += dt * 0.028;
+                    const loopPoint = viewport.scrollWidth / 2;
+                    if (loopPoint > 0 && viewport.scrollLeft >= loopPoint) viewport.scrollLeft -= loopPoint;
+                }
+                last = now;
+                homeAlumniAnimationFrame = requestAnimationFrame(tick);
+            };
+            homeAlumniAnimationFrame = requestAnimationFrame(tick);
+        }
+
+        function toggleHomeAlumniAutoScroll() {
+            homeAlumniPaused = !homeAlumniPaused;
+            const icon = document.getElementById('alumni-auto-toggle-icon');
+            const btn = document.getElementById('alumni-auto-toggle');
+            if (icon) icon.setAttribute('data-lucide', homeAlumniPaused ? 'play' : 'pause');
+            if (btn) btn.title = homeAlumniPaused ? 'เล่นการเลื่อนอัตโนมัติ' : 'หยุดการเลื่อนอัตโนมัติ';
+            try { lucide.createIcons(); } catch (_) {}
+        }
 
         function renderDocuments() {
             const container = document.getElementById('documents-container');

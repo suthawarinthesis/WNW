@@ -271,3 +271,11 @@ using (bucket_id = 'alumni-submission-files' and public.is_site_admin());
 
 comment on table public.alumni_submissions is
 'Public alumni self-registration queue. Admin reviews/edits before approving into public.alumni.';
+
+
+-- structured alumni fields 2026-09-25
+alter table public.alumni_submissions add column if not exists naktham_level text not null default '';
+alter table public.alumni_submissions add column if not exists pali_level text not null default '';
+alter table public.alumni_submissions add column if not exists is_royal_scholarship boolean not null default false;
+alter table public.alumni_submissions add column if not exists royal_scholarship_batch text not null default '';
+alter table public.alumni_submissions add column if not exists royal_scholarship_phase text not null default '';

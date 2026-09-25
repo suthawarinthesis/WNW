@@ -6,6 +6,7 @@ let schoolSettings = {};
 let alumniRows = [];
 let staffAlumni = [];
 let combined = [];
+let directoryMode = 'all';
 
 function normalize(v=''){ return String(v).trim().toLowerCase().replace(/\s+/g,' '); }
 function batchLabel(v=''){ return String(v).trim() || 'ไม่ระบุรุ่น'; }
@@ -34,6 +35,8 @@ async function loadData(){
   alumniRows = (rows||[]).map(r=>({
     id:r.id, source:'alumni', fullName:r.full_name, photo:r.photo_url, batch:r.batch,
     graduationYear:r.graduation_year, graduationLevel:r.graduation_level,
+    nakthamLevel:r.naktham_level||'', paliLevel:r.pali_level||'',
+    isRoyalScholarship:!!r.is_royal_scholarship, royalScholarshipBatch:r.royal_scholarship_batch||'', royalScholarshipPhase:r.royal_scholarship_phase||'',
     currentPosition:r.current_position, occupation:r.occupation, organization:r.organization,
     education:r.education, phone:r.phone, email:r.email, facebookUrl:r.facebook_url, bio:r.bio,
     showContact:!!r.show_contact, featured:!!r.featured
@@ -48,6 +51,8 @@ async function loadData(){
   applyBranding();
   populateBatches();
   render();
+  const requestedProfile = new URLSearchParams(window.location.search).get('profile');
+  if(requestedProfile) setTimeout(()=>openProfile(requestedProfile), 80);
 }
 
 function extractPersonnelAlumni(rows){
@@ -74,6 +79,7 @@ function extractStaffAlumni(s){
         batch:p.alumniBatch||'', graduationYear:'', graduationLevel:'', currentPosition:p.position||'',
         occupation:p.position||'', organization:p.department||label, education:p.education||'', phone:p.phone||'',
         email:p.email||'', facebookUrl:'', bio:`ปัจจุบันเป็น${p.position||label}${p.department?' • '+p.department:''}`,
+        nakthamLevel:'', paliLevel:'', isRoyalScholarship:false, royalScholarshipBatch:'', royalScholarshipPhase:'',
         showContact:true, featured:false, staffLabel:label
       });
     });
@@ -99,6 +105,10 @@ function applyBranding(){
   $('#school-name').textContent=name; $('#hero-school-name').textContent=name; document.title=`ทำเนียบศิษย์เก่า - ${name}`;
   const logo=schoolSettings?.branding?.logoUrl;
   if(logo){ $('#school-logo').src=logo; $('#school-logo').classList.remove('hidden'); $('#logo-fallback').classList.add('hidden'); }
+  const heroBg=schoolSettings?.alumniDirectory?.heroBackgroundUrl||'';
+  const heroImg=$('#alumni-hero-bg');
+  if(heroBg && heroImg){ heroImg.src=heroBg; heroImg.classList.remove('hidden'); heroImg.onerror=()=>heroImg.classList.add('hidden'); }
+  else if(heroImg){ heroImg.classList.add('hidden'); heroImg.removeAttribute('src'); }
 }
 
 function populateBatches(){
@@ -108,14 +118,16 @@ function populateBatches(){
   $('#stat-total').textContent=combined.length.toLocaleString('th-TH');
   $('#stat-batches').textContent=batches.length.toLocaleString('th-TH');
   $('#stat-staff').textContent=staffAlumni.length.toLocaleString('th-TH');
+  $('#stat-scholarship').textContent=combined.filter(x=>x.isRoyalScholarship).length.toLocaleString('th-TH');
 }
 
 function getFiltered(){
   const q=normalize($('#search-input').value);
   const batch=$('#batch-filter').value;
   return combined.filter(x=>{
-    const searchable=normalize([x.fullName,x.batch,x.currentPosition,x.occupation,x.organization,x.education,x.graduationYear,x.graduationLevel].join(' '));
-    return (!q || searchable.includes(q)) && (!batch || batchLabel(x.batch)===batch);
+    const searchable=normalize([x.fullName,x.batch,x.currentPosition,x.occupation,x.organization,x.education,x.graduationYear,x.graduationLevel,x.nakthamLevel,x.paliLevel,x.royalScholarshipBatch,x.royalScholarshipPhase].join(' '));
+    const modeOk=directoryMode!=='scholarship'||x.isRoyalScholarship;
+    return modeOk && (!q || searchable.includes(q)) && (!batch || batchLabel(x.batch)===batch);
   });
 }
 
@@ -149,7 +161,7 @@ function cardHtml(x){
   const career=x.currentPosition||x.occupation||'';
   const org=x.organization||'';
   return `<button type="button" data-profile-id="${esc(x.id)}" class="alumni-card glass rounded-[2rem] p-5 text-left w-full group">
-    <div class="relative"><img src="${esc(photo)}" onerror="this.src='${placeholderAvatar(x.fullName)}'" class="w-full aspect-square rounded-[1.5rem] object-cover bg-slate-100" alt="${esc(x.fullName)}" loading="lazy">${x.source==='staff'?'<span class="absolute top-3 left-3 bg-slate-950/80 text-white text-[10px] font-bold px-2.5 py-1 rounded-full backdrop-blur">บุคลากร</span>':''}${x.featured?'<span class="absolute top-3 right-3 bg-amber-400 text-amber-950 text-[10px] font-black px-2.5 py-1 rounded-full">โดดเด่น</span>':''}</div>
+    <div class="relative"><img src="${esc(photo)}" onerror="this.src='${placeholderAvatar(x.fullName)}'" class="w-full aspect-square rounded-[1.5rem] object-cover bg-slate-100" alt="${esc(x.fullName)}" loading="lazy">${x.source==='staff'?'<span class="absolute top-3 left-3 bg-slate-950/80 text-white text-[10px] font-bold px-2.5 py-1 rounded-full backdrop-blur">บุคลากร</span>':''}${x.featured?'<span class="absolute top-3 right-3 bg-amber-400 text-amber-950 text-[10px] font-black px-2.5 py-1 rounded-full">โดดเด่น</span>':''}${x.isRoyalScholarship?'<span class="absolute bottom-3 left-3 bg-fuchsia-600/90 text-white text-[10px] font-black px-2.5 py-1 rounded-full backdrop-blur">ทุนเฉลิมราชกุมารี</span>':''}</div>
     <div class="mt-4"><span class="inline-flex text-[10px] font-bold text-orange-700 bg-orange-50 border border-orange-100 px-2.5 py-1 rounded-full">${esc(batchLabel(x.batch))}</span><h3 class="font-bold text-slate-900 mt-2 group-hover:text-orange-600 transition-colors line-clamp-2">${esc(x.fullName||'-')}</h3>${career?`<p class="text-xs text-slate-600 mt-1 line-clamp-1">${esc(career)}</p>`:''}${org?`<p class="text-[11px] text-slate-400 mt-1 line-clamp-1">${esc(org)}</p>`:''}</div>
   </button>`;
 }
@@ -163,6 +175,9 @@ function openProfile(id){
   const badges=[`<span class="text-xs font-bold bg-orange-50 text-orange-700 border border-orange-100 px-3 py-1 rounded-full">${esc(batchLabel(x.batch))}</span>`];
   if(x.graduationYear)badges.push(`<span class="text-xs font-bold bg-slate-100 text-slate-700 px-3 py-1 rounded-full">จบปี ${esc(x.graduationYear)}</span>`);
   if(x.graduationLevel)badges.push(`<span class="text-xs font-bold bg-slate-100 text-slate-700 px-3 py-1 rounded-full">${esc(x.graduationLevel)}</span>`);
+  if(x.nakthamLevel)badges.push(`<span class="text-xs font-bold bg-amber-50 text-amber-700 border border-amber-100 px-3 py-1 rounded-full">นักธรรม ${esc(x.nakthamLevel)}</span>`);
+  if(x.paliLevel)badges.push(`<span class="text-xs font-bold bg-violet-50 text-violet-700 border border-violet-100 px-3 py-1 rounded-full">${esc(x.paliLevel)}</span>`);
+  if(x.isRoyalScholarship)badges.push(`<span class="text-xs font-bold bg-fuchsia-50 text-fuchsia-700 border border-fuchsia-100 px-3 py-1 rounded-full">ทุนเฉลิมราชกุมารี${x.royalScholarshipBatch?' • '+esc(x.royalScholarshipBatch):''}${x.royalScholarshipPhase?' • '+esc(x.royalScholarshipPhase):''}</span>`);
   if(x.source==='staff')badges.push('<span class="text-xs font-bold bg-amber-50 text-amber-700 border border-amber-100 px-3 py-1 rounded-full">บุคลากรปัจจุบัน</span>');
   $('#profile-badges').innerHTML=badges.join('');
   setBlock('#profile-bio-wrap','#profile-bio',x.bio);
@@ -184,6 +199,18 @@ function renderError(msg){ $('#directory').innerHTML=`<div class="glass rounded-
 $('#search-input').addEventListener('input',render);
 $('#batch-filter').addEventListener('change',render);
 $('#print-btn').addEventListener('click',()=>window.print());
+document.querySelectorAll('[data-directory-mode]').forEach(btn=>btn.addEventListener('click',()=>{
+  directoryMode=btn.dataset.directoryMode||'all';
+  document.querySelectorAll('.directory-mode-btn').forEach(x=>{
+    const active=x.dataset.directoryMode===directoryMode;
+    x.classList.toggle('bg-slate-900',active&&directoryMode==='all');
+    x.classList.toggle('text-white',active&&directoryMode==='all');
+    x.classList.toggle('bg-fuchsia-600',active&&directoryMode==='scholarship');
+    x.classList.toggle('text-white',active&&directoryMode==='scholarship');
+    if(!active){x.classList.remove('bg-slate-900','bg-fuchsia-600','text-white'); if(x.dataset.directoryMode==='all')x.classList.add('bg-white','text-slate-700'); else x.classList.add('bg-fuchsia-50','text-fuchsia-700');}
+  });
+  render();
+}));
 document.querySelectorAll('[data-close-profile]').forEach(x=>x.addEventListener('click',closeProfile));
 document.addEventListener('keydown',e=>{if(e.key==='Escape')closeProfile()});
 lucide.createIcons();

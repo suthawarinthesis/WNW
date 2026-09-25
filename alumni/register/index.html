@@ -43,9 +43,12 @@
           <div class="flex items-center gap-3 mb-4"><div class="w-9 h-9 rounded-xl bg-slate-900 text-white flex items-center justify-center text-sm font-black">1</div><div><h2 class="font-black">ข้อมูลพื้นฐาน</h2><p class="text-xs text-slate-500">ชื่อ รุ่น และข้อมูลการศึกษาเดิม</p></div></div>
           <div class="grid sm:grid-cols-2 gap-4">
             <div class="sm:col-span-2"><label class="label">ชื่อ-นามสกุล <span class="req">*</span></label><input name="full_name" class="field" required placeholder="เช่น นายสมชาย ใจดี"></div>
-            <div><label class="label">รุ่นศิษย์เก่า <span class="req">*</span></label><input name="batch" class="field" required placeholder="เช่น รุ่น 25"></div>
-            <div><label class="label">ปีที่จบ</label><input name="graduation_year" class="field" placeholder="เช่น 2562"></div>
-            <div class="sm:col-span-2"><label class="label">ระดับที่จบ</label><input name="graduation_level" class="field" placeholder="เช่น ม.6 / เปรียญธรรม 3 ประโยค"></div>
+            <div><label class="label">รุ่นศิษย์เก่า <span class="req">*</span></label><select name="batch" class="field alumni-batch-select" required></select></div>
+            <div><label class="label">ปีที่จบ</label><select name="graduation_year" class="field graduation-year-select"></select></div>
+            <div><label class="label">ระดับมัธยมที่จบ</label><select name="graduation_level" class="field graduation-level-select"></select></div>
+            <div><label class="label">นักธรรม <span class="text-slate-400 font-normal">(ไม่บังคับ)</span></label><select name="naktham_level" class="field naktham-select"></select></div>
+            <div class="sm:col-span-2"><label class="label">เปรียญธรรม <span class="text-slate-400 font-normal">(ไม่บังคับ)</span></label><select name="pali_level" class="field pali-select"></select></div>
+            <div class="sm:col-span-2 rounded-2xl border border-fuchsia-100 bg-fuchsia-50/60 p-4"><label class="flex items-center gap-3 cursor-pointer"><input name="is_royal_scholarship" type="checkbox" class="royal-scholarship-toggle w-5 h-5 accent-fuchsia-600"><span><span class="block text-sm font-bold text-fuchsia-900">เป็นนักเรียนทุนเฉลิมราชกุมารี</span><span class="block text-[11px] text-fuchsia-700 mt-0.5">หากเป็นนักเรียนทุน กรุณาระบุรุ่นและระยะ</span></span></label><div class="royal-scholarship-fields hidden grid sm:grid-cols-2 gap-3 mt-4"><div><label class="label">ทุนรุ่นที่ <span class="req">*</span></label><input name="royal_scholarship_batch" class="field" placeholder="เช่น รุ่น 5"></div><div><label class="label">ระยะ <span class="req">*</span></label><input name="royal_scholarship_phase" class="field" placeholder="เช่น ระยะที่ 2"></div></div></div>
           </div>
         </section>
 
@@ -96,6 +99,6 @@
     </section>
   </main>
 
-  <script src="register.js?v=20260922-alumni-submission-1"></script>
+  <script src="register.js?v=20260925-alumni-structured-2"></script>
 </body>
 </html>

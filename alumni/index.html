@@ -40,8 +40,10 @@
   </header>
 
   <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
-    <section class="relative overflow-hidden rounded-[2.5rem] bg-slate-950 text-white p-7 sm:p-10 lg:p-12 mb-8 shadow-2xl shadow-slate-200 no-print">
-      <div class="absolute inset-0 bg-gradient-to-br from-orange-500/30 via-transparent to-amber-400/10"></div>
+    <section id="alumni-hero" class="relative overflow-hidden rounded-[2.5rem] bg-slate-950 text-white p-7 sm:p-10 lg:p-12 mb-8 shadow-2xl shadow-slate-200 no-print">
+      <img id="alumni-hero-bg" class="hidden absolute inset-0 w-full h-full object-cover" alt="พื้นหลังทำเนียบศิษย์เก่า">
+      <div id="alumni-hero-overlay" class="absolute inset-0 bg-gradient-to-r from-slate-950/95 via-slate-950/82 to-slate-950/45"></div>
+      <div class="absolute inset-0 bg-gradient-to-br from-orange-500/20 via-transparent to-amber-400/10"></div>
       <div class="absolute -right-20 -top-24 w-80 h-80 rounded-full bg-orange-500/20 blur-3xl"></div>
       <div class="relative z-10 max-w-3xl">
         <span class="inline-flex items-center gap-2 bg-white/10 border border-white/10 px-3 py-1.5 rounded-full text-xs font-bold text-orange-200"><i data-lucide="book-open" class="w-4 h-4"></i> สมุดทำเนียบรุ่น</span>
@@ -53,14 +55,19 @@
 
     <div class="print-title hidden mb-6"><h1 class="text-3xl font-bold">ทำเนียบศิษย์เก่า</h1><p id="print-filter-label" class="text-slate-500 mt-1"></p></div>
 
-    <section class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6 no-print">
+    <section class="grid grid-cols-2 lg:grid-cols-5 gap-4 mb-6 no-print">
       <div class="glass rounded-3xl p-5"><p class="text-xs text-slate-500">ศิษย์เก่าที่เผยแพร่</p><p id="stat-total" class="text-3xl font-black text-orange-600 mt-2">0</p></div>
       <div class="glass rounded-3xl p-5"><p class="text-xs text-slate-500">จำนวนรุ่น</p><p id="stat-batches" class="text-3xl font-black text-slate-900 mt-2">0</p></div>
       <div class="glass rounded-3xl p-5"><p class="text-xs text-slate-500">บุคลากรที่เป็นศิษย์เก่า</p><p id="stat-staff" class="text-3xl font-black text-amber-600 mt-2">0</p></div>
+      <div class="glass rounded-3xl p-5"><p class="text-xs text-slate-500">ทุนเฉลิมราชกุมารี</p><p id="stat-scholarship" class="text-3xl font-black text-fuchsia-600 mt-2">0</p></div>
       <div class="glass rounded-3xl p-5"><p class="text-xs text-slate-500">กำลังแสดง</p><p id="stat-visible" class="text-3xl font-black text-slate-900 mt-2">0</p></div>
     </section>
 
     <section class="glass rounded-[2rem] p-4 sm:p-5 mb-8 no-print">
+      <div class="flex flex-wrap gap-2 mb-4" id="directory-mode-tabs">
+        <button type="button" data-directory-mode="all" class="directory-mode-btn px-4 py-2.5 rounded-xl bg-slate-900 text-white text-xs font-bold flex items-center gap-2"><i data-lucide="users" class="w-4 h-4"></i> ศิษย์เก่าทั้งหมด</button>
+        <button type="button" data-directory-mode="scholarship" class="directory-mode-btn px-4 py-2.5 rounded-xl bg-fuchsia-50 text-fuchsia-700 border border-fuchsia-100 text-xs font-bold flex items-center gap-2"><i data-lucide="award" class="w-4 h-4"></i> นักเรียนทุนเฉลิมราชกุมารี</button>
+      </div>
       <div class="grid md:grid-cols-[1fr_240px_auto] gap-3 items-center">
         <div class="relative"><i data-lucide="search" class="w-4 h-4 text-slate-400 absolute left-4 top-1/2 -translate-y-1/2"></i><input id="search-input" class="field pl-11" placeholder="ค้นหาชื่อ อาชีพ หน่วยงาน หรือรุ่น..."></div>
         <select id="batch-filter" class="field"><option value="">ทุกรุ่น</option></select>
@@ -92,6 +99,6 @@
     </div>
   </div>
 
-  <script src="alumni.js?v=20260922-personnel-supabase-v1"></script>
+  <script src="alumni.js?v=20260925-alumni-structured-2"></script>
 </body>
 </html>

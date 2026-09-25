@@ -180,7 +180,7 @@ function openProfile(id){
   if(x.isRoyalScholarship)badges.push(`<span class="text-xs font-bold bg-fuchsia-50 text-fuchsia-700 border border-fuchsia-100 px-3 py-1 rounded-full">ทุนเฉลิมราชกุมารี${x.royalScholarshipBatch?' • '+esc(x.royalScholarshipBatch):''}${x.royalScholarshipPhase?' • '+esc(x.royalScholarshipPhase):''}</span>`);
   if(x.source==='staff')badges.push('<span class="text-xs font-bold bg-amber-50 text-amber-700 border border-amber-100 px-3 py-1 rounded-full">บุคลากรปัจจุบัน</span>');
   $('#profile-badges').innerHTML=badges.join('');
-  setBlock('#profile-bio-wrap','#profile-bio',x.bio);
+  setBioAccordion(x.bio);
   setBlock('#profile-education-wrap','#profile-education',x.education);
   const contact=$('#profile-contact-wrap'); contact.innerHTML='';
   if(x.showContact){
@@ -191,6 +191,18 @@ function openProfile(id){
   contact.classList.toggle('hidden',!contact.children.length);
   const modal=$('#profile-modal'); modal.classList.remove('hidden'); modal.classList.add('flex');
   lucide.createIcons();
+}
+function setBioAccordion(value){
+  const wrap=$('#profile-bio-wrap'), el=$('#profile-bio'), toggle=$('#profile-bio-toggle-text');
+  const text=String(value||'').trim();
+  if(!text){ wrap.classList.add('hidden'); wrap.open=false; return; }
+  el.textContent=text;
+  wrap.classList.remove('hidden');
+  // เนื้อหาสั้นเปิดให้เห็นเลย ส่วนเนื้อหายาวพับไว้ก่อนเพื่อไม่ให้ Modal ยาวเกินไป
+  wrap.open = text.length <= 220;
+  const sync=()=>{ if(toggle) toggle.textContent=wrap.open ? 'ซ่อนรายละเอียด' : 'ดูรายละเอียด'; };
+  sync();
+  if(!wrap.dataset.toggleBound){ wrap.addEventListener('toggle',sync); wrap.dataset.toggleBound='1'; }
 }
 function setBlock(wrapSel,textSel,value){const wrap=$(wrapSel),el=$(textSel); if(String(value||'').trim()){el.textContent=value;wrap.classList.remove('hidden')}else wrap.classList.add('hidden')}
 function closeProfile(){const m=$('#profile-modal');m.classList.add('hidden');m.classList.remove('flex')}

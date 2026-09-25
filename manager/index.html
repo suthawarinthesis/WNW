@@ -25,9 +25,16 @@
 
   <div id="login-screen" class="fixed inset-0 z-[100] bg-slate-950/70 backdrop-blur-xl flex items-center justify-center p-4">
     <div class="w-full max-w-md glass rounded-[2rem] p-8 bg-white/90">
-      <div class="w-14 h-14 rounded-2xl bg-orange-500 text-white flex items-center justify-center shadow-lg shadow-orange-200 mb-5"><i data-lucide="shield-check" class="w-7 h-7"></i></div>
-      <h1 class="text-2xl font-bold text-slate-900">Website Manager</h1>
-      <p class="text-sm text-slate-500 mt-2 mb-6">เข้าสู่ระบบด้วยบัญชีผู้ดูแลที่สร้างใน Supabase Authentication</p>
+      <div class="flex flex-col items-center text-center mb-6">
+        <div id="login-logo-frame" class="w-24 h-24 rounded-[1.75rem] bg-white border border-orange-100 shadow-lg shadow-orange-100/70 flex items-center justify-center overflow-hidden p-2 mb-4">
+          <img id="login-school-logo" src="" alt="โลโก้โรงเรียน" class="hidden w-full h-full object-contain">
+          <div id="login-logo-fallback" class="w-14 h-14 rounded-2xl bg-orange-500 text-white flex items-center justify-center"><i data-lucide="school" class="w-7 h-7"></i></div>
+        </div>
+        <p id="login-school-name" class="text-sm font-bold text-orange-600 mb-1">โรงเรียนวัดหนองแวงวิทยา</p>
+        <h1 class="text-2xl font-bold text-slate-900">Website Manager</h1>
+        <p class="text-sm text-slate-500 mt-2">ระบบจัดการเว็บไซต์โรงเรียน</p>
+      </div>
+      <p class="text-xs text-slate-400 text-center mb-6">เข้าสู่ระบบด้วยบัญชีผู้ดูแลที่สร้างใน Supabase Authentication</p>
       <div id="config-warning" class="hidden bg-amber-50 border border-amber-200 text-amber-700 rounded-2xl p-4 text-xs mb-5">ยังไม่ได้ตั้งค่า Supabase ใน <b>assets/app-config.js</b></div>
       <form id="login-form" class="space-y-4">
         <div><label class="label">อีเมลผู้ดูแล</label><input id="login-email" type="email" class="field" required autocomplete="email"></div>
@@ -177,6 +184,6 @@
     </div>
   </div>
   <div id="toast" class="hidden"></div>
-  <script src="manager.js?v=20260922-personnel-supabase-v1"></script>
+  <script src="manager.js?v=20260925-login-school-logo"></script>
 </body>
 </html>

@@ -43,6 +43,25 @@ function refreshStaticImagePreviews(){
   $$('[data-upload-target]').forEach(fileInput=>{const input=$$('[data-path]').find(x=>x.dataset.path===fileInput.dataset.uploadTarget);setImagePreview(fileInput,input?.value||getPath(settings,fileInput.dataset.uploadTarget)||'',input?.value?'ภาพที่ใช้อยู่บนเว็บไซต์':'ยังไม่ได้เลือกภาพ')});
 }
 async function loadDefault(){const r=await fetch('../assets/default-data.json');return r.json()}
+async function loadLoginBranding(){
+  let data={};
+  try{data=await loadDefault()}catch(_){}
+  if(db){
+    try{
+      const {data:row}=await db.from('site_settings').select('data').eq('id',1).maybeSingle();
+      if(row?.data)data=mergeDefaults(data,row.data);
+    }catch(_){}
+  }
+  const logo=data?.branding?.logoUrl||'';
+  const name=data?.info?.nameTh||'โรงเรียนวัดหนองแวงวิทยา';
+  const nameEl=$('#login-school-name'),img=$('#login-school-logo'),fallback=$('#login-logo-fallback');
+  if(nameEl)nameEl.textContent=name;
+  if(img&&fallback&&logo){
+    img.onload=()=>{img.classList.remove('hidden');fallback.classList.add('hidden')};
+    img.onerror=()=>{img.classList.add('hidden');fallback.classList.remove('hidden')};
+    img.src=logo;
+  }
+}
 
 const iconOptions=[['users','ผู้คน'],['book-open','หนังสือ'],['calendar','ปฏิทิน'],['bell','ระฆัง'],['sun','ดวงอาทิตย์'],['moon','พระจันทร์'],['clock','นาฬิกา'],['graduation-cap','การศึกษา'],['monitor-play','สื่อการเรียน'],['book','ตำรา'],['scroll-text','คัมภีร์ / เอกสาร'],['file-text','ไฟล์เอกสาร'],['school','โรงเรียน'],['heart','หัวใจ'],['award','รางวัล'],['star','ดาว'],['link','ลิงก์'],['globe','เว็บไซต์'],['map','แผนที่'],['phone','โทรศัพท์'],['mail','อีเมล'],['languages','ภาษา']];
 const colorOptions=[
@@ -74,6 +93,7 @@ const collectionSchemas={
 };
 
 async function start(){
+  await loadLoginBranding();
   lucide.createIcons();
   if(!db){$('#config-warning').classList.remove('hidden');$('#login-form button').disabled=true;$('#login-form button').classList.add('opacity-50');return}
   const {data:{session}}=await db.auth.getSession();

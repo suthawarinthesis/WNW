@@ -153,8 +153,9 @@ function personnelRowToStaff(row={}){
   return {
     id:row.id||'', name:row.full_name||'', position:row.position||'', department:row.department||'',
     img:row.image_url||'', education:row.education||'', phone:row.phone||'', email:row.email||'',
-    isAlumni:!!row.is_alumni, alumniBatch:row.alumni_batch||'', published:row.published!==false,
-    sortOrder:Number(row.sort_order||0)
+    isAlumni:!!row.is_alumni, alumniBatch:row.alumni_batch||'',
+    isRoyalScholarship:!!row.is_royal_scholarship, royalScholarshipBatch:row.royal_scholarship_batch||'', royalScholarshipPhase:row.royal_scholarship_phase||'',
+    published:row.published!==false, sortOrder:Number(row.sort_order||0)
   };
 }
 function staffToPersonnelRow(item={},kind='teachers',sortOrder=0){
@@ -163,6 +164,9 @@ function staffToPersonnelRow(item={},kind='teachers',sortOrder=0){
     department:String(item.department||'').trim(), image_url:String(item.img||'').trim(),
     education:String(item.education||'').trim(), phone:String(item.phone||'').trim(), email:String(item.email||'').trim(),
     is_alumni:!!item.isAlumni, alumni_batch:item.isAlumni?String(item.alumniBatch||'').trim():'',
+    is_royal_scholarship:!!item.isRoyalScholarship,
+    royal_scholarship_batch:item.isRoyalScholarship?String(item.royalScholarshipBatch||'').trim():'',
+    royal_scholarship_phase:item.isRoyalScholarship?String(item.royalScholarshipPhase||'').trim():'',
     published:item.published!==false, sort_order:Number.isFinite(Number(sortOrder))?Number(sortOrder):0
   };
 }
@@ -225,7 +229,7 @@ function renderStaff(){
   }
   if(status){status.className='rounded-2xl bg-green-50 text-green-700 px-4 py-3 text-xs font-bold';status.textContent=`เชื่อมต่อ Supabase personnel แล้ว • บุคลากรทั้งหมด ${(settings.executives?.length||0)+(settings.teachers?.length||0)+(settings.specialTeachers?.length||0)} รายการ • บันทึกอัตโนมัติ`; }
   if(addBtn)addBtn.disabled=false;
-  list.innerHTML=arr.map((p,i)=>`<article class="glass rounded-3xl p-5 flex gap-4 items-center"><img src="${esc(p.img||'')}" class="w-20 h-20 rounded-2xl object-cover bg-slate-100"><div class="min-w-0 flex-1"><div class="flex items-center gap-2 flex-wrap"><h4 class="font-bold truncate">${esc(p.name||'-')}</h4>${p.isAlumni?`<span class="text-[10px] font-bold bg-amber-50 text-amber-700 border border-amber-200 px-2 py-0.5 rounded-full">ศิษย์เก่า${p.alumniBatch?' • '+esc(p.alumniBatch):''}</span>`:''}</div><p class="text-xs text-slate-500 mt-1 line-clamp-2">${esc(isExec?(p.position||''):(p.position||p.department||''))}</p><p class="text-[10px] text-slate-400 mt-1">${p.phone?'☎ '+esc(p.phone):''}${p.phone&&p.email?' • ':''}${p.email?'✉ '+esc(p.email):''}</p></div><div class="flex flex-col gap-2"><button class="p-2.5 rounded-xl bg-orange-50 text-orange-600" data-edit-staff="${i}"><i data-lucide="pencil" class="w-4 h-4"></i></button><button class="p-2.5 rounded-xl bg-red-50 text-red-500" data-delete-staff="${i}"><i data-lucide="trash-2" class="w-4 h-4"></i></button></div></article>`).join('')||'<div class="md:col-span-2 xl:col-span-3 glass rounded-3xl p-10 text-center text-slate-400">ยังไม่มีบุคลากรในหมวดนี้</div>';
+  list.innerHTML=arr.map((p,i)=>`<article class="glass rounded-3xl p-5 flex gap-4 items-center"><img src="${esc(p.img||'')}" class="w-20 h-20 rounded-2xl object-cover bg-slate-100"><div class="min-w-0 flex-1"><div class="flex items-center gap-2 flex-wrap"><h4 class="font-bold truncate">${esc(p.name||'-')}</h4>${p.isAlumni?`<span class="text-[10px] font-bold bg-amber-50 text-amber-700 border border-amber-200 px-2 py-0.5 rounded-full">ศิษย์เก่า${p.alumniBatch?' • '+esc(p.alumniBatch):''}</span>`:''}${p.isRoyalScholarship?`<span class="text-[10px] font-bold bg-fuchsia-50 text-fuchsia-700 border border-fuchsia-200 px-2 py-0.5 rounded-full">ทุนเฉลิมราชกุมารี</span>`:''}</div><p class="text-xs text-slate-500 mt-1 line-clamp-2">${esc(isExec?(p.position||''):(p.position||p.department||''))}</p><p class="text-[10px] text-slate-400 mt-1">${p.phone?'☎ '+esc(p.phone):''}${p.phone&&p.email?' • ':''}${p.email?'✉ '+esc(p.email):''}</p></div><div class="flex flex-col gap-2"><button class="p-2.5 rounded-xl bg-orange-50 text-orange-600" data-edit-staff="${i}"><i data-lucide="pencil" class="w-4 h-4"></i></button><button class="p-2.5 rounded-xl bg-red-50 text-red-500" data-delete-staff="${i}"><i data-lucide="trash-2" class="w-4 h-4"></i></button></div></article>`).join('')||'<div class="md:col-span-2 xl:col-span-3 glass rounded-3xl p-10 text-center text-slate-400">ยังไม่มีบุคลากรในหมวดนี้</div>';
   $$('[data-edit-staff]').forEach(b=>b.addEventListener('click',()=>openStaffEditor(+b.dataset.editStaff)));
   $$('[data-delete-staff]').forEach(b=>b.addEventListener('click',async()=>{
     const i=+b.dataset.deleteStaff,item=(settings[currentStaffKind]||[])[i]; if(!item||!confirm('ลบบุคลากรรายการนี้?'))return;
@@ -237,7 +241,7 @@ function renderStaff(){
 }
 
 function openStaffEditor(index=null){
-  const editing=index!==null,item=editing?clone(settings[currentStaffKind][index]):{name:'',department:'',position:'',img:'',education:'',phone:'',email:'',isAlumni:false,alumniBatch:''};$('#modal-title').textContent=editing?'แก้ไขบุคลากร':'เพิ่มบุคลากร';$('#modal-help').textContent='ข้อมูลนี้จะแสดงในทำเนียบบุคลากรทันทีหลังบันทึกรายการ หากเป็นศิษย์เก่าให้ติ๊กและระบุรุ่น';
+  const editing=index!==null,item=editing?clone(settings[currentStaffKind][index]):{name:'',department:'',position:'',img:'',education:'',phone:'',email:'',isAlumni:false,alumniBatch:'',isRoyalScholarship:false,royalScholarshipBatch:'',royalScholarshipPhase:''};$('#modal-title').textContent=editing?'แก้ไขบุคลากร':'เพิ่มบุคลากร';$('#modal-help').textContent='ข้อมูลนี้จะแสดงในทำเนียบบุคลากรทันทีหลังบันทึก สามารถระบุสถานะศิษย์เก่าและนักเรียนทุนเฉลิมราชกุมารีได้';
   $('#editor-form').innerHTML=`
     <div><label class="label">ชื่อ-นามสกุล</label><input name="name" class="field" value="${esc(item.name)}" required></div>
     <div><label class="label">ตำแหน่ง</label><input name="position" class="field" value="${esc(item.position||'')}"></div>
@@ -248,10 +252,17 @@ function openStaffEditor(index=null){
       <div class="grid sm:grid-cols-2 gap-3"><div><label class="label">เบอร์โทรศัพท์</label><input name="phone" type="tel" class="field" value="${esc(item.phone||'')}" placeholder="เช่น 08x-xxx-xxxx"></div><div><label class="label">Email</label><input name="email" type="email" class="field" value="${esc(item.email||'')}" placeholder="name@school.ac.th"></div></div>
       <label class="flex items-center gap-3 p-4 rounded-2xl bg-white border border-orange-200 cursor-pointer"><input id="staff-is-alumni" name="isAlumni" type="checkbox" class="w-5 h-5 accent-orange-500" ${item.isAlumni?'checked':''}><div><span class="text-sm font-bold text-slate-800">เคยเป็นศิษย์เก่าโรงเรียน</span><p class="text-[10px] text-slate-500 mt-0.5">ติ๊กเพื่อให้แสดงในทำเนียบศิษย์เก่าและแสดงป้ายศิษย์เก่า</p></div></label>
       <div id="staff-alumni-batch-wrap" class="${item.isAlumni?'':'hidden'}"><label class="label">ศิษย์เก่ารุ่นที่ <span class="text-red-500">*</span></label><input name="alumniBatch" class="field" value="${esc(item.alumniBatch||'')}" placeholder="เช่น รุ่น 25 / รุ่นปีการศึกษา 2560"><p id="staff-alumni-batch-help" class="text-[10px] text-orange-600 mt-1">จำเป็นต้องกรอกเมื่อเลือก “เคยเป็นศิษย์เก่าโรงเรียน”</p></div>
+      <div class="rounded-2xl border border-fuchsia-100 bg-fuchsia-50/70 p-4">
+        <label class="flex items-center gap-3 cursor-pointer"><input id="staff-is-royal-scholarship" name="isRoyalScholarship" type="checkbox" class="w-5 h-5 accent-fuchsia-600" ${item.isRoyalScholarship?'checked':''}><div><span class="text-sm font-bold text-fuchsia-900">เป็นนักเรียนทุนเฉลิมราชกุมารี</span><p class="text-[10px] text-fuchsia-700 mt-0.5">หากเลือก กรุณาระบุรุ่นและระยะของทุน</p></div></label>
+        <div id="staff-royal-scholarship-wrap" class="${item.isRoyalScholarship?'':'hidden'} grid sm:grid-cols-2 gap-3 mt-4">
+          <div><label class="label">ทุนรุ่นที่ <span class="text-red-500">*</span></label><input name="royalScholarshipBatch" class="field" value="${esc(item.royalScholarshipBatch||'')}" placeholder="เช่น รุ่น 5"></div>
+          <div><label class="label">ระยะ <span class="text-red-500">*</span></label><input name="royalScholarshipPhase" class="field" value="${esc(item.royalScholarshipPhase||'')}" placeholder="เช่น ระยะที่ 2"></div>
+        </div>
+      </div>
     </div>
     <div><label class="label">รูปภาพ</label><div class="flex gap-2"><input name="img" class="field" value="${esc(item.img||'')}" placeholder="URL รูป หรือกดอัปโหลด"><label class="cursor-pointer px-4 py-3 rounded-2xl bg-slate-100 text-xs font-bold"><input id="modal-staff-upload" type="file" accept="image/*" class="hidden">อัปโหลด</label></div></div>
     <button class="w-full bg-orange-500 text-white rounded-2xl py-3 font-bold">บันทึกรายการ</button>`;
-  const staffFile=$('#modal-staff-upload'),staffUrl=$('#editor-form [name="img"]'),alumniCheck=$('#staff-is-alumni'),alumniWrap=$('#staff-alumni-batch-wrap'),alumniInput=$('#editor-form [name="alumniBatch"]');
+  const staffFile=$('#modal-staff-upload'),staffUrl=$('#editor-form [name="img"]'),alumniCheck=$('#staff-is-alumni'),alumniWrap=$('#staff-alumni-batch-wrap'),alumniInput=$('#editor-form [name="alumniBatch"]'),scholarCheck=$('#staff-is-royal-scholarship'),scholarWrap=$('#staff-royal-scholarship-wrap'),scholarBatch=$('#editor-form [name="royalScholarshipBatch"]'),scholarPhase=$('#editor-form [name="royalScholarshipPhase"]');
   const toggleAlumni=()=>{
     alumniWrap.classList.toggle('hidden',!alumniCheck.checked);
     alumniInput.required=alumniCheck.checked;
@@ -261,10 +272,23 @@ function openStaffEditor(index=null){
   alumniCheck.addEventListener('change',toggleAlumni);
   alumniInput.addEventListener('input',()=>alumniInput.setCustomValidity(alumniCheck.checked&&!alumniInput.value.trim()?'กรุณาระบุศิษย์เก่ารุ่นที่':''));
   toggleAlumni();
+  const toggleScholarship=()=>{
+    scholarWrap.classList.toggle('hidden',!scholarCheck.checked);
+    [scholarBatch,scholarPhase].forEach(input=>input.required=scholarCheck.checked);
+    if(!scholarCheck.checked){scholarBatch.value='';scholarPhase.value='';scholarBatch.setCustomValidity('');scholarPhase.setCustomValidity('');}
+    else{
+      scholarBatch.setCustomValidity(scholarBatch.value.trim()?'':'กรุณาระบุรุ่นของทุนเฉลิมราชกุมารี');
+      scholarPhase.setCustomValidity(scholarPhase.value.trim()?'':'กรุณาระบุระยะของทุนเฉลิมราชกุมารี');
+    }
+  };
+  scholarCheck.addEventListener('change',toggleScholarship);
+  scholarBatch.addEventListener('input',()=>scholarBatch.setCustomValidity(scholarCheck.checked&&!scholarBatch.value.trim()?'กรุณาระบุรุ่นของทุนเฉลิมราชกุมารี':''));
+  scholarPhase.addEventListener('input',()=>scholarPhase.setCustomValidity(scholarCheck.checked&&!scholarPhase.value.trim()?'กรุณาระบุระยะของทุนเฉลิมราชกุมารี':''));
+  toggleScholarship();
   setImagePreview(staffFile,staffUrl.value,staffUrl.value?'ภาพปัจจุบัน':'ยังไม่ได้เลือกภาพ');staffUrl.addEventListener('input',()=>setImagePreview(staffFile,staffUrl.value,staffUrl.value?'ตัวอย่างจาก URL':'ยังไม่ได้เลือกภาพ'));
   $('#editor-form').onsubmit=async e=>{
     e.preventDefault();
-    const f=new FormData(e.currentTarget),isAlumni=f.get('isAlumni')==='on';
+    const f=new FormData(e.currentTarget),isAlumni=f.get('isAlumni')==='on',isRoyalScholarship=f.get('isRoyalScholarship')==='on';
     if(isAlumni&&!String(f.get('alumniBatch')||'').trim()){
       alumniInput.setCustomValidity('กรุณาระบุศิษย์เก่ารุ่นที่');
       alumniInput.reportValidity();
@@ -272,7 +296,13 @@ function openStaffEditor(index=null){
       return;
     }
     alumniInput.setCustomValidity('');
-    const value={name:f.get('name'),position:f.get('position'),department:f.get('department'),education:f.get('education'),phone:f.get('phone'),email:f.get('email'),isAlumni,alumniBatch:isAlumni?String(f.get('alumniBatch')||'').trim():'',img:f.get('img'),published:true};
+    if(isRoyalScholarship && (!String(f.get('royalScholarshipBatch')||'').trim() || !String(f.get('royalScholarshipPhase')||'').trim())){
+      if(!String(f.get('royalScholarshipBatch')||'').trim()){scholarBatch.setCustomValidity('กรุณาระบุรุ่นของทุนเฉลิมราชกุมารี');scholarBatch.reportValidity();scholarBatch.focus();}
+      else{scholarPhase.setCustomValidity('กรุณาระบุระยะของทุนเฉลิมราชกุมารี');scholarPhase.reportValidity();scholarPhase.focus();}
+      return;
+    }
+    scholarBatch.setCustomValidity('');scholarPhase.setCustomValidity('');
+    const value={name:f.get('name'),position:f.get('position'),department:f.get('department'),education:f.get('education'),phone:f.get('phone'),email:f.get('email'),isAlumni,alumniBatch:isAlumni?String(f.get('alumniBatch')||'').trim():'',isRoyalScholarship,royalScholarshipBatch:isRoyalScholarship?String(f.get('royalScholarshipBatch')||'').trim():'',royalScholarshipPhase:isRoyalScholarship?String(f.get('royalScholarshipPhase')||'').trim():'',img:f.get('img'),published:true};
     if(!personnelTableReady){toast('ยังไม่พบตาราง personnel ใน Supabase',true);return;}
     settings[currentStaffKind]=settings[currentStaffKind]||[];
     try{

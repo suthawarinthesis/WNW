@@ -30,12 +30,19 @@ create table if not exists public.personnel (
   email text not null default '',
   is_alumni boolean not null default false,
   alumni_batch text not null default '',
+  is_royal_scholarship boolean not null default false,
+  royal_scholarship_batch text not null default '',
+  royal_scholarship_phase text not null default '',
   published boolean not null default true,
   sort_order integer not null default 0,
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now(),
   created_by uuid default auth.uid()
 );
+
+alter table public.personnel add column if not exists is_royal_scholarship boolean not null default false;
+alter table public.personnel add column if not exists royal_scholarship_batch text not null default '';
+alter table public.personnel add column if not exists royal_scholarship_phase text not null default '';
 
 create index if not exists personnel_public_order_idx
   on public.personnel (published, staff_type, sort_order, created_at);
@@ -88,6 +95,7 @@ begin
     insert into public.personnel (
       staff_type, full_name, position, department, image_url,
       education, phone, email, is_alumni, alumni_batch,
+      is_royal_scholarship, royal_scholarship_batch, royal_scholarship_phase,
       published, sort_order
     )
     select
@@ -101,6 +109,9 @@ begin
       coalesce(src.item->>'email',''),
       case when lower(coalesce(src.item->>'isAlumni','false')) in ('true','1','yes','on') then true else false end,
       coalesce(src.item->>'alumniBatch',''),
+      case when lower(coalesce(src.item->>'isRoyalScholarship','false')) in ('true','1','yes','on') then true else false end,
+      coalesce(src.item->>'royalScholarshipBatch',''),
+      coalesce(src.item->>'royalScholarshipPhase',''),
       case when lower(coalesce(src.item->>'published','true')) in ('false','0','no','off') then false else true end,
       ((src.ord - 1)::integer) * 10
     from public.site_settings s

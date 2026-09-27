@@ -22,6 +22,21 @@ function showStatus(message, ok=false){
   el.textContent=message; el.classList.remove('hidden');
 }
 function clearStatus(){ $('#form-status').classList.add('hidden'); }
+function normalizeExternalPhotoUrl(url){
+  const raw=(url||'').trim();
+  if(!raw) return '';
+  try{
+    const u=new URL(raw);
+    if(u.hostname.includes('drive.google.com')){
+      let id='';
+      const m=u.pathname.match(/\/file\/d\/([^/]+)/);
+      if(m) id=m[1];
+      if(!id) id=u.searchParams.get('id')||'';
+      if(id) return `https://drive.google.com/thumbnail?id=${encodeURIComponent(id)}&sz=w1600`;
+    }
+  }catch(_){ }
+  return raw;
+}
 function setPreview(url){
   const img=$('#photo-preview'), ph=$('#photo-placeholder');
   if(url){ img.src=url;img.classList.remove('hidden');ph.classList.add('hidden');img.onerror=()=>{img.classList.add('hidden');ph.classList.remove('hidden')}; }
@@ -33,9 +48,9 @@ $('#photo-file').addEventListener('change',e=>{
   if(selectedPhoto){
     if(selectedPhoto.size>10*1024*1024){selectedPhoto=null;e.target.value='';showStatus('รูปภาพต้องมีขนาดไม่เกิน 10 MB');return}
     objectPreviewUrl=URL.createObjectURL(selectedPhoto);setPreview(objectPreviewUrl);$('#file-note').textContent=`${selectedPhoto.name} • ${(selectedPhoto.size/1024/1024).toFixed(2)} MB`;
-  } else {setPreview($('#photo-url').value.trim());$('#file-note').textContent='สูงสุด 10 MB'}
+  } else {setPreview(normalizeExternalPhotoUrl($('#photo-url').value.trim()));$('#file-note').textContent='ใช้กรณีไม่มีลิงก์รูปภาพ • สูงสุด 10 MB'}
 });
-$('#photo-url').addEventListener('input',e=>{if(!selectedPhoto)setPreview(e.target.value.trim())});
+$('#photo-url').addEventListener('input',e=>{if(!selectedPhoto)setPreview(normalizeExternalPhotoUrl(e.target.value.trim()))});
 
 async function uploadPhoto(submissionId, uploadToken){
   if(!selectedPhoto) return '';
@@ -60,7 +75,7 @@ $('#submission-form').addEventListener('submit',async e=>{
       fullName:f.elements.full_name.value.trim(),batch:f.elements.batch.value.trim(),graduationYear:f.elements.graduation_year.value.trim(),graduationLevel:f.elements.graduation_level.value.trim(),nakthamLevel:f.elements.naktham_level.value.trim(),paliLevel:f.elements.pali_level.value.trim(),isRoyalScholarship:f.elements.is_royal_scholarship.checked,royalScholarshipBatch:f.elements.royal_scholarship_batch.value.trim(),royalScholarshipPhase:f.elements.royal_scholarship_phase.value.trim(),
       currentPosition:f.elements.current_position.value.trim(),occupation:f.elements.occupation.value.trim(),organization:f.elements.organization.value.trim(),education:f.elements.education.value.trim(),bio:f.elements.bio.value.trim(),
       phone:f.elements.phone.value.trim(),email:f.elements.email.value.trim(),facebookUrl:f.elements.facebook_url.value.trim(),showContact:f.elements.show_contact.checked,
-      photoUrl:selectedPhoto?'':f.elements.photo_url.value.trim(),consentAccepted:true
+      photoUrl:selectedPhoto?'':normalizeExternalPhotoUrl(f.elements.photo_url.value.trim()),consentAccepted:true
     };
     const {data:createData,error:createError}=await db.rpc('create_alumni_submission',{p_payload:payload});
     if(createError) throw createError;

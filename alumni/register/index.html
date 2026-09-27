@@ -10,7 +10,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Thai:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
   <script src="https://unpkg.com/lucide@latest"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="../../assets/app-config.js"></script>
+  <script src="../../assets/app-config.js?v=20260926-favicon"></script>
   <style>
     body{font-family:'Noto Sans Thai',sans-serif;background:#f8fafc;color:#1e293b}.glass{background:rgba(255,255,255,.82);backdrop-filter:blur(22px);border:1px solid rgba(255,255,255,.9);box-shadow:0 10px 40px rgba(15,23,42,.06)}.blob{position:fixed;filter:blur(110px);z-index:-1;opacity:.4}
     .field{width:100%;background:#fff;border:1px solid #e2e8f0;border-radius:1rem;padding:.8rem 1rem;font-size:.875rem;outline:none}.field:focus{border-color:#fb923c;box-shadow:0 0 0 3px rgba(251,146,60,.14)}.label{display:block;font-size:.78rem;font-weight:700;color:#475569;margin-bottom:.45rem}.req{color:#ef4444}.step-dot{width:10px;height:10px;border-radius:999px;background:#cbd5e1}.step-dot.active{background:#f97316;box-shadow:0 0 0 5px rgba(249,115,22,.12)}
@@ -64,10 +64,20 @@
         </section>
 
         <section class="border-t border-slate-100 pt-7">
-          <div class="flex items-center gap-3 mb-4"><div class="w-9 h-9 rounded-xl bg-amber-500 text-white flex items-center justify-center text-sm font-black">3</div><div><h2 class="font-black">รูปภาพ</h2><p class="text-xs text-slate-500">เลือกอัปโหลดจากเครื่อง หรือใช้ลิงก์รูปภาพ</p></div></div>
+          <div class="flex items-center gap-3 mb-4"><div class="w-9 h-9 rounded-xl bg-amber-500 text-white flex items-center justify-center text-sm font-black">3</div><div><h2 class="font-black">รูปภาพ</h2><p class="text-xs text-slate-500">แนะนำให้ใช้ลิงก์รูปภาพ เพื่อช่วยประหยัดพื้นที่จัดเก็บของระบบ</p></div></div>
+          <div class="mb-5 rounded-2xl border border-amber-200 bg-amber-50/80 p-4 text-sm text-amber-900">
+            <div class="flex items-start gap-3">
+              <i data-lucide="lightbulb" class="w-5 h-5 text-amber-600 shrink-0 mt-0.5"></i>
+              <div>
+                <p class="font-bold">แนะนำการแนบรูปภาพ</p>
+                <p class="text-xs sm:text-sm mt-1 leading-relaxed">กรุณาอัปโหลดรูปภาพไว้ใน <strong>Google Drive</strong> แล้วนำลิงก์รูปภาพมาวางในช่อง “ลิงก์รูปภาพ” ด้านล่าง เพื่อช่วยประหยัดพื้นที่ฐานข้อมูลและพื้นที่จัดเก็บของโรงเรียน</p>
+                <p class="text-xs mt-2 text-amber-700"><strong>สำคัญ:</strong> ตั้งสิทธิ์ไฟล์ใน Google Drive เป็น “ทุกคนที่มีลิงก์สามารถดูได้” ก่อนส่งข้อมูล</p>
+              </div>
+            </div>
+          </div>
           <div class="grid sm:grid-cols-[180px_1fr] gap-5 items-start">
             <div class="w-40 h-40 rounded-[1.7rem] bg-slate-100 overflow-hidden border border-slate-200 mx-auto sm:mx-0"><img id="photo-preview" class="w-full h-full object-cover hidden" alt="Preview"><div id="photo-placeholder" class="w-full h-full flex flex-col items-center justify-center text-slate-300"><i data-lucide="user-round" class="w-12 h-12"></i><span class="text-[10px] mt-2">ตัวอย่างรูป</span></div></div>
-            <div class="space-y-4"><div><label class="label">อัปโหลดรูปประจำตัว</label><label class="field cursor-pointer flex items-center justify-center gap-2 font-bold text-orange-600"><i data-lucide="upload" class="w-4 h-4"></i> เลือกรูปภาพ<input id="photo-file" type="file" accept="image/jpeg,image/png,image/webp,image/heic,image/heif" class="hidden"></label><p id="file-note" class="text-[10px] text-slate-400 mt-1">สูงสุด 10 MB</p></div><div><label class="label">หรือ ลิงก์รูปภาพ</label><input name="photo_url" id="photo-url" type="url" class="field" placeholder="https://example.com/photo.jpg"><p class="text-[10px] text-slate-400 mt-1">หากเลือกไฟล์จากเครื่อง ระบบจะใช้ไฟล์นั้นแทนลิงก์</p></div></div>
+            <div class="space-y-4"><div><label class="label">ลิงก์รูปภาพ <span class="text-amber-600 font-normal">(แนะนำ)</span></label><input name="photo_url" id="photo-url" type="url" class="field" placeholder="https://drive.google.com/file/d/…/view"><p class="text-[10px] text-slate-400 mt-1">รองรับลิงก์ Google Drive และลิงก์รูปภาพทั่วไป • ระบบจะแสดงตัวอย่างให้ตรวจสอบก่อนส่ง</p></div><div><label class="label">หรือ อัปโหลดรูปจากเครื่อง</label><label class="field cursor-pointer flex items-center justify-center gap-2 font-bold text-orange-600"><i data-lucide="upload" class="w-4 h-4"></i> เลือกรูปภาพ<input id="photo-file" type="file" accept="image/jpeg,image/png,image/webp,image/heic,image/heif" class="hidden"></label><p id="file-note" class="text-[10px] text-slate-400 mt-1">ใช้กรณีไม่มีลิงก์รูปภาพ • สูงสุด 10 MB</p></div></div>
           </div>
         </section>
 

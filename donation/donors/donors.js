@@ -23,8 +23,9 @@
   function certificateCell(x){
     const no=x.certificate_no?`<p class="font-extrabold text-emerald-800 break-all">${esc(x.certificate_no)}</p>`:'<p class="font-bold text-slate-400">ยังไม่มีเลขใบ</p>';
     const actions=[];
-    if(x.certificate_pdf_url) actions.push(`<a href="${esc(x.certificate_pdf_url)}" target="_blank" rel="noopener" class="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl bg-emerald-600 text-white text-xs font-bold hover:bg-emerald-700"><i data-lucide="file-text" class="w-3.5 h-3.5"></i> ดูใบอนุโมทนาบัตร</a>`);
-    else if(x.certificate_no) actions.push(`<span class="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl bg-amber-50 text-amber-700 border border-amber-100 text-xs font-bold"><i data-lucide="clock-3" class="w-3.5 h-3.5"></i> กำลังจัดทำ PDF</span>`);
+    if(x.certificate_pdf_url) actions.push(`<a href="${esc(x.certificate_pdf_url)}" target="_blank" rel="noopener" class="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl bg-emerald-600 text-white text-xs font-bold hover:bg-emerald-700"><i data-lucide="file-text" class="w-3.5 h-3.5"></i> ดูใบ PDF</a>`);
+    if(x.certificate_image_url) actions.push(`<a href="${esc(x.certificate_image_url)}" target="_blank" rel="noopener" class="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl bg-sky-600 text-white text-xs font-bold hover:bg-sky-700"><i data-lucide="image" class="w-3.5 h-3.5"></i> ดูภาพใบ</a>`);
+    if(x.certificate_no && !x.certificate_pdf_url && !x.certificate_image_url) actions.push(`<span class="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl bg-amber-50 text-amber-700 border border-amber-100 text-xs font-bold"><i data-lucide="clock-3" class="w-3.5 h-3.5"></i> กำลังจัดทำใบ</span>`);
     if(x.certificate_no) actions.push(`<a href="../verify/?no=${encodeURIComponent(x.certificate_no)}" class="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl bg-white text-slate-700 border border-slate-200 text-xs font-bold hover:bg-slate-50"><i data-lucide="badge-check" class="w-3.5 h-3.5"></i> ตรวจสอบใบ</a>`);
     return `${no}<div class="mt-2 flex flex-wrap gap-2">${actions.join('')}</div>`;
   }

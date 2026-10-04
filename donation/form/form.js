@@ -8,11 +8,89 @@
   const proofSection = document.getElementById('proof-section');
   const confirmSection = document.getElementById('confirm-section');
   const reminder = document.getElementById('return-reminder');
-  let selectedSlip = null, previewUrl = '', donationSettings = null, paymentStageEntered = false, campaigns = [];
+  let selectedSlip = null, previewUrl = '', donationSettings = null, paymentStageEntered = false, campaigns = [], isCompressingSlip = false;
   const DRAFT_KEY = 'wnw-donation-form-draft-v15';
 
   function showStatus(message, ok=false){ status.className=`rounded-2xl p-4 text-sm border ${ok?'bg-emerald-50 text-emerald-700 border-emerald-200':'bg-rose-50 text-rose-700 border-rose-200'}`; status.textContent=message; status.classList.remove('hidden'); }
   function clearStatus(){ status.classList.add('hidden'); }
+  function formatFileSize(bytes){
+    const n=Number(bytes)||0;
+    if(n<1024)return `${n} B`;
+    if(n<1024*1024)return `${(n/1024).toFixed(n<10240?1:0)} KB`;
+    return `${(n/1024/1024).toFixed(2)} MB`;
+  }
+
+  function canvasToBlob(canvas,type,quality){
+    return new Promise((resolve,reject)=>canvas.toBlob(blob=>blob?resolve(blob):reject(new Error('ไม่สามารถบีบอัดรูปภาพได้')),type,quality));
+  }
+
+  async function decodeSlipImage(file){
+    const url=URL.createObjectURL(file);
+    try{
+      const img=new Image();
+      img.decoding='async';
+      await new Promise((resolve,reject)=>{img.onload=resolve;img.onerror=()=>reject(new Error('ไม่สามารถอ่านรูปสลิปได้'));img.src=url;});
+      return {img,width:img.naturalWidth||img.width,height:img.naturalHeight||img.height};
+    }finally{
+      // revoke หลัง draw ใน compressSlipImage โดยหน่วงเล็กน้อยเพื่อรองรับบาง browser
+      setTimeout(()=>URL.revokeObjectURL(url),1000);
+    }
+  }
+
+  async function compressSlipImage(file){
+    const originalSize=file.size;
+    // ไฟล์เล็กอยู่แล้วไม่บีบซ้ำ เพื่อไม่ลดคุณภาพโดยไม่จำเป็น
+    if(originalSize<=550*1024)return {file,originalSize,compressed:false};
+    const {img,width,height}=await decodeSlipImage(file);
+    if(!width||!height)throw new Error('ไม่พบขนาดรูปสลิป');
+
+    const targetBytes=1200*1024;
+    const passes=[
+      {max:1600,q:[0.82,0.76,0.70]},
+      {max:1400,q:[0.76,0.68]},
+      {max:1200,q:[0.70,0.62]}
+    ];
+    let best=null;
+    for(const pass of passes){
+      const scale=Math.min(1,pass.max/Math.max(width,height));
+      const w=Math.max(1,Math.round(width*scale));
+      const h=Math.max(1,Math.round(height*scale));
+      const canvas=document.createElement('canvas');canvas.width=w;canvas.height=h;
+      const ctx=canvas.getContext('2d',{alpha:false});
+      if(!ctx)throw new Error('Browser นี้ไม่รองรับการบีบอัดรูป');
+      ctx.fillStyle='#fff';ctx.fillRect(0,0,w,h);
+      ctx.drawImage(img,0,0,w,h);
+      for(const q of pass.q){
+        const blob=await canvasToBlob(canvas,'image/jpeg',q);
+        if(!best||blob.size<best.size)best=blob;
+        if(blob.size<=targetBytes)break;
+      }
+      if(best?.size<=targetBytes)break;
+    }
+    if(!best||best.size>=originalSize)return {file,originalSize,compressed:false};
+    const base=(file.name||'slip').replace(/\.[^.]+$/,'').replace(/[^a-zA-Z0-9ก-๙_-]+/g,'-').slice(0,80)||'slip';
+    const out=new File([best],`${base}-compressed.jpg`,{type:'image/jpeg',lastModified:Date.now()});
+    return {file:out,originalSize,compressed:true};
+  }
+
+  function renderSlipCompressionInfo(originalSize,finalSize,compressed,type){
+    const info=document.getElementById('slip-compress-info');
+    if(!info)return;
+    info.classList.remove('hidden');
+    if(type==='application/pdf'){
+      info.className='mt-3 rounded-xl bg-slate-50 border border-slate-200 px-4 py-3 text-xs text-slate-600';
+      info.textContent=`PDF ${formatFileSize(finalSize)} • ระบบจะอัปโหลดไฟล์เดิม (การบีบอัดอัตโนมัติใช้กับรูปภาพเท่านั้น)`;
+      return;
+    }
+    if(compressed){
+      const pct=originalSize>0?Math.max(0,Math.round((1-finalSize/originalSize)*100)):0;
+      info.className='mt-3 rounded-xl bg-emerald-50 border border-emerald-200 px-4 py-3 text-xs text-emerald-800';
+      info.innerHTML=`<b>บีบอัดอัตโนมัติแล้ว</b> ${formatFileSize(originalSize)} → <b>${formatFileSize(finalSize)}</b>${pct?` • ลดลง ${pct}%`:''}`;
+    }else{
+      info.className='mt-3 rounded-xl bg-blue-50 border border-blue-200 px-4 py-3 text-xs text-blue-800';
+      info.innerHTML=`ไฟล์มีขนาดเหมาะสมแล้ว <b>${formatFileSize(finalSize)}</b> • ไม่บีบซ้ำเพื่อรักษาคุณภาพ`;
+    }
+  }
   function donorType(){ return form.elements.donor_type.value; }
   function givingAsType(){ return form.elements.giving_as_type?.value || 'person'; }
   function isPerson(){ return givingAsType()==='person'; }
@@ -180,15 +258,39 @@
   document.addEventListener('visibilitychange',()=>{if(!document.hidden&&paymentStageEntered&&proofSection.classList.contains('hidden')){reminder.classList.remove('hidden');lucide.createIcons()}});
 
   const fileInput=document.getElementById('slip-file');
-  fileInput.addEventListener('change',()=>{
-    selectedSlip=fileInput.files?.[0]||null;if(previewUrl)URL.revokeObjectURL(previewUrl);
-    const wrap=document.getElementById('slip-preview-wrap'),img=document.getElementById('slip-preview'),pdf=document.getElementById('pdf-preview');img.classList.add('hidden');pdf.classList.add('hidden');wrap.classList.add('hidden');
-    if(!selectedSlip)return;
-    if(selectedSlip.size>10*1024*1024){selectedSlip=null;fileInput.value='';showStatus('ไฟล์สลิปต้องมีขนาดไม่เกิน 10 MB');return}
-    if(!['image/jpeg','image/png','image/webp','application/pdf'].includes(selectedSlip.type)){selectedSlip=null;fileInput.value='';showStatus('รองรับเฉพาะ JPG, PNG, WebP หรือ PDF');return}
-    document.getElementById('slip-label').textContent=`${selectedSlip.name} • ${(selectedSlip.size/1024/1024).toFixed(2)} MB`;wrap.classList.remove('hidden');
-    if(selectedSlip.type==='application/pdf'){pdf.querySelector('span').textContent=selectedSlip.name;pdf.classList.remove('hidden')}else{previewUrl=URL.createObjectURL(selectedSlip);img.src=previewUrl;img.classList.remove('hidden')}
-    saveDraft();lucide.createIcons();
+  fileInput.addEventListener('change',async()=>{
+    const source=fileInput.files?.[0]||null;
+    selectedSlip=null;isCompressingSlip=false;
+    if(previewUrl)URL.revokeObjectURL(previewUrl);
+    const wrap=document.getElementById('slip-preview-wrap'),img=document.getElementById('slip-preview'),pdf=document.getElementById('pdf-preview'),info=document.getElementById('slip-compress-info');
+    img.classList.add('hidden');pdf.classList.add('hidden');wrap.classList.add('hidden');info?.classList.add('hidden');
+    if(!source)return;
+    if(!['image/jpeg','image/png','image/webp','application/pdf'].includes(source.type)){fileInput.value='';showStatus('รองรับเฉพาะ JPG, PNG, WebP หรือ PDF');return}
+    const isPdf=source.type==='application/pdf';
+    if(isPdf && source.size>10*1024*1024){fileInput.value='';showStatus('ไฟล์ PDF ต้องมีขนาดไม่เกิน 10 MB');return}
+    if(!isPdf && source.size>20*1024*1024){fileInput.value='';showStatus('รูปสลิปต้นฉบับต้องมีขนาดไม่เกิน 20 MB');return}
+
+    try{
+      clearStatus();isCompressingSlip=!isPdf;
+      document.getElementById('slip-label').textContent=isPdf?`${source.name} • ${formatFileSize(source.size)}`:'กำลังบีบอัดรูปสลิป...';
+      if(!isPdf && info){info.className='mt-3 rounded-xl bg-amber-50 border border-amber-200 px-4 py-3 text-xs text-amber-800';info.textContent='กำลังลดขนาดรูปก่อนอัปโหลด เพื่อประหยัดพื้นที่จัดเก็บ...';info.classList.remove('hidden');}
+      const result=isPdf?{file:source,originalSize:source.size,compressed:false}:await compressSlipImage(source);
+      selectedSlip=result.file;isCompressingSlip=false;
+      if(selectedSlip.size>10*1024*1024)throw new Error('ไฟล์หลังประมวลผลยังเกิน 10 MB กรุณาเลือกรูปที่เล็กลง');
+      document.getElementById('slip-label').textContent=`${selectedSlip.name} • ${formatFileSize(selectedSlip.size)}`;
+      renderSlipCompressionInfo(result.originalSize,selectedSlip.size,result.compressed,selectedSlip.type);
+      wrap.classList.remove('hidden');
+      if(selectedSlip.type==='application/pdf'){
+        pdf.querySelector('span').textContent=selectedSlip.name;pdf.classList.remove('hidden');
+      }else{
+        previewUrl=URL.createObjectURL(selectedSlip);img.src=previewUrl;img.classList.remove('hidden');
+      }
+      saveDraft();lucide.createIcons();
+    }catch(err){
+      console.error(err);selectedSlip=null;isCompressingSlip=false;fileInput.value='';
+      document.getElementById('slip-label').textContent='กดเพื่อแนบสลิปทันที';
+      info?.classList.add('hidden');showStatus('เตรียมไฟล์สลิปไม่สำเร็จ: '+(err.message||err));
+    }
   });
 
   function applyPaymentSettings(settings){
@@ -215,7 +317,7 @@
 
   form.addEventListener('submit',async e=>{
     e.preventDefault();clearStatus();if(!db)return showStatus('ยังไม่ได้ตั้งค่า Supabase');if(!validateDonorStage())return;
-    if(proofSection.classList.contains('hidden'))return showStatus('กรุณากด “โอนเรียบร้อยแล้ว” และแนบสลิปก่อนส่งข้อมูล');if(!selectedSlip)return showStatus('กรุณาแนบหลักฐานการโอนเงิน');
+    if(proofSection.classList.contains('hidden'))return showStatus('กรุณากด “โอนเรียบร้อยแล้ว” และแนบสลิปก่อนส่งข้อมูล');if(isCompressingSlip)return showStatus('ระบบกำลังบีบอัดรูปสลิป กรุณารอสักครู่');if(!selectedSlip)return showStatus('กรุณาแนบหลักฐานการโอนเงิน');
     const person=isPerson(),monastic=person&&donorType()==='monastic';
     const effectiveDonorType=monastic?'monastic':'layperson';
     const historyCode=localStorage.getItem('wnw-donation-history-code')||'';

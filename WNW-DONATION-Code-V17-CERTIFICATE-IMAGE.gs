@@ -1,11 +1,10 @@
 /**
- * WNW Donation Certificate Generator — V19
+ * WNW Donation Certificate Generator — V17
  * Google Slides tags:
  *   {{donor_name}}
  *   {{donation_amount}}
  *   {{certificate_no}}
  *   {{verify_qr}}  <-- put this tag in its own Text Box where the QR should appear
- *   {{issue_date}} <-- document generation date, e.g. 24 ตุลาคม 2569
  *
  * Deploy as Web App: Execute as Me / Who has access: Anyone
  */
@@ -17,12 +16,11 @@ const TAGS = {
   donor_name: '{{donor_name}}',
   donation_amount: '{{donation_amount}}',
   certificate_no: '{{certificate_no}}',
-  verify_qr: '{{verify_qr}}',
-  issue_date: '{{issue_date}}'
+  verify_qr: '{{verify_qr}}'
 };
 
 function doGet() {
-  return HtmlService.createHtmlOutput('<h3>WNW Donation Certificate Generator V19</h3><p>Web App พร้อมทำงาน</p>')
+  return HtmlService.createHtmlOutput('<h3>WNW Donation Certificate Generator V17</h3><p>Web App พร้อมทำงาน</p>')
     .setXFrameOptionsMode(HtmlService.XFrameOptionsMode.ALLOWALL);
 }
 
@@ -73,13 +71,12 @@ function validateTemplate_(templateId, folderId) {
     donor_name: countText_(allText, TAGS.donor_name),
     donation_amount: countText_(allText, TAGS.donation_amount),
     certificate_no: countText_(allText, TAGS.certificate_no),
-    verify_qr: countText_(allText, TAGS.verify_qr),
-    issue_date: countText_(allText, TAGS.issue_date)
+    verify_qr: countText_(allText, TAGS.verify_qr)
   };
   return {
     template_name: file.getName(),
     tags: tags,
-    ready: tags.donor_name > 0 && tags.donation_amount > 0 && tags.certificate_no > 0 && tags.verify_qr > 0 && tags.issue_date > 0
+    ready: tags.donor_name > 0 && tags.donation_amount > 0 && tags.certificate_no > 0 && tags.verify_qr > 0
   };
 }
 
@@ -94,7 +91,7 @@ function generateCertificate_(templateId, folderId, p) {
   if (!/^https?:\/\//i.test(verifyUrl)) throw new Error('ลิงก์ตรวจสอบใบไม่ถูกต้อง');
 
   const check = validateTemplate_(templateId, folderId);
-  if (!check.ready) throw new Error('Google Slides Template มี Tag ไม่ครบ 5 รายการ กรุณาเพิ่ม {{issue_date}} และตรวจ {{verify_qr}}');
+  if (!check.ready) throw new Error('Google Slides Template มี Tag ไม่ครบ 4 รายการ กรุณาเพิ่ม {{verify_qr}} เป็น Text Box แยก');
 
   const lock = LockService.getScriptLock();
   lock.waitLock(30000);
@@ -112,11 +109,9 @@ function generateCertificate_(templateId, folderId, p) {
     const n2 = pres.replaceAllText(TAGS.donation_amount, amount);
     const n3 = pres.replaceAllText(TAGS.certificate_no, certificateNo);
     const n4 = replaceQrPlaceholders_(pres, verifyUrl);
-    const issueDate = formatThaiIssueDate_(new Date());
-    const n5 = pres.replaceAllText(TAGS.issue_date, issueDate);
     const slideId = pres.getSlides()[0].getObjectId();
     pres.saveAndClose();
-    if (n1 < 1 || n2 < 1 || n3 < 1 || n4 < 1 || n5 < 1) throw new Error('Replace Tag/QR ไม่ครบ กรุณาตรวจ Template');
+    if (n1 < 1 || n2 < 1 || n3 < 1 || n4 < 1) throw new Error('Replace Tag/QR ไม่ครบ กรุณาตรวจ Template');
 
     Utilities.sleep(900);
     const pdfBlob = workingCopy.getAs(MimeType.PDF).setName(pdfName);
@@ -149,8 +144,7 @@ function generateCertificate_(templateId, folderId, p) {
       image_public_sharing: image ? imagePublicSharing : false,
       image_error: imageError,
       verify_url: verifyUrl,
-      issue_date: issueDate,
-      replaced: { donor_name:n1, donation_amount:n2, certificate_no:n3, verify_qr:n4, issue_date:n5 }
+      replaced: { donor_name:n1, donation_amount:n2, certificate_no:n3, verify_qr:n4 }
     };
   } finally {
     try { if (workingCopy) workingCopy.setTrashed(true); } catch (_) {}
@@ -180,15 +174,6 @@ function fetchSlideThumbnailBlob_(presentationId, slideObjectId) {
     throw new Error('ดาวน์โหลดภาพใบอนุโมทนาบัตรไม่สำเร็จ: HTTP ' + imgRes.getResponseCode());
   }
   return imgRes.getBlob().setName('certificate-image.png');
-}
-
-function formatThaiIssueDate_(dateValue) {
-  const tz = 'Asia/Bangkok';
-  const months = ['มกราคม','กุมภาพันธ์','มีนาคม','เมษายน','พฤษภาคม','มิถุนายน','กรกฎาคม','สิงหาคม','กันยายน','ตุลาคม','พฤศจิกายน','ธันวาคม'];
-  const day = Number(Utilities.formatDate(dateValue, tz, 'd'));
-  const month = Number(Utilities.formatDate(dateValue, tz, 'M'));
-  const yearBE = Number(Utilities.formatDate(dateValue, tz, 'yyyy')) + 543;
-  return day + ' ' + months[month - 1] + ' ' + yearBE;
 }
 
 function replaceQrPlaceholders_(pres, verifyUrl) {

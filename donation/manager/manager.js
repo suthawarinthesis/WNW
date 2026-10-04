@@ -148,18 +148,19 @@
   function googleScriptUrl(){return String(settings?.google_apps_script_url||defaultGoogleScriptUrl()||'').trim()}
   function refreshReviewCertificateUI(x){
     if(!x)return;
-    const hasNo=!!x.certificate_no, hasPdf=!!x.certificate_pdf_url;
+    const hasNo=!!x.certificate_no, hasPdf=!!x.certificate_pdf_url, hasImage=!!x.certificate_image_url;
     $('#review-cert-box').classList.toggle('hidden',!hasNo);
     $('#review-cert-no').textContent=x.certificate_no||'';
     const link=$('#review-open-pdf'); link.classList.toggle('hidden',!hasPdf); if(hasPdf)link.href=x.certificate_pdf_url; else link.removeAttribute('href');
+    const imageLink=$('#review-open-image'); if(imageLink){ imageLink.classList.toggle('hidden',!hasImage); if(hasImage) imageLink.href=x.certificate_image_url; else imageLink.removeAttribute('href'); }
     const gen=$('#review-generate-pdf');
     const generationStatus=String(x.certificate_generation_status||'');
-    const showRetry=hasNo && !hasPdf && generationStatus!=='generating';
+    const showRetry=hasNo && (!hasPdf || !hasImage) && generationStatus!=='generating';
     gen.classList.toggle('hidden',!showRetry);
-    if(showRetry)gen.textContent='ลองสร้าง PDF อีกครั้ง';
-    const text=generationStatus==='ready'?'สร้าง PDF จาก Google Slides แล้ว':generationStatus==='generating'?'กำลังสร้าง PDF อัตโนมัติ...':generationStatus==='error'?'สร้าง PDF อัตโนมัติไม่สำเร็จ — สามารถลองสร้างอีกครั้งได้':hasNo?'กำลังเตรียมสร้างไฟล์ PDF อัตโนมัติ':'';
+    if(showRetry)gen.textContent='ลองสร้างใบใหม่อีกครั้ง';
+    const text=generationStatus==='ready'?(hasPdf&&hasImage?'สร้าง PDF และภาพใบอนุโมทนาบัตรแล้ว':hasPdf?'สร้าง PDF แล้ว และกำลังรอภาพใบอนุโมทนาบัตร':'สร้างข้อมูลใบแล้ว'):(generationStatus==='generating'?'กำลังสร้างใบอนุโมทนาบัตรอัตโนมัติ...':generationStatus==='error'?'สร้างใบอัตโนมัติไม่สำเร็จ — สามารถลองสร้างอีกครั้งได้':hasNo?'กำลังเตรียมสร้างไฟล์ใบอนุโมทนาบัตรอัตโนมัติ':'');
     $('#review-cert-generation').textContent=text;
-    gen.textContent=hasPdf?'สร้างใบใหม่จาก Google Slides':'สร้างใบจาก Google Slides';
+    gen.textContent=(hasPdf||hasImage)?'สร้างใบใหม่จาก Google Slides':'สร้างใบจาก Google Slides';
   }
   async function callGoogleSlidesBridge(action,payload={}){
     const url=googleScriptUrl(); if(!url)throw new Error('ยังไม่ได้ตั้งค่า Google Apps Script Web App URL');
@@ -186,7 +187,7 @@
       const verifyBase=String(settings?.verify_base_url||`${location.origin}/donation/verify/?no=`);const verifyUrl=verifyBase+encodeURIComponent(x.certificate_no);const result=await callGoogleSlidesBridge('generate',{donation_id:x.id,donor_name:x.certificate_name_override||x.display_name,donation_amount:formatTagAmount(x.amount),certificate_no:x.certificate_no,verify_url:verifyUrl});
       if(!result.pdf_url)throw new Error('Google Apps Script ไม่ได้ส่งลิงก์ PDF กลับมา');
       if(result.public_sharing===false)throw new Error('สร้าง PDF แล้ว แต่ Google Drive ไม่อนุญาตให้แชร์แบบทุกคนที่มีลิงก์ กรุณาตรวจนโยบายการแชร์ของโฟลเดอร์');
-      const patch={certificate_pdf_url:result.pdf_url,certificate_drive_file_id:result.file_id||'',certificate_generated_at:new Date().toISOString(),certificate_generation_status:'ready',certificate_generation_error:''};
+      const patch={certificate_pdf_url:result.pdf_url,certificate_drive_file_id:result.file_id||'',certificate_image_url:result.image_url||'',certificate_image_drive_file_id:result.image_file_id||'',certificate_generated_at:new Date().toISOString(),certificate_generation_status:'ready',certificate_generation_error:result.image_error?String(result.image_error).slice(0,1000):''};
       const {data,error}=await db.from('donations').update(patch).eq('id',x.id).select('*').single(); if(error)throw error;
       const idx=rows.findIndex(r=>r.id===x.id);if(idx>=0)rows[idx]=data;
       return data;
@@ -228,9 +229,9 @@
       await loadAll(); let x=rows.find(r=>r.id===currentReviewId);
       if(x){
         refreshReviewCertificateUI(x);$('#review-approve').classList.add('hidden');$('#review-reject').classList.add('hidden');
-        modalStatus('ตรวจสอบผ่านแล้ว กำลังสร้างใบอนุโมทนาบัตรจาก Google Slides อัตโนมัติ...',true);
+        modalStatus('ตรวจสอบผ่านแล้ว กำลังสร้าง PDF และภาพใบอนุโมทนาบัตรจาก Google Slides อัตโนมัติ...',true);
         try{x=await generateGoogleCertificate(x);refreshReviewCertificateUI(x);renderDashboard();renderDonationList();modalStatus('ตรวจสอบและสร้างใบอนุโมทนาบัตรเรียบร้อยแล้ว',true)}
-        catch(genErr){refreshReviewCertificateUI(rows.find(r=>r.id===currentReviewId)||x);modalStatus('ออกเลขใบเรียบร้อยแล้ว แต่ยังสร้าง PDF ไม่สำเร็จ: '+(genErr.message||genErr))}
+        catch(genErr){refreshReviewCertificateUI(rows.find(r=>r.id===currentReviewId)||x);modalStatus('ออกเลขใบเรียบร้อยแล้ว แต่ยังสร้างไฟล์ใบอนุโมทนาบัตรไม่สำเร็จ: '+(genErr.message||genErr))}
       }
     }catch(err){modalStatus('อนุมัติไม่สำเร็จ: '+(err.message||err))}finally{btn.disabled=false;btn.textContent='ตรวจสอบแล้ว • ยืนยันและสร้างใบ'}
   };
@@ -240,18 +241,22 @@
   };
   $('#review-generate-pdf').onclick=async()=>{
     const x=rows.find(r=>r.id===currentReviewId);if(!x?.certificate_no)return;
-    const btn=$('#review-generate-pdf');btn.disabled=true;btn.textContent='กำลังสร้าง PDF...';
-    try{const updated=await generateGoogleCertificate(x);refreshReviewCertificateUI(updated);renderDashboard();renderDonationList();modalStatus('สร้างใบอนุโมทนาบัตรจาก Google Slides แล้ว',true)}catch(err){modalStatus('สร้างใบไม่สำเร็จ: '+(err.message||err))}finally{btn.disabled=false;const now=rows.find(r=>r.id===currentReviewId);btn.textContent=now?.certificate_pdf_url?'สร้างใบใหม่จาก Google Slides':'สร้างใบจาก Google Slides'}
+    const btn=$('#review-generate-pdf');btn.disabled=true;btn.textContent='กำลังสร้างใบ...';
+    try{const updated=await generateGoogleCertificate(x);refreshReviewCertificateUI(updated);renderDashboard();renderDonationList();modalStatus('สร้าง PDF และภาพใบอนุโมทนาบัตรจาก Google Slides แล้ว',true)}catch(err){modalStatus('สร้างใบไม่สำเร็จ: '+(err.message||err))}finally{btn.disabled=false;const now=rows.find(r=>r.id===currentReviewId);btn.textContent=(now?.certificate_pdf_url||now?.certificate_image_url)?'สร้างใบใหม่จาก Google Slides':'สร้างใบจาก Google Slides'}
   };
 
   async function deleteDonationRecord(x){
     if(!x)throw new Error('ไม่พบรายการบริจาค');
     const warnings=[];
 
-    // ลบ PDF ที่ระบบสร้างไว้ใน Google Drive แบบ best-effort
+    // ลบไฟล์ใบอนุโมทนาบัตรที่ระบบสร้างไว้ใน Google Drive แบบ best-effort
     if(x.certificate_drive_file_id){
       try{await callGoogleSlidesBridge('delete_certificate',{file_id:x.certificate_drive_file_id})}
       catch(err){warnings.push('ลบ PDF ใน Google Drive ไม่สำเร็จ: '+(err.message||err))}
+    }
+    if(x.certificate_image_drive_file_id){
+      try{await callGoogleSlidesBridge('delete_certificate',{file_id:x.certificate_image_drive_file_id})}
+      catch(err){warnings.push('ลบไฟล์ภาพใน Google Drive ไม่สำเร็จ: '+(err.message||err))}
     }
 
     // ลบสลิปออกจาก Supabase Storage แบบ best-effort
@@ -340,8 +345,8 @@
     try{
       await saveGoogleCertificateSettings(false);
       if(!googleScriptUrl())throw new Error('ยังไม่มี Google Apps Script Web App URL');
-      const r=await callGoogleSlidesBridge('validate');const c=r.tags||{};setTagResult('#tag-donor-status',c.donor_name||0);setTagResult('#tag-amount-status',c.donation_amount||0);setTagResult('#tag-number-status',c.certificate_no||0);setTagResult('#tag-qr-status',c.verify_qr||0);
-      if((c.donor_name||0)<1||(c.donation_amount||0)<1||(c.certificate_no||0)<1||(c.verify_qr||0)<1)throw new Error('Template ยังมี Tag ไม่ครบ 4 รายการ');
+      const r=await callGoogleSlidesBridge('validate');const c=r.tags||{};setTagResult('#tag-donor-status',c.donor_name||0);setTagResult('#tag-amount-status',c.donation_amount||0);setTagResult('#tag-number-status',c.certificate_no||0);setTagResult('#tag-qr-status',c.verify_qr||0);setTagResult('#tag-date-status',c.issue_date||0);
+      if((c.donor_name||0)<1||(c.donation_amount||0)<1||(c.certificate_no||0)<1||(c.verify_qr||0)<1||(c.issue_date||0)<1)throw new Error('Template ยังมี Tag ไม่ครบ 5 รายการ');
       certStatus('ตรวจสอบแล้ว: พบ Tag ครบทั้งชื่อ จำนวนเงิน เลขใบ และ QR ตรวจสอบ พร้อมสร้าง PDF',true);
     }catch(err){certStatus('ตรวจ Template ไม่สำเร็จ: '+(err.message||err))}finally{btn.disabled=false;btn.textContent='ตรวจ 4 Tag ใน Slides'}
   };

@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>เส้นทางศึกษาต่อของศิษย์เก่า</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Thai:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="../../assets/app-config.js?v=20260927-pathways"></script>
+  <style>
+    body{font-family:'Noto Sans Thai',sans-serif;background:#f8fafc;color:#1e293b}.glass{background:rgba(255,255,255,.82);backdrop-filter:blur(22px);border:1px solid rgba(255,255,255,.92);box-shadow:0 12px 42px rgba(15,23,42,.06)}.blob{position:fixed;filter:blur(110px);z-index:-1;opacity:.4}.field{width:100%;background:#fff;border:1px solid #e2e8f0;border-radius:1rem;padding:.78rem 1rem;font-size:.875rem;outline:none}.field:focus{border-color:#fb923c;box-shadow:0 0 0 3px rgba(251,146,60,.12)}
+    .flow-node{position:relative}.flow-node:after{content:'';position:absolute;top:50%;right:-1rem;width:1rem;height:2px;background:linear-gradient(90deg,#fdba74,#fed7aa)}.flow-node:last-child:after{display:none}.path-card{transition:.25s ease}.path-card:hover{transform:translateY(-3px);box-shadow:0 18px 45px rgba(15,23,42,.09)}
+    @media(max-width:1023px){.flow-node:after{top:auto;bottom:-1rem;right:50%;width:2px;height:1rem;background:linear-gradient(#fdba74,#fed7aa)}}
+  </style>
+</head>
+<body class="min-h-screen overflow-x-hidden">
+  <div class="blob bg-orange-300/50 w-[46vw] h-[46vw] rounded-full -top-40 -left-32"></div>
+  <div class="blob bg-amber-200/35 w-[38vw] h-[38vw] rounded-full -bottom-28 -right-20"></div>
+
+  <header class="sticky top-0 z-40 glass border-b border-white/80">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between gap-4">
+      <a href="../" class="flex items-center gap-3 min-w-0">
+        <div class="w-12 h-12 rounded-2xl flex items-center justify-center overflow-hidden shrink-0"><img id="school-logo" class="w-full h-full object-contain hidden" alt="โลโก้โรงเรียน"><div id="logo-fallback" class="w-12 h-12 rounded-2xl bg-orange-500 text-white flex items-center justify-center"><i data-lucide="route" class="w-6 h-6"></i></div></div>
+        <div class="min-w-0"><p id="school-name" class="font-bold text-slate-900 truncate">โรงเรียนวัดหนองแวงวิทยา</p><p class="text-xs text-orange-600 font-semibold">Alumni Pathways</p></div>
+      </a>
+      <div class="flex items-center gap-2"><a href="../" class="px-4 py-2.5 rounded-xl bg-white border border-slate-200 text-xs font-bold text-slate-700">ทำเนียบศิษย์เก่า</a><a href="../../" class="hidden sm:inline-flex px-4 py-2.5 rounded-xl bg-slate-900 text-white text-xs font-bold">เว็บหลัก</a></div>
+    </div>
+  </header>
+
+  <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
+    <section class="relative overflow-hidden rounded-[2.5rem] bg-gradient-to-br from-orange-500 via-orange-500 to-amber-500 text-white p-7 sm:p-10 lg:p-12 shadow-2xl shadow-orange-100">
+      <div class="absolute inset-0 opacity-20" style="background-image:radial-gradient(circle at 20% 15%,white 0 2px,transparent 3px),radial-gradient(circle at 80% 75%,white 0 2px,transparent 3px);background-size:50px 50px"></div>
+      <div class="relative z-10 max-w-3xl"><span class="inline-flex items-center gap-2 bg-white/15 border border-white/20 px-3 py-1.5 rounded-full text-xs font-bold"><i data-lucide="git-branch" class="w-4 h-4"></i> Alumni Education & Career Pathway</span><h1 class="text-3xl sm:text-5xl font-black mt-5 leading-tight">จากรั้วแสด–ขาว<br>สู่เส้นทางการศึกษาและอาชีพ</h1><p class="mt-4 text-orange-50/90 leading-relaxed max-w-2xl">สำรวจว่าศิษย์เก่าของโรงเรียนไปศึกษาต่อที่สถาบันใด เรียนสาขาอะไร และเติบโตไปสู่อาชีพด้านใด พร้อมค้นหาตามรุ่นและเส้นทางที่สนใจ</p></div>
+    </section>
+
+    <section class="grid grid-cols-2 lg:grid-cols-4 gap-4 mt-6">
+      <div class="glass rounded-3xl p-5"><p class="text-xs text-slate-500">มีข้อมูลเส้นทาง</p><p id="stat-people" class="text-3xl font-black text-orange-600 mt-2">0</p></div>
+      <div class="glass rounded-3xl p-5"><p class="text-xs text-slate-500">สถาบันศึกษาต่อ</p><p id="stat-institutions" class="text-3xl font-black text-slate-900 mt-2">0</p></div>
+      <div class="glass rounded-3xl p-5"><p class="text-xs text-slate-500">คณะ / สาขา</p><p id="stat-majors" class="text-3xl font-black text-amber-600 mt-2">0</p></div>
+      <div class="glass rounded-3xl p-5"><p class="text-xs text-slate-500">กลุ่มอาชีพ</p><p id="stat-careers" class="text-3xl font-black text-slate-900 mt-2">0</p></div>
+    </section>
+
+    <section class="glass rounded-[2rem] p-4 sm:p-5 mt-6">
+      <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-3"><div class="relative"><i data-lucide="search" class="w-4 h-4 text-slate-400 absolute left-4 top-1/2 -translate-y-1/2"></i><input id="search" class="field pl-11" placeholder="ค้นหาชื่อ มหาวิทยาลัย สาขา อาชีพ..."></div><select id="batch-filter" class="field"><option value="">ทุกรุ่น</option></select><select id="institution-filter" class="field"><option value="">ทุกสถาบัน</option></select><select id="career-filter" class="field"><option value="">ทุกกลุ่มอาชีพ</option></select></div>
+    </section>
+
+    <section class="mt-8">
+      <div class="flex items-end justify-between gap-4 mb-5"><div><p class="text-xs font-black uppercase tracking-[.18em] text-orange-600">Visual Pathway</p><h2 class="text-2xl font-black mt-1">ภาพรวมเส้นทาง</h2><p class="text-sm text-slate-500 mt-1">สรุปจากข้อมูลศิษย์เก่าที่อนุญาตให้แสดงในเส้นทางศึกษาต่อ</p></div><span id="filtered-count" class="text-xs font-bold bg-orange-50 text-orange-700 border border-orange-100 px-3 py-1.5 rounded-full">0 คน</span></div>
+      <div id="flow-empty" class="hidden glass rounded-[2rem] p-10 text-center text-slate-500">ยังไม่มีข้อมูลเส้นทางศึกษาต่อสำหรับตัวกรองนี้</div>
+      <div id="flow-grid" class="grid lg:grid-cols-4 gap-4"></div>
+    </section>
+
+    <section class="mt-10 grid lg:grid-cols-[1.1fr_.9fr] gap-6">
+      <div class="glass rounded-[2rem] p-6"><div class="flex items-center justify-between gap-3 mb-5"><div><h2 class="text-xl font-black">สถาบันยอดนิยม</h2><p class="text-xs text-slate-500 mt-1">เรียงตามจำนวนศิษย์เก่าในข้อมูลที่กำลังแสดง</p></div><i data-lucide="building-2" class="w-6 h-6 text-orange-500"></i></div><div id="institution-ranking" class="space-y-3"></div></div>
+      <div class="glass rounded-[2rem] p-6"><div class="flex items-center justify-between gap-3 mb-5"><div><h2 class="text-xl font-black">กลุ่มอาชีพ</h2><p class="text-xs text-slate-500 mt-1">ภาพรวมปลายทางหลังสำเร็จการศึกษา</p></div><i data-lucide="briefcase-business" class="w-6 h-6 text-orange-500"></i></div><div id="career-ranking" class="space-y-3"></div></div>
+    </section>
+
+    <section class="mt-10"><div class="flex items-end justify-between gap-4 mb-5"><div><p class="text-xs font-black uppercase tracking-[.18em] text-orange-600">Individual Path</p><h2 class="text-2xl font-black mt-1">เส้นทางรายบุคคล</h2></div></div><div id="person-list" class="grid md:grid-cols-2 xl:grid-cols-3 gap-5"></div><div id="people-empty" class="hidden glass rounded-[2rem] p-10 text-center text-slate-500">ไม่พบศิษย์เก่าที่ตรงกับตัวกรอง</div></section>
+  </main>
+
+  <footer class="mt-14 bg-slate-950 text-slate-400 py-8"><div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row gap-3 justify-between text-xs"><p>เส้นทางศึกษาต่อของศิษย์เก่า</p><a href="../" class="hover:text-orange-400">กลับทำเนียบศิษย์เก่า</a></div></footer>
+  <script src="pathways.js?v=20260927-1"></script>
+</body>
+</html>

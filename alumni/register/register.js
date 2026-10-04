@@ -69,11 +69,12 @@ $('#submission-form').addEventListener('submit',async e=>{
   if(!$('#consent').checked) return showStatus('กรุณายอมรับเงื่อนไขก่อนส่งข้อมูล');
   if(f.elements.is_royal_scholarship.checked && (!f.elements.royal_scholarship_batch.value.trim() || !f.elements.royal_scholarship_phase.value.trim())) return showStatus('กรุณาระบุรุ่นและระยะของทุนเฉลิมราชกุมารี');
   if(!f.elements.phone.value.trim() && !f.elements.email.value.trim()) return showStatus('กรุณาระบุเบอร์โทรศัพท์หรือ Email อย่างน้อย 1 ช่อง');
+  if(f.elements.show_pathway.checked && !f.elements.further_study_institution.value.trim()) return showStatus('หากต้องการแสดงเส้นทางศึกษาต่อ กรุณาระบุมหาวิทยาลัย/สถาบันที่ศึกษาต่อ');
   const btn=$('#submit-btn');btn.disabled=true;btn.classList.add('opacity-60','cursor-wait');btn.innerHTML='<span class="animate-pulse">กำลังส่งข้อมูล...</span>';
   try{
     const payload={
       fullName:f.elements.full_name.value.trim(),batch:f.elements.batch.value.trim(),graduationYear:f.elements.graduation_year.value.trim(),graduationLevel:f.elements.graduation_level.value.trim(),nakthamLevel:f.elements.naktham_level.value.trim(),paliLevel:f.elements.pali_level.value.trim(),isRoyalScholarship:f.elements.is_royal_scholarship.checked,royalScholarshipBatch:f.elements.royal_scholarship_batch.value.trim(),royalScholarshipPhase:f.elements.royal_scholarship_phase.value.trim(),
-      currentPosition:f.elements.current_position.value.trim(),occupation:f.elements.occupation.value.trim(),organization:f.elements.organization.value.trim(),education:f.elements.education.value.trim(),bio:f.elements.bio.value.trim(),
+      currentPosition:f.elements.current_position.value.trim(),occupation:f.elements.occupation.value.trim(),organization:f.elements.organization.value.trim(),education:f.elements.education.value.trim(),furtherStudyInstitution:f.elements.further_study_institution.value.trim(),faculty:f.elements.faculty.value.trim(),major:f.elements.major.value.trim(),degreeLevel:f.elements.degree_level.value.trim(),studyStartYear:f.elements.study_start_year.value.trim(),studyEndYear:f.elements.study_end_year.value.trim(),careerGroup:f.elements.career_group.value.trim(),showPathway:f.elements.show_pathway.checked,bio:f.elements.bio.value.trim(),
       phone:f.elements.phone.value.trim(),email:f.elements.email.value.trim(),facebookUrl:f.elements.facebook_url.value.trim(),showContact:f.elements.show_contact.checked,
       photoUrl:selectedPhoto?'':normalizeExternalPhotoUrl(f.elements.photo_url.value.trim()),consentAccepted:true
     };

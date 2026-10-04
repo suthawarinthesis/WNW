@@ -38,7 +38,7 @@ async function loadData(){
     nakthamLevel:r.naktham_level||'', paliLevel:r.pali_level||'',
     isRoyalScholarship:!!r.is_royal_scholarship, royalScholarshipBatch:r.royal_scholarship_batch||'', royalScholarshipPhase:r.royal_scholarship_phase||'',
     currentPosition:r.current_position, occupation:r.occupation, organization:r.organization,
-    education:r.education, phone:r.phone, email:r.email, facebookUrl:r.facebook_url, bio:r.bio,
+    education:r.education, furtherStudyInstitution:r.further_study_institution||'', faculty:r.faculty||'', major:r.major||'', degreeLevel:r.degree_level||'', studyStartYear:r.study_start_year||'', studyEndYear:r.study_end_year||'', careerGroup:r.career_group||'', showPathway:!!r.show_pathway, phone:r.phone, email:r.email, facebookUrl:r.facebook_url, bio:r.bio,
     showContact:!!r.show_contact, featured:!!r.featured
   }));
   if(personnelError){
@@ -62,7 +62,7 @@ function extractPersonnelAlumni(rows){
     batch:p.alumni_batch||'', graduationYear:'', graduationLevel:'', currentPosition:p.position||'',
     occupation:p.position||'', organization:p.department||labels[p.staff_type]||'บุคลากร', education:p.education||'', phone:p.phone||'',
     email:p.email||'', facebookUrl:'', bio:`ปัจจุบันเป็น${p.position||labels[p.staff_type]||'บุคลากร'}${p.department?' • '+p.department:''}`,
-    showContact:true, featured:false, staffLabel:labels[p.staff_type]||'บุคลากร'
+    furtherStudyInstitution:'',faculty:'',major:'',degreeLevel:'',studyStartYear:'',studyEndYear:'',careerGroup:'',showPathway:false,showContact:true, featured:false, staffLabel:labels[p.staff_type]||'บุคลากร'
   }));
 }
 
@@ -79,7 +79,7 @@ function extractStaffAlumni(s){
         batch:p.alumniBatch||'', graduationYear:'', graduationLevel:'', currentPosition:p.position||'',
         occupation:p.position||'', organization:p.department||label, education:p.education||'', phone:p.phone||'',
         email:p.email||'', facebookUrl:'', bio:`ปัจจุบันเป็น${p.position||label}${p.department?' • '+p.department:''}`,
-        nakthamLevel:'', paliLevel:'', isRoyalScholarship:false, royalScholarshipBatch:'', royalScholarshipPhase:'',
+        nakthamLevel:'', paliLevel:'', isRoyalScholarship:false, royalScholarshipBatch:'', royalScholarshipPhase:'', furtherStudyInstitution:'',faculty:'',major:'',degreeLevel:'',studyStartYear:'',studyEndYear:'',careerGroup:'',showPathway:false,
         showContact:true, featured:false, staffLabel:label
       });
     });
@@ -125,7 +125,7 @@ function getFiltered(){
   const q=normalize($('#search-input').value);
   const batch=$('#batch-filter').value;
   return combined.filter(x=>{
-    const searchable=normalize([x.fullName,x.batch,x.currentPosition,x.occupation,x.organization,x.education,x.graduationYear,x.graduationLevel,x.nakthamLevel,x.paliLevel,x.royalScholarshipBatch,x.royalScholarshipPhase].join(' '));
+    const searchable=normalize([x.fullName,x.batch,x.currentPosition,x.occupation,x.organization,x.education,x.graduationYear,x.graduationLevel,x.nakthamLevel,x.paliLevel,x.royalScholarshipBatch,x.royalScholarshipPhase,x.furtherStudyInstitution,x.faculty,x.major,x.degreeLevel,x.careerGroup].join(' '));
     const modeOk=directoryMode!=='scholarship'||x.isRoyalScholarship;
     return modeOk && (!q || searchable.includes(q)) && (!batch || batchLabel(x.batch)===batch);
   });
@@ -182,6 +182,8 @@ function openProfile(id){
   $('#profile-badges').innerHTML=badges.join('');
   setBioAccordion(x.bio);
   setBlock('#profile-education-wrap','#profile-education',x.education);
+  const pathWrap=$('#profile-pathway-wrap'),pathBox=$('#profile-pathway');
+  const pathBits=[];if(x.furtherStudyInstitution)pathBits.push(`<div class="flex items-start gap-2"><i data-lucide="building-2" class="w-4 h-4 text-orange-500 shrink-0 mt-0.5"></i><span><strong>สถาบัน:</strong> ${esc(x.furtherStudyInstitution)}</span></div>`);if(x.faculty||x.major)pathBits.push(`<div class="flex items-start gap-2"><i data-lucide="book-open" class="w-4 h-4 text-orange-500 shrink-0 mt-0.5"></i><span><strong>คณะ/สาขา:</strong> ${esc([x.faculty,x.major].filter(Boolean).join(' • '))}</span></div>`);if(x.degreeLevel||x.studyStartYear||x.studyEndYear)pathBits.push(`<div class="flex items-start gap-2"><i data-lucide="graduation-cap" class="w-4 h-4 text-orange-500 shrink-0 mt-0.5"></i><span><strong>ระดับ/ช่วงเวลา:</strong> ${esc([x.degreeLevel,(x.studyStartYear||x.studyEndYear)?`พ.ศ. ${x.studyStartYear||'?'}–${x.studyEndYear||'?'}`:''].filter(Boolean).join(' • '))}</span></div>`);if(x.careerGroup)pathBits.push(`<div class="flex items-start gap-2"><i data-lucide="briefcase-business" class="w-4 h-4 text-emerald-600 shrink-0 mt-0.5"></i><span><strong>กลุ่มอาชีพ:</strong> ${esc(x.careerGroup)}</span></div>`);if(pathBits.length){pathBox.innerHTML=pathBits.join('');pathWrap.classList.remove('hidden')}else pathWrap.classList.add('hidden');
   const contact=$('#profile-contact-wrap'); contact.innerHTML='';
   if(x.showContact){
     if(x.phone) contact.innerHTML+=`<a href="tel:${esc(String(x.phone).replace(/[^0-9+]/g,''))}" class="inline-flex items-center gap-2 bg-orange-50 text-orange-700 border border-orange-100 px-4 py-2.5 rounded-xl text-xs font-bold"><i data-lucide="phone" class="w-4 h-4"></i>${esc(x.phone)}</a>`;

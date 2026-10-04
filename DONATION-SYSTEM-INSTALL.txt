@@ -1,0 +1,30 @@
+ระบบบริจาค / ใบอนุโมทนาบัตร
+================================
+1) อัปโหลดไฟล์เว็บไซต์ชุดนี้ขึ้น GitHub Pages ทับเวอร์ชันเดิม
+2) Supabase > SQL Editor > รันไฟล์ supabase/donation-system.sql หนึ่งครั้ง
+3) เปิด /donation/manager/ และเข้าสู่ระบบด้วยบัญชี Website Manager
+4) ไปที่ "ตั้งค่าหน้าบริจาค" เพื่อกรอก Banner + บัญชีธนาคาร + QR
+5) ไปที่ "ใบอนุโมทนาบัตร" เพื่ออัปโหลด PNG/JPG/PDF Template
+6) ลากตำแหน่ง 3 ฟิลด์: ชื่อผู้บริจาค / จำนวนเงิน / เลขใบ แล้วกดบันทึก
+
+เส้นทาง
+- /donation/               Dashboard สาธารณะ
+- /donation/form/          แจ้งการร่วมบุญ + แนบสลิป
+- /donation/history/       ประวัติย้อนหลังของผู้บริจาค
+- /donation/verify/        ตรวจสอบเลขใบอนุโมทนาบัตร
+- /donation/manager/       หลังบ้านตรวจสลิป อนุมัติ และตั้งค่า Template
+
+หมายเหตุ
+- สลิปอยู่ใน bucket ส่วนตัว donation-slips
+- Banner / QR / Template อยู่ใน bucket public donation-assets
+- การส่งฟอร์มยังไม่ออกใบทันที เจ้าหน้าที่ต้องยืนยันสลิปก่อน
+- เลขใบสร้างอัตโนมัติรูปแบบ WNW-DN-พ.ศ.-000001
+- รุ่นนี้รองรับข้อมูลบนใบ 3 จุดตามที่ตกลง: ชื่อ / จำนวนเงิน / เลขใบ
+
+
+=== Google Slides Certificate V2 ===
+1) รัน DONATION-GOOGLE-SLIDES-UPGRADE.sql
+2) Deploy google-apps-script/Code.gs เป็น Web App (Execute as Me / Anyone)
+3) นำ /exec URL ไปวางใน Donation Manager > ใบอนุโมทนาบัตร
+4) กดตรวจ 3 Tag
+ดู GOOGLE-SLIDES-DONATION-SETUP.md

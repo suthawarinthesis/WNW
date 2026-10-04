@@ -141,3 +141,30 @@ Intro/หน้ารำลึกจะแสดงตั้งแต่ first p
 
 ## Dynamic favicon
 ทุกหน้าเว็บและ subweb ใช้ `branding.logoUrl` จาก `site_settings` เป็น favicon บนแท็บเบราว์เซอร์อัตโนมัติ โดยมี local cache เพื่อให้ไอคอนแสดงเร็วขึ้น ไม่ต้องสร้างไฟล์ `.ico` แยก และไม่ต้องรัน SQL เพิ่ม
+
+## Alumni Education & Career Pathways (2026-09-27)
+
+เพิ่มหน้า `/alumni/pathways/` สำหรับแสดงเส้นทางจากโรงเรียน → สถาบันศึกษาต่อ → คณะ/สาขา → กลุ่มอาชีพ
+
+ก่อนใช้งาน ให้รัน `ALUMNI-PATHWAYS-SUPABASE.sql` ใน Supabase SQL Editor หนึ่งครั้ง
+
+ฟิลด์ใหม่ใน `alumni` และ `alumni_submissions`:
+- `further_study_institution`
+- `faculty`
+- `major`
+- `degree_level`
+- `study_start_year`
+- `study_end_year`
+- `career_group`
+- `show_pathway`
+
+การจัดการข้อมูลอยู่ที่ `/alumni/manager/` เมนู **ข้อมูลการศึกษาต่อ** และในฟอร์มเพิ่ม/แก้ไขศิษย์เก่า
+
+## Donation Subweb
+- Public dashboard: `/donation/`
+- Submit transfer evidence: `/donation/form/`
+- Donor history: `/donation/history/`
+- Certificate verification: `/donation/verify/`
+- Donation Manager: `/donation/manager/`
+- Run `supabase/donation-system.sql` before first use.
+- Certificate template can be PNG/JPG/PDF; Manager positions donor name, amount, and certificate number by drag-and-drop.

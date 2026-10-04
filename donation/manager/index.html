@@ -1,0 +1,106 @@
+<!doctype html>
+<html lang="th">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Donation Manager | โรงเรียนวัดหนองแวงวิทยา</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+  <script>if(window.pdfjsLib)pdfjsLib.GlobalWorkerOptions.workerSrc='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';</script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    *{font-family:'Sarabun',sans-serif}body{background:#f8fafc;color:#1f2937}.glass{background:rgba(255,255,255,.94);border:1px solid #fff;box-shadow:0 14px 45px rgba(15,23,42,.06)}.field{width:100%;border:1px solid #e2e8f0;border-radius:.9rem;padding:.7rem .9rem;outline:none;background:#fff}.field:focus{border-color:#fb923c;box-shadow:0 0 0 3px #ffedd5}.nav-btn.active{background:#f97316;color:#fff}.overlay-field{position:absolute;transform:translate(-50%,-50%);z-index:5;white-space:nowrap;border:1px dashed #f97316;background:rgba(255,247,237,.9);color:#9a3412;border-radius:.5rem;padding:.3rem .55rem;font-weight:700;cursor:move;touch-action:none;box-shadow:0 3px 12px rgba(249,115,22,.15)}.overlay-field.selected{outline:3px solid rgba(249,115,22,.25);background:#fff7ed}.table-scroll{overflow:auto}.modal-backdrop{background:rgba(15,23,42,.6);backdrop-filter:blur(7px)}
+  </style>
+</head>
+<body class="min-h-screen">
+  <div id="login-view" class="min-h-screen flex items-center justify-center p-5 bg-gradient-to-br from-orange-50 via-white to-amber-50">
+    <form id="login-form" class="glass w-full max-w-md rounded-[2rem] p-7 sm:p-9">
+      <div class="w-16 h-16 rounded-2xl bg-orange-100 text-orange-600 flex items-center justify-center mx-auto"><i data-lucide="hand-coins" class="w-8 h-8"></i></div>
+      <h1 class="text-2xl font-extrabold text-center mt-5">Donation Manager</h1><p class="text-sm text-slate-500 text-center mt-1">เข้าสู่ระบบด้วยบัญชี Website Manager</p>
+      <label class="block mt-6"><span class="text-sm font-bold">Email</span><input name="email" type="email" required class="field mt-1.5"></label>
+      <label class="block mt-4"><span class="text-sm font-bold">Password</span><input name="password" type="password" required class="field mt-1.5"></label>
+      <div id="login-status" class="hidden mt-4 rounded-xl p-3 text-sm bg-rose-50 text-rose-700"></div>
+      <button class="mt-5 w-full py-3.5 rounded-2xl bg-orange-500 text-white font-extrabold hover:bg-orange-600">เข้าสู่ระบบ</button>
+      <a href="../" class="mt-4 block text-center text-sm text-slate-500 hover:text-orange-600">← กลับหน้าบริจาค</a>
+    </form>
+  </div>
+
+  <div id="app-view" class="hidden min-h-screen lg:grid lg:grid-cols-[270px_1fr]">
+    <aside class="bg-slate-950 text-slate-300 p-4 lg:min-h-screen lg:sticky lg:top-0 lg:h-screen">
+      <div class="flex items-center gap-3 p-3"><div class="w-11 h-11 rounded-2xl bg-orange-500 text-white flex items-center justify-center"><i data-lucide="hand-coins"></i></div><div><p class="font-extrabold text-white">Donation Manager</p><p class="text-xs text-slate-400">ระบบบริจาคและใบอนุโมทนา</p></div></div>
+      <nav class="mt-5 grid grid-cols-2 lg:block gap-2">
+        <button data-view="dashboard" class="nav-btn active w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-bold"><i data-lucide="layout-dashboard" class="w-4 h-4"></i> ภาพรวม</button>
+        <button data-view="donations" class="nav-btn w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-bold hover:bg-white/5"><i data-lucide="receipt-text" class="w-4 h-4"></i> รายการบริจาค</button>
+        <button data-view="settings" class="nav-btn w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-bold hover:bg-white/5"><i data-lucide="settings" class="w-4 h-4"></i> ตั้งค่าหน้าบริจาค</button>
+        <button data-view="certificate" class="nav-btn w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-bold hover:bg-white/5"><i data-lucide="badge-check" class="w-4 h-4"></i> ใบอนุโมทนาบัตร</button>
+      </nav>
+      <div class="mt-6 lg:absolute lg:bottom-5 lg:left-4 lg:right-4 space-y-2"><a href="../" target="_blank" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm hover:bg-white/5"><i data-lucide="external-link" class="w-4 h-4"></i> เปิดหน้าบริจาค</a><button id="logout-btn" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm text-rose-300 hover:bg-rose-500/10"><i data-lucide="log-out" class="w-4 h-4"></i> ออกจากระบบ</button></div>
+    </aside>
+
+    <main class="p-4 sm:p-6 lg:p-8 min-w-0">
+      <div class="max-w-7xl mx-auto">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-6"><div><p id="page-kicker" class="text-xs font-bold text-orange-500 uppercase tracking-[.2em]">Donation Manager</p><h1 id="page-title" class="text-3xl font-extrabold">ภาพรวม</h1></div><div class="flex items-center gap-2"><span id="manager-email" class="text-xs text-slate-500 hidden sm:block"></span><button id="refresh-btn" class="w-10 h-10 rounded-xl border border-slate-200 bg-white flex items-center justify-center hover:bg-orange-50"><i data-lucide="refresh-cw" class="w-4 h-4"></i></button></div></div>
+
+        <section id="panel-dashboard">
+          <div class="grid sm:grid-cols-2 xl:grid-cols-4 gap-4"><article class="glass rounded-2xl p-5"><p class="text-xs text-slate-500">รอตรวจสอบ</p><p id="d-pending" class="mt-1 text-3xl font-extrabold text-amber-600">0</p></article><article class="glass rounded-2xl p-5"><p class="text-xs text-slate-500">ยืนยันแล้ว</p><p id="d-verified" class="mt-1 text-3xl font-extrabold text-emerald-600">0</p></article><article class="glass rounded-2xl p-5"><p class="text-xs text-slate-500">ยอดร่วมบุญยืนยันแล้ว</p><p id="d-amount" class="mt-1 text-2xl font-extrabold text-orange-700">0 บาท</p></article><article class="glass rounded-2xl p-5"><p class="text-xs text-slate-500">ใบอนุโมทนาบัตร</p><p id="d-certs" class="mt-1 text-3xl font-extrabold text-blue-600">0</p></article></div>
+          <div class="grid xl:grid-cols-[1.3fr_.7fr] gap-5 mt-5"><article class="glass rounded-[1.8rem] p-5 sm:p-6"><div class="flex items-center justify-between"><h2 class="font-extrabold text-xl">รายการล่าสุด</h2><button data-go="donations" class="text-sm font-bold text-orange-600">ดูทั้งหมด →</button></div><div id="dashboard-latest" class="mt-4 space-y-3"></div></article><article class="glass rounded-[1.8rem] p-5 sm:p-6"><h2 class="font-extrabold text-xl">สถานะระบบ</h2><div class="mt-4 space-y-3 text-sm"><div class="flex justify-between gap-3"><span class="text-slate-500">เปิดรับบริจาค</span><b id="d-open">—</b></div><div class="flex justify-between gap-3"><span class="text-slate-500">Banner</span><b id="d-banner">—</b></div><div class="flex justify-between gap-3"><span class="text-slate-500">Template ใบอนุโมทนา</span><b id="d-template">—</b></div><div class="flex justify-between gap-3"><span class="text-slate-500">Prefix เลขใบ</span><b id="d-prefix">—</b></div></div></article></div>
+        </section>
+
+        <section id="panel-donations" class="hidden">
+          <div class="glass rounded-[1.8rem] p-4 sm:p-5"><div class="grid md:grid-cols-[1fr_190px] gap-3"><input id="donation-search" class="field" placeholder="ค้นหาชื่อ เลขคำขอ เลขใบ วัด หรือเบอร์โทร"><select id="status-filter" class="field"><option value="">ทุกสถานะ</option><option value="pending">รอตรวจสอบ</option><option value="verified">ยืนยันแล้ว</option><option value="rejected">ไม่อนุมัติ</option></select></div></div>
+          <div id="donation-list" class="mt-4 space-y-3"></div>
+        </section>
+
+        <section id="panel-settings" class="hidden">
+          <form id="settings-form" class="grid xl:grid-cols-[1.1fr_.9fr] gap-5">
+            <div class="glass rounded-[1.8rem] p-5 sm:p-6 space-y-4"><div><p class="text-xs font-bold text-orange-500">PUBLIC PAGE</p><h2 class="text-xl font-extrabold mt-1">ข้อความและ Banner</h2></div><label class="block"><span class="text-sm font-bold">ชื่อโครงการ / งาน</span><input name="campaign_title" class="field mt-1.5"></label><label class="block"><span class="text-sm font-bold">คำอธิบาย</span><textarea name="campaign_description" rows="3" class="field mt-1.5"></textarea></label><label class="flex items-center gap-3 p-4 rounded-2xl bg-orange-50"><input name="is_open" type="checkbox" class="w-5 h-5 accent-orange-500"><span><b>เปิดรับรายการบริจาค</b><small class="block text-slate-500">ปิดได้ชั่วคราวโดยไม่ต้องแก้เว็บ</small></span></label><div><label class="block"><span class="text-sm font-bold">Banner URL</span><input name="banner_url" class="field mt-1.5" placeholder="https://..."></label><div class="mt-2 flex gap-2"><label class="px-4 py-2.5 rounded-xl bg-slate-100 font-bold text-sm cursor-pointer"><input id="banner-file" type="file" accept="image/jpeg,image/png,image/webp" class="hidden">อัปโหลด Banner</label><button id="banner-clear" type="button" class="px-4 py-2.5 rounded-xl text-sm text-rose-600">ล้างรูป</button></div><img id="banner-preview" class="hidden mt-3 w-full max-h-64 rounded-2xl object-cover border border-slate-100"></div></div>
+            <div class="glass rounded-[1.8rem] p-5 sm:p-6 space-y-4"><div><p class="text-xs font-bold text-orange-500">PAYMENT</p><h2 class="text-xl font-extrabold mt-1">ข้อมูลบัญชีรับบริจาค</h2></div><label class="block"><span class="text-sm font-bold">ธนาคาร</span><input name="bank_name" class="field mt-1.5"></label><label class="block"><span class="text-sm font-bold">ชื่อบัญชี</span><input name="bank_account_name" class="field mt-1.5"></label><label class="block"><span class="text-sm font-bold">เลขที่บัญชี</span><input name="bank_account_no" class="field mt-1.5"></label><label class="block"><span class="text-sm font-bold">พร้อมเพย์ <span class="font-normal text-slate-400">(ถ้ามี)</span></span><input name="promptpay" class="field mt-1.5"></label><label class="block"><span class="text-sm font-bold">หมายเหตุการโอน</span><textarea name="donation_note" rows="2" class="field mt-1.5"></textarea></label><div><label class="block"><span class="text-sm font-bold">QR Code URL</span><input name="qr_image_url" class="field mt-1.5"></label><label class="mt-2 inline-block px-4 py-2.5 rounded-xl bg-slate-100 font-bold text-sm cursor-pointer"><input id="qr-file" type="file" accept="image/jpeg,image/png,image/webp" class="hidden">อัปโหลด QR Code</label><img id="qr-preview" class="hidden mt-3 max-h-56 mx-auto rounded-2xl object-contain border border-slate-100"></div><button class="w-full py-3.5 rounded-2xl bg-orange-500 text-white font-extrabold">บันทึกการตั้งค่า</button><p id="settings-status" class="hidden rounded-xl p-3 text-sm"></p></div>
+          </form>
+        </section>
+
+        <section id="panel-certificate" class="hidden">
+          <div class="grid xl:grid-cols-[1fr_360px] gap-5">
+            <article class="glass rounded-[1.8rem] p-5 sm:p-6 min-w-0">
+              <div>
+                <p class="text-xs font-bold text-orange-500">GOOGLE SLIDES CERTIFICATE</p>
+                <h2 class="text-xl font-extrabold mt-1">เชื่อมเทมเพลตใบอนุโมทนาบัตร</h2>
+                <p class="text-sm text-slate-500 mt-2">ระบบจะคัดลอก Google Slides → แทน 3 Tag → Export เป็น PDF → เก็บไว้ใน Google Drive อัตโนมัติ</p>
+              </div>
+              <div class="mt-5 grid gap-4">
+                <label class="block"><span class="text-sm font-bold">Google Slides Template</span><input id="google-template-url" class="field mt-1.5" placeholder="https://docs.google.com/presentation/d/..."><span class="text-xs text-slate-400 mt-1 block">ต้องมี {{donor_name}}, {{donation_amount}} และ {{certificate_no}} เป็น Text Box จริง</span></label>
+                <label class="block"><span class="text-sm font-bold">โฟลเดอร์ Google Drive สำหรับเก็บ PDF</span><input id="google-folder-url" class="field mt-1.5" placeholder="https://drive.google.com/drive/folders/..."></label>
+                <label class="block"><span class="text-sm font-bold">Google Apps Script Web App URL</span><input id="google-script-url" class="field mt-1.5" placeholder="https://script.google.com/macros/s/.../exec"><span class="text-xs text-emerald-600 mt-1 block">V3 ฝัง Web App URL ของโรงเรียนไว้แล้ว หากเปลี่ยน Deployment ภายหลังสามารถแก้ช่องนี้และกดบันทึกได้</span></label>
+              </div>
+              <div class="mt-5 flex flex-wrap gap-2">
+                <button id="save-google-cert-settings" type="button" class="px-5 py-3 rounded-xl bg-slate-900 text-white font-bold">บันทึกการเชื่อมต่อ</button>
+                <button id="validate-google-template" type="button" class="px-5 py-3 rounded-xl bg-orange-500 text-white font-bold">ตรวจ 3 Tag ใน Slides</button>
+                <a id="open-google-template" target="_blank" rel="noopener" class="px-4 py-3 rounded-xl bg-white border border-orange-200 text-orange-700 font-bold">เปิด Template ↗</a>
+                <a id="open-google-folder" target="_blank" rel="noopener" class="px-4 py-3 rounded-xl bg-white border border-orange-200 text-orange-700 font-bold">เปิดโฟลเดอร์ ↗</a>
+              </div>
+              <div class="mt-5 grid sm:grid-cols-3 gap-3">
+                <div id="tag-donor-status" class="rounded-2xl border border-slate-200 bg-white p-4"><p class="text-xs text-slate-400">ชื่อผู้บริจาค</p><code class="text-sm font-bold text-orange-700">{{donor_name}}</code><p class="tag-result mt-2 text-xs text-slate-400">รอตรวจสอบ</p></div>
+                <div id="tag-amount-status" class="rounded-2xl border border-slate-200 bg-white p-4"><p class="text-xs text-slate-400">จำนวนเงิน</p><code class="text-sm font-bold text-orange-700">{{donation_amount}}</code><p class="tag-result mt-2 text-xs text-slate-400">รอตรวจสอบ</p></div>
+                <div id="tag-number-status" class="rounded-2xl border border-slate-200 bg-white p-4"><p class="text-xs text-slate-400">เลขใบ</p><code class="text-sm font-bold text-orange-700">{{certificate_no}}</code><p class="tag-result mt-2 text-xs text-slate-400">รอตรวจสอบ</p></div>
+              </div>
+              <div class="mt-5 rounded-2xl bg-amber-50 border border-amber-200 p-4 text-sm text-amber-900">
+                <b>สำคัญ:</b> Tag ต้องยังเป็นข้อความใน Google Slides ห้ามแปลงเป็นรูปภาพ เมื่อสร้างใบ ระบบจะ Replace Tag เดิมออกแล้วใส่ข้อมูลจริง จึงไม่มีข้อความซ้อนกัน
+              </div>
+            </article>
+            <aside class="space-y-4">
+              <div class="glass rounded-[1.8rem] p-5"><h3 class="font-extrabold">ตั้งค่าเลขใบ</h3><label class="block mt-3"><span class="text-sm font-bold">Prefix</span><input id="cert-prefix" class="field mt-1.5" placeholder="WNW-DN"></label><p class="text-xs text-slate-500 mt-2">ตัวอย่าง: WNW-DN-2569-000001</p></div>
+              <div class="glass rounded-[1.8rem] p-5"><h3 class="font-extrabold">ข้อมูลที่จะใส่ลง Slides</h3><div class="mt-3 space-y-3 text-sm"><div class="rounded-xl bg-slate-50 p-3"><code>{{donor_name}}</code><p class="text-xs text-slate-500 mt-1">เช่น พระมหาสมชาย ธมฺมิโก ใจดี</p></div><div class="rounded-xl bg-slate-50 p-3"><code>{{donation_amount}}</code><p class="text-xs text-slate-500 mt-1">เช่น 5,000.00 — คำว่า “บาท” ใช้ข้อความเดิมใน Slides ได้</p></div><div class="rounded-xl bg-slate-50 p-3"><code>{{certificate_no}}</code><p class="text-xs text-slate-500 mt-1">เช่น WNW-DN-2569-000001</p></div></div></div>
+              <div class="glass rounded-[1.8rem] p-5"><h3 class="font-extrabold">ขั้นตอนหลังอนุมัติ</h3><p class="text-sm text-slate-500 mt-2 leading-6">เมื่อกด “ยืนยันและออกเลขใบ” ระบบจะพยายามสร้าง PDF จาก Google Slides ทันที หาก Google มีปัญหา เลขใบจะยังอยู่และสามารถกด “สร้างใบอีกครั้ง” ได้โดยไม่ออกเลขใหม่</p></div>
+              <p id="cert-status" class="hidden rounded-xl p-3 text-sm"></p>
+            </aside>
+          </div>
+        </section>
+      </div>
+    </main>
+  </div>
+
+  <div id="review-modal" class="hidden fixed inset-0 z-50 modal-backdrop p-3 sm:p-6 overflow-y-auto"><div class="max-w-5xl mx-auto bg-white rounded-[2rem] overflow-hidden shadow-2xl"><div class="p-5 border-b flex items-center justify-between"><div><p class="text-xs font-bold text-orange-500">ตรวจสอบรายการ</p><h2 id="review-title" class="text-xl font-extrabold">—</h2></div><button id="review-close" class="w-10 h-10 rounded-xl bg-slate-100 flex items-center justify-center"><i data-lucide="x"></i></button></div><div class="grid lg:grid-cols-[1fr_.9fr]"><div class="p-5 sm:p-6 space-y-4"><div id="review-donor" class="rounded-2xl bg-slate-50 p-4 text-sm"></div><div class="grid sm:grid-cols-2 gap-3"><label class="block sm:col-span-2"><span class="text-xs font-bold">ชื่อบนใบอนุโมทนาบัตร <span class="font-normal text-slate-400">(เว้นว่าง = ใช้ชื่อที่ผู้บริจาคกรอก)</span></span><input id="review-cert-name" class="field mt-1.5"></label><label class="block"><span class="text-xs font-bold">จำนวนเงิน</span><input id="review-amount" type="number" min="0.01" step=".01" class="field mt-1.5"></label><label class="block"><span class="text-xs font-bold">วันที่โอน</span><input id="review-date" type="date" class="field mt-1.5"></label><label class="block"><span class="text-xs font-bold">เวลาโอน</span><input id="review-time" type="time" class="field mt-1.5"></label><div></div><label class="block sm:col-span-2"><span class="text-xs font-bold">หมายเหตุเจ้าหน้าที่</span><textarea id="review-note" rows="3" class="field mt-1.5"></textarea></label></div><button id="review-save" class="px-5 py-3 rounded-xl bg-slate-900 text-white font-bold">บันทึกข้อมูลที่แก้ไข</button><div id="review-cert-box" class="hidden rounded-2xl bg-emerald-50 border border-emerald-100 p-4"><p class="text-xs text-emerald-700">เลขใบอนุโมทนาบัตร</p><p id="review-cert-no" class="font-extrabold text-emerald-900 mt-1"></p><p id="review-cert-generation" class="mt-2 text-xs text-emerald-700"></p><div class="mt-3 flex flex-wrap gap-2"><a id="review-open-pdf" target="_blank" rel="noopener" class="hidden px-4 py-2 rounded-xl bg-emerald-600 text-white text-sm font-bold">เปิด / ดาวน์โหลด PDF</a><button id="review-generate-pdf" class="px-4 py-2 rounded-xl bg-white border border-emerald-200 text-emerald-700 text-sm font-bold">สร้างใบจาก Google Slides</button></div></div><div id="review-status" class="hidden rounded-xl p-3 text-sm"></div><div class="flex flex-wrap gap-2 pt-2 border-t"><button id="review-approve" class="px-5 py-3 rounded-xl bg-emerald-600 text-white font-extrabold">ยืนยันและออกเลขใบ</button><button id="review-reject" class="px-5 py-3 rounded-xl bg-rose-50 text-rose-700 font-bold">ไม่อนุมัติ</button></div></div><div class="p-5 sm:p-6 bg-slate-50"><div class="flex items-center justify-between"><h3 class="font-extrabold">หลักฐานการโอน</h3><a id="slip-open" target="_blank" class="text-sm font-bold text-orange-600">เปิดไฟล์ใหม่ ↗</a></div><div id="slip-view" class="mt-4 min-h-[420px] rounded-2xl bg-white border border-slate-200 flex items-center justify-center overflow-hidden text-slate-400">กำลังโหลดสลิป...</div></div></div></div></div>
+
+<script src="../../assets/app-config.js"></script><script src="../donation-common.js"></script><script src="./manager.js"></script>
+</body></html>

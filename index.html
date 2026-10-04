@@ -171,6 +171,10 @@
                                     <i data-lucide="newspaper" class="w-5 h-5 text-orange-500 mt-0.5"></i>
                                     <div><p class="font-semibold text-slate-800">ข่าวสาร</p><p class="text-xs text-slate-500">ประกาศและความเคลื่อนไหวล่าสุด</p></div>
                                 </a>
+                                <a href="./donation/" class="flex items-start gap-3 px-3 py-3 rounded-xl hover:bg-orange-50 transition-colors">
+                                    <i data-lucide="heart-handshake" class="w-5 h-5 text-orange-500 mt-0.5"></i>
+                                    <div><p class="font-semibold text-slate-800">ร่วมทำบุญและบริจาค</p><p class="text-xs text-slate-500">แจ้งสลิป ตรวจสอบประวัติ และใบอนุโมทนาบัตร</p></div>
+                                </a>
                             </div>
                         </div>
                     </div>
@@ -202,6 +206,10 @@
                                 <a href="./alumni/" class="flex items-start gap-3 px-3 py-3 rounded-xl hover:bg-orange-50 transition-colors">
                                     <i data-lucide="badge-check" class="w-5 h-5 text-orange-500 mt-0.5"></i>
                                     <div><p class="font-semibold text-slate-800">ทำเนียบศิษย์เก่า</p><p class="text-xs text-slate-500">ค้นหาศิษย์เก่าและกรองตามรุ่น</p></div>
+                                </a>
+                                <a href="./alumni/pathways/" class="flex items-start gap-3 px-3 py-3 rounded-xl hover:bg-orange-50 transition-colors">
+                                    <i data-lucide="route" class="w-5 h-5 text-orange-500 mt-0.5"></i>
+                                    <div><p class="font-semibold text-slate-800">เส้นทางศึกษาต่อศิษย์เก่า</p><p class="text-xs text-slate-500">สำรวจมหาวิทยาลัย คณะ สาขา และอาชีพของรุ่นพี่</p></div>
                                 </a>
                                 <a href="./alumni/register/" class="flex items-start gap-3 px-3 py-3 rounded-xl hover:bg-orange-50 transition-colors">
                                     <i data-lucide="file-signature" class="w-5 h-5 text-orange-500 mt-0.5"></i>
@@ -245,6 +253,7 @@
                         <a href="#staff-section" class="block px-3 py-2.5 rounded-xl text-slate-700 hover:bg-orange-50">ทำเนียบบุคลากร</a>
                         <a href="#stats-section" class="block px-3 py-2.5 rounded-xl text-slate-700 hover:bg-orange-50">สถิติผลการสอบ</a>
                         <a href="#news-section" class="block px-3 py-2.5 rounded-xl text-slate-700 hover:bg-orange-50">ข่าวสาร</a>
+                        <a href="./donation/" class="block px-3 py-2.5 rounded-xl text-orange-700 hover:bg-orange-50 font-semibold">ร่วมทำบุญและบริจาค</a>
                     </div>
                 </details>
 
@@ -266,6 +275,7 @@
                     </summary>
                     <div class="px-3 pb-3 space-y-1">
                         <a href="./alumni/" class="block px-3 py-2.5 rounded-xl text-slate-700 hover:bg-orange-50">ทำเนียบศิษย์เก่า</a>
+                        <a href="./alumni/pathways/" class="block px-3 py-2.5 rounded-xl text-slate-700 hover:bg-orange-50">เส้นทางศึกษาต่อศิษย์เก่า</a>
                         <a href="./alumni/register/" class="block px-3 py-2.5 rounded-xl text-slate-700 hover:bg-orange-50">ส่งข้อมูลศิษย์เก่า</a>
                         <a href="./university-admission/" class="block px-3 py-2.5 rounded-xl text-slate-700 hover:bg-orange-50">ประชาสัมพันธ์ศึกษาต่อมหาวิทยาลัย</a>
                     </div>
@@ -625,7 +635,7 @@
                         <button id="alumni-auto-toggle" type="button" onclick="toggleHomeAlumniAutoScroll()" class="w-10 h-10 rounded-full bg-white/90 hover:bg-orange-50 border border-orange-200 text-slate-700 flex items-center justify-center transition-colors shadow-sm" title="หยุด/เล่นการเลื่อนอัตโนมัติ" aria-label="หยุดหรือเล่นการเลื่อนอัตโนมัติ">
                             <i id="alumni-auto-toggle-icon" data-lucide="pause" class="w-4 h-4"></i>
                         </button>
-                        <a href="./alumni/" class="inline-flex items-center gap-2 bg-orange-500 text-white hover:bg-orange-600 px-4 py-2.5 rounded-full text-sm font-bold transition-all shadow-md shadow-orange-200">ดูทำเนียบทั้งหมด <i data-lucide="arrow-up-right" class="w-4 h-4"></i></a>
+                        <a href="./alumni/pathways/" class="inline-flex items-center gap-2 bg-white/90 text-orange-700 border border-orange-200 hover:bg-orange-50 px-4 py-2.5 rounded-full text-sm font-bold transition-all shadow-sm"><i data-lucide="route" class="w-4 h-4"></i> เส้นทางศึกษาต่อ</a><a href="./alumni/" class="inline-flex items-center gap-2 bg-orange-500 text-white hover:bg-orange-600 px-4 py-2.5 rounded-full text-sm font-bold transition-all shadow-md shadow-orange-200">ดูทำเนียบทั้งหมด <i data-lucide="arrow-up-right" class="w-4 h-4"></i></a>
                     </div>
                 </div>
                 <div id="home-alumni-empty" class="hidden relative z-10 px-8 pb-8 text-sm text-slate-500">ยังไม่มีข้อมูลศิษย์เก่าที่เผยแพร่</div>
@@ -717,6 +727,7 @@
                     <li><a href="./alumni/" class="hover:text-orange-400 transition-colors">ทำเนียบศิษย์เก่า</a></li>
                     <li><a href="./student-portal/" class="hover:text-orange-400 transition-colors">Student Portal</a></li>
                     <li><a href="./university-admission/" class="hover:text-orange-400 transition-colors">ประชาสัมพันธ์รับสมัครมหาวิทยาลัย</a></li>
+                    <li><a href="./donation/" class="hover:text-orange-400 transition-colors text-orange-400">ร่วมทำบุญและใบอนุโมทนาบัตร</a></li>
                 </ul>
             </div>
             <div>

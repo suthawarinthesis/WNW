@@ -10,7 +10,11 @@ window.SCHOOL_APP_CONFIG = {
   SUPABASE_ANON_KEY: 'sb_publishable_NTJJiE0r1hojS-8DTRzWFA_3BPADfEH',
   STORAGE_BUCKET: 'site-media',
   ADMISSION_STORAGE_BUCKET: 'admission-files',
-  STUDENT_PORTAL_STORAGE_BUCKET: 'student-portal-files'
+  STUDENT_PORTAL_STORAGE_BUCKET: 'student-portal-files',
+  DONATION_SLIP_BUCKET: 'donation-slips',
+  DONATION_ASSETS_BUCKET: 'donation-assets',
+  // Donation certificate generator (Google Apps Script Web App)
+  DONATION_GOOGLE_APPS_SCRIPT_URL: 'https://script.google.com/macros/s/AKfycby2RD2z8dMwB3Ajp0JPCPHN_rKFIL1M5IckIN4VyUMG2yNAV_2gW4kWaGjx-49CXECJ4A/exec'
 };
 
 (() => {

@@ -345,8 +345,8 @@
     try{
       await saveGoogleCertificateSettings(false);
       if(!googleScriptUrl())throw new Error('ยังไม่มี Google Apps Script Web App URL');
-      const r=await callGoogleSlidesBridge('validate');const c=r.tags||{};setTagResult('#tag-donor-status',c.donor_name||0);setTagResult('#tag-amount-status',c.donation_amount||0);setTagResult('#tag-number-status',c.certificate_no||0);setTagResult('#tag-qr-status',c.verify_qr||0);setTagResult('#tag-date-status',c.issue_date||0);
-      if((c.donor_name||0)<1||(c.donation_amount||0)<1||(c.certificate_no||0)<1||(c.verify_qr||0)<1||(c.issue_date||0)<1)throw new Error('Template ยังมี Tag ไม่ครบ 5 รายการ');
+      const r=await callGoogleSlidesBridge('validate');const c=r.tags||{};setTagResult('#tag-donor-status',c.donor_name||0);setTagResult('#tag-amount-status',c.donation_amount||0);setTagResult('#tag-number-status',c.certificate_no||0);setTagResult('#tag-qr-status',c.verify_qr||0);
+      if((c.donor_name||0)<1||(c.donation_amount||0)<1||(c.certificate_no||0)<1||(c.verify_qr||0)<1)throw new Error('Template ยังมี Tag ไม่ครบ 4 รายการ');
       certStatus('ตรวจสอบแล้ว: พบ Tag ครบทั้งชื่อ จำนวนเงิน เลขใบ และ QR ตรวจสอบ พร้อมสร้าง PDF',true);
     }catch(err){certStatus('ตรวจ Template ไม่สำเร็จ: '+(err.message||err))}finally{btn.disabled=false;btn.textContent='ตรวจ 4 Tag ใน Slides'}
   };

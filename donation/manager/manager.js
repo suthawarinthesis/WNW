@@ -9,6 +9,23 @@
 
   function esc(v){return C.escapeHtml(v)}
   function normalize(v){return String(v||'').toLowerCase().replace(/\s+/g,' ').trim()}
+  function normalizePhotoUrl(value=''){
+    const raw=String(value||'').trim();if(!raw)return '';
+    try{
+      const u=new URL(raw);if(!['http:','https:'].includes(u.protocol))return '';
+      if(/(^|\.)drive\.google\.com$/i.test(u.hostname)){
+        const m=raw.match(/\/file\/d\/([a-zA-Z0-9_-]+)/)||raw.match(/[?&]id=([a-zA-Z0-9_-]+)/);
+        if(m?.[1])return `https://drive.google.com/thumbnail?id=${encodeURIComponent(m[1])}&sz=w1200`;
+      }
+      return raw;
+    }catch(_){return ''}
+  }
+  function avatarHtml(x,size='w-11 h-11'){
+    const src=normalizePhotoUrl(x?.photo_url);
+    if(src)return `<img src="${esc(src)}" alt="${esc(x?.display_name||'ผู้บริจาค')}" class="${size} rounded-xl object-cover bg-slate-100 shrink-0" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'"><div style="display:none" class="${size} rounded-xl ${x?.donor_type==='monastic'?'bg-amber-50 text-amber-700':'bg-orange-50 text-orange-600'} items-center justify-center shrink-0"><i data-lucide="${x?.donor_type==='monastic'?'landmark':'user'}" class="w-5 h-5"></i></div>`;
+    return `<div class="${size} rounded-xl ${x?.donor_type==='monastic'?'bg-amber-50 text-amber-700':'bg-orange-50 text-orange-600'} flex items-center justify-center shrink-0"><i data-lucide="${x?.donor_type==='monastic'?'landmark':'user'}" class="w-5 h-5"></i></div>`;
+  }
+  function alumniBadge(x){return x?.is_alumni?`<span class="text-[10px] px-2 py-0.5 rounded-full bg-fuchsia-50 text-fuchsia-700 border border-fuchsia-100 font-bold">ศิษย์เก่า${x.alumni_batch?' รุ่น '+esc(x.alumni_batch):''}</span>`:''}
   function modalStatus(msg, ok=false){const el=$('#review-status');el.className=`rounded-xl p-3 text-sm border ${ok?'bg-emerald-50 text-emerald-700 border-emerald-200':'bg-rose-50 text-rose-700 border-rose-200'}`;el.textContent=msg;el.classList.remove('hidden')}
   function certStatus(msg,ok=false){const el=$('#cert-status');el.className=`rounded-xl p-3 text-sm border ${ok?'bg-emerald-50 text-emerald-700 border-emerald-200':'bg-rose-50 text-rose-700 border-rose-200'}`;el.textContent=msg;el.classList.remove('hidden')}
   function settingsStatus(msg,ok=false){const el=$('#settings-status');el.className=`rounded-xl p-3 text-sm border ${ok?'bg-emerald-50 text-emerald-700 border-emerald-200':'bg-rose-50 text-rose-700 border-rose-200'}`;el.textContent=msg;el.classList.remove('hidden')}
@@ -39,7 +56,7 @@
     ]);
     if(setRes.error) throw setRes.error;if(donRes.error)throw donRes.error;
     settings=setRes.data||{};rows=donRes.data||[];
-    renderDashboard();renderDonationList();fillSettingsForm();renderGoogleCertificateSettings();
+    renderDashboard();renderDonationList();renderHistoryAll();fillSettingsForm();renderGoogleCertificateSettings();
   }
 
   function renderDashboard(){
@@ -49,7 +66,7 @@
     $('#d-open').textContent=settings?.is_open?'เปิด':'ปิด';$('#d-open').className=settings?.is_open?'text-emerald-600':'text-rose-600';
     $('#d-banner').textContent=settings?.banner_url?'ตั้งค่าแล้ว':'ยังไม่มี';$('#d-template').textContent=settings?.google_slides_template_id?'Google Slides':'รอ Template';$('#d-prefix').textContent=settings?.certificate_prefix||'WNW-DN';
     const latest=rows.slice(0,6),box=$('#dashboard-latest');
-    box.innerHTML=latest.length?latest.map(x=>{const st=C.normalizeStatus(x.status);return `<button data-review="${x.id}" class="w-full text-left flex items-center gap-3 rounded-2xl border border-slate-100 bg-white p-3 hover:border-orange-200"><div class="w-10 h-10 rounded-xl ${x.donor_type==='monastic'?'bg-amber-50 text-amber-700':'bg-orange-50 text-orange-600'} flex items-center justify-center"><i data-lucide="${x.donor_type==='monastic'?'landmark':'user'}" class="w-4 h-4"></i></div><div class="min-w-0 flex-1"><p class="font-bold truncate">${esc(x.display_name)}</p><p class="text-xs text-slate-400 mt-0.5">${esc(x.request_no)} • ${C.formatDateTH(x.transfer_date)}</p></div><div class="text-right"><p class="font-extrabold text-orange-700">${C.formatTHB(x.amount)}</p><span class="text-[10px] border px-2 py-0.5 rounded-full ${st.classes}">${st.label}</span></div></button>`}).join(''):'<div class="rounded-2xl bg-slate-50 p-7 text-center text-slate-400">ยังไม่มีรายการ</div>';
+    box.innerHTML=latest.length?latest.map(x=>{const st=C.normalizeStatus(x.status);return `<button data-review="${x.id}" class="w-full text-left flex items-center gap-3 rounded-2xl border border-slate-100 bg-white p-3 hover:border-orange-200">${avatarHtml(x,'w-10 h-10')}<div class="min-w-0 flex-1"><p class="font-bold truncate">${esc(x.display_name)}</p><p class="text-xs text-slate-400 mt-0.5">${esc(x.request_no)} • ${C.formatDateTH(x.transfer_date)}</p></div><div class="text-right"><p class="font-extrabold text-orange-700">${C.formatTHB(x.amount)}</p><span class="text-[10px] border px-2 py-0.5 rounded-full ${st.classes}">${st.label}</span></div></button>`}).join(''):'<div class="rounded-2xl bg-slate-50 p-7 text-center text-slate-400">ยังไม่มีรายการ</div>';
     bindReviewButtons();lucide.createIcons();
   }
 
@@ -58,11 +75,30 @@
     const arr=rows.filter(x=>(!filter||x.status===filter)&&(!q||normalize([x.display_name,x.request_no,x.certificate_no,x.temple_name,x.organization,x.phone,x.email].join(' ')).includes(q)));
     const box=$('#donation-list');
     if(!arr.length){box.innerHTML='<div class="glass rounded-2xl p-10 text-center text-slate-400">ไม่พบรายการที่ตรงกับตัวกรอง</div>';return}
-    box.innerHTML=arr.map(x=>{const st=C.normalizeStatus(x.status);return `<article class="glass rounded-2xl p-4 sm:p-5"><div class="flex flex-col lg:flex-row lg:items-center gap-4"><div class="flex items-start gap-3 min-w-0 flex-1"><div class="w-11 h-11 rounded-xl ${x.donor_type==='monastic'?'bg-amber-50 text-amber-700':'bg-orange-50 text-orange-600'} flex items-center justify-center shrink-0"><i data-lucide="${x.donor_type==='monastic'?'landmark':'user'}" class="w-5 h-5"></i></div><div class="min-w-0"><div class="flex flex-wrap items-center gap-2"><h3 class="font-extrabold truncate">${esc(x.display_name)}</h3><span class="text-[10px] border px-2 py-0.5 rounded-full ${st.classes}">${st.label}</span></div><p class="text-xs text-slate-400 mt-1">${esc(x.request_no)} • ${C.formatDateTH(x.transfer_date)} ${String(x.transfer_time||'').slice(0,5)} น.${x.temple_name?' • '+esc(x.temple_name):''}</p>${x.certificate_no?`<p class="text-xs text-emerald-700 font-bold mt-1">${esc(x.certificate_no)}</p>`:''}</div></div><div class="flex items-center justify-between lg:justify-end gap-3"><p class="text-xl font-extrabold text-orange-700">${C.formatTHB(x.amount)}</p><button data-review="${x.id}" class="px-4 py-2.5 rounded-xl bg-slate-900 text-white text-sm font-bold">ตรวจสอบ</button></div></div></article>`}).join('');
+    box.innerHTML=arr.map(x=>{const st=C.normalizeStatus(x.status);return `<article class="glass rounded-2xl p-4 sm:p-5"><div class="flex flex-col lg:flex-row lg:items-center gap-4"><div class="flex items-start gap-3 min-w-0 flex-1">${avatarHtml(x)}<div class="min-w-0"><div class="flex flex-wrap items-center gap-2"><h3 class="font-extrabold truncate">${esc(x.display_name)}</h3>${alumniBadge(x)}<span class="text-[10px] border px-2 py-0.5 rounded-full ${st.classes}">${st.label}</span></div><p class="text-xs text-slate-400 mt-1">${esc(x.request_no)} • ${C.formatDateTH(x.transfer_date)} ${String(x.transfer_time||'').slice(0,5)} น.${x.temple_name?' • '+esc(x.temple_name):''}</p>${x.certificate_no?`<p class="text-xs text-emerald-700 font-bold mt-1">${esc(x.certificate_no)}</p>`:''}</div></div><div class="flex items-center justify-between lg:justify-end gap-3"><p class="text-xl font-extrabold text-orange-700">${C.formatTHB(x.amount)}</p><button data-review="${x.id}" class="px-4 py-2.5 rounded-xl bg-slate-900 text-white text-sm font-bold">ตรวจสอบ</button></div></div></article>`}).join('');
     bindReviewButtons();lucide.createIcons();
   }
   function bindReviewButtons(){$$('[data-review]').forEach(b=>b.onclick=()=>openReview(b.dataset.review))}
   $('#donation-search').addEventListener('input',renderDonationList);$('#status-filter').addEventListener('change',renderDonationList);
+
+  function renderHistoryAll(){
+    const verified=rows.filter(x=>x.status==='verified');
+    if($('#h-total'))$('#h-total').textContent=rows.length.toLocaleString('th-TH');
+    if($('#h-donors'))$('#h-donors').textContent=new Set(rows.map(x=>x.history_code).filter(Boolean)).size.toLocaleString('th-TH');
+    if($('#h-alumni'))$('#h-alumni').textContent=new Set(rows.filter(x=>x.is_alumni).map(x=>x.history_code||x.display_name)).size.toLocaleString('th-TH');
+    if($('#h-amount'))$('#h-amount').textContent=C.formatTHB(verified.reduce((sum,x)=>sum+Number(x.amount||0),0));
+    const q=normalize($('#history-all-search')?.value),stf=$('#history-status-filter')?.value||'',tf=$('#history-type-filter')?.value||'',af=$('#history-alumni-filter')?.value||'';
+    const arr=rows.filter(x=>
+      (!stf||x.status===stf)&&(!tf||x.donor_type===tf)&&
+      (!af||(af==='yes'?!!x.is_alumni:!x.is_alumni))&&
+      (!q||normalize([x.display_name,x.request_no,x.certificate_no,x.temple_name,x.organization,x.phone,x.email,x.alumni_batch].join(' ')).includes(q))
+    );
+    const box=$('#history-all-list');if(!box)return;
+    if(!arr.length){box.innerHTML='<div class="glass rounded-2xl p-10 text-center text-slate-400">ไม่พบประวัติที่ตรงกับตัวกรอง</div>';return}
+    box.innerHTML=arr.map(x=>{const st=C.normalizeStatus(x.status);return `<article class="glass rounded-2xl p-4 sm:p-5"><div class="flex flex-col lg:flex-row lg:items-center gap-4"><div class="flex items-start gap-3 min-w-0 flex-1">${avatarHtml(x,'w-14 h-14')}<div class="min-w-0"><div class="flex flex-wrap items-center gap-2"><h3 class="font-extrabold">${esc(x.display_name)}</h3>${alumniBadge(x)}<span class="text-[10px] border px-2 py-0.5 rounded-full ${st.classes}">${st.label}</span></div><p class="text-xs text-slate-400 mt-1">${esc(x.request_no)} • ${C.formatDateTH(x.transfer_date)} ${String(x.transfer_time||'').slice(0,5)} น.</p><p class="text-xs text-slate-500 mt-1">${x.donor_type==='monastic'?'พระสงฆ์ / สามเณร':'ฆราวาส'}${x.temple_name?' • '+esc(x.temple_name):''}${x.organization?' • '+esc(x.organization):''}</p>${x.certificate_no?`<p class="text-xs text-emerald-700 font-bold mt-1">${esc(x.certificate_no)}</p>`:''}</div></div><div class="flex items-center justify-between lg:justify-end gap-3"><p class="text-xl font-extrabold text-orange-700">${C.formatTHB(x.amount)}</p><button data-review="${x.id}" class="px-4 py-2.5 rounded-xl bg-white border border-slate-200 text-slate-800 text-sm font-bold hover:border-orange-200">ดูรายละเอียด</button></div></div></article>`}).join('');
+    bindReviewButtons();lucide.createIcons();
+  }
+  ['history-all-search','history-status-filter','history-type-filter','history-alumni-filter'].forEach(id=>{const el=$('#'+id);if(el)el.addEventListener(el.tagName==='INPUT'?'input':'change',renderHistoryAll)});
 
   function parseGoogleId(value='', kind='file'){
     const v=String(value||'').trim(); if(!v) return '';
@@ -124,7 +160,7 @@
     currentReviewId=id;const x=rows.find(r=>r.id===id);if(!x)return;
     $('#review-title').textContent=x.request_no;$('#review-cert-name').value=x.certificate_name_override||'';$('#review-amount').value=x.amount;$('#review-date').value=x.transfer_date||'';$('#review-time').value=String(x.transfer_time||'').slice(0,5);$('#review-note').value=x.admin_note||'';$('#review-status').classList.add('hidden');
     const address=[x.address_line,x.subdistrict&&`ต.${x.subdistrict}`,x.district&&`อ.${x.district}`,x.province&&`จ.${x.province}`,x.postal_code].filter(Boolean).join(' ');
-    $('#review-donor').innerHTML=`<div class="grid sm:grid-cols-2 gap-x-5 gap-y-3"><div><span class="text-slate-400 text-xs">ชื่อผู้บริจาค</span><p class="font-bold mt-0.5">${esc(x.display_name)}</p></div><div><span class="text-slate-400 text-xs">ประเภท</span><p class="font-bold mt-0.5">${x.donor_type==='monastic'?'พระสงฆ์ / สามเณร':'ฆราวาส'}</p></div>${x.temple_name?`<div><span class="text-slate-400 text-xs">วัด</span><p class="font-bold mt-0.5">${esc(x.temple_name)}</p></div>`:''}${x.organization?`<div><span class="text-slate-400 text-xs">หน่วยงาน</span><p class="font-bold mt-0.5">${esc(x.organization)}</p></div>`:''}<div><span class="text-slate-400 text-xs">ติดต่อ</span><p class="font-bold mt-0.5">${esc(x.phone||x.email||'-')}</p></div><div><span class="text-slate-400 text-xs">ที่อยู่</span><p class="font-bold mt-0.5">${esc(address||'-')}</p></div>${x.donor_note?`<div class="sm:col-span-2"><span class="text-slate-400 text-xs">หมายเหตุผู้บริจาค</span><p class="font-bold mt-0.5">${esc(x.donor_note)}</p></div>`:''}</div>`;
+    $('#review-donor').innerHTML=`<div class="flex flex-col sm:flex-row gap-4"><div>${avatarHtml(x,'w-24 h-24')}</div><div class="grid sm:grid-cols-2 gap-x-5 gap-y-3 flex-1"><div><span class="text-slate-400 text-xs">ชื่อผู้บริจาค</span><p class="font-bold mt-0.5">${esc(x.display_name)}</p>${x.is_alumni?`<p class="mt-1 text-xs font-bold text-fuchsia-700">ศิษย์เก่า${x.alumni_batch?' รุ่น '+esc(x.alumni_batch):''}</p>`:''}</div><div><span class="text-slate-400 text-xs">ประเภท</span><p class="font-bold mt-0.5">${x.donor_type==='monastic'?'พระสงฆ์ / สามเณร':'ฆราวาส'}</p></div>${x.temple_name?`<div><span class="text-slate-400 text-xs">วัด</span><p class="font-bold mt-0.5">${esc(x.temple_name)}</p></div>`:''}${x.organization?`<div><span class="text-slate-400 text-xs">หน่วยงาน</span><p class="font-bold mt-0.5">${esc(x.organization)}</p></div>`:''}<div><span class="text-slate-400 text-xs">ติดต่อ</span><p class="font-bold mt-0.5">${esc(x.phone||x.email||'-')}</p></div><div><span class="text-slate-400 text-xs">ที่อยู่</span><p class="font-bold mt-0.5">${esc(address||'-')}</p></div>${x.photo_url?`<div class="sm:col-span-2"><span class="text-slate-400 text-xs">ลิงก์รูปภาพ</span><p class="mt-0.5"><a href="${esc(x.photo_url)}" target="_blank" rel="noopener" class="font-bold text-orange-600 break-all">เปิดรูปต้นฉบับ ↗</a></p></div>`:''}${x.donor_note?`<div class="sm:col-span-2"><span class="text-slate-400 text-xs">หมายเหตุผู้บริจาค</span><p class="font-bold mt-0.5">${esc(x.donor_note)}</p></div>`:''}</div></div>`;
     refreshReviewCertificateUI(x);
     $('#review-approve').classList.toggle('hidden',x.status==='verified');
     $('#review-reject').classList.toggle('hidden',x.status==='verified');
@@ -141,7 +177,7 @@
     const payload={certificate_name_override:$('#review-cert-name').value.trim(),amount:Number($('#review-amount').value),transfer_date:$('#review-date').value,transfer_time:$('#review-time').value,admin_note:$('#review-note').value.trim()};
     if(!payload.amount||payload.amount<=0)throw new Error('จำนวนเงินไม่ถูกต้อง');
     const {data,error}=await db.from('donations').update(payload).eq('id',x.id).select('*').single();if(error)throw error;
-    const idx=rows.findIndex(r=>r.id===x.id);if(idx>=0)rows[idx]=data;if(showMessage)modalStatus('บันทึกข้อมูลแล้ว',true);renderDashboard();renderDonationList();return data;
+    const idx=rows.findIndex(r=>r.id===x.id);if(idx>=0)rows[idx]=data;if(showMessage)modalStatus('บันทึกข้อมูลแล้ว',true);renderDashboard();renderDonationList();renderHistoryAll();return data;
   }
   $('#review-save').onclick=async()=>{try{await saveReview(true)}catch(err){modalStatus('บันทึกไม่สำเร็จ: '+(err.message||err))}};
   $('#review-approve').onclick=async()=>{
@@ -167,6 +203,50 @@
     const x=rows.find(r=>r.id===currentReviewId);if(!x?.certificate_no)return;
     const btn=$('#review-generate-pdf');btn.disabled=true;btn.textContent='กำลังสร้าง PDF...';
     try{const updated=await generateGoogleCertificate(x);refreshReviewCertificateUI(updated);renderDashboard();renderDonationList();modalStatus('สร้างใบอนุโมทนาบัตรจาก Google Slides แล้ว',true)}catch(err){modalStatus('สร้างใบไม่สำเร็จ: '+(err.message||err))}finally{btn.disabled=false;const now=rows.find(r=>r.id===currentReviewId);btn.textContent=now?.certificate_pdf_url?'สร้างใบใหม่จาก Google Slides':'สร้างใบจาก Google Slides'}
+  };
+
+  async function deleteDonationRecord(x){
+    if(!x)throw new Error('ไม่พบรายการบริจาค');
+    const warnings=[];
+
+    // ลบ PDF ที่ระบบสร้างไว้ใน Google Drive แบบ best-effort
+    if(x.certificate_drive_file_id){
+      try{await callGoogleSlidesBridge('delete_certificate',{file_id:x.certificate_drive_file_id})}
+      catch(err){warnings.push('ลบ PDF ใน Google Drive ไม่สำเร็จ: '+(err.message||err))}
+    }
+
+    // ลบสลิปออกจาก Supabase Storage แบบ best-effort
+    if(x.slip_path){
+      try{
+        const bucket=window.SCHOOL_APP_CONFIG?.DONATION_SLIP_BUCKET||'donation-slips';
+        const {error}=await db.storage.from(bucket).remove([x.slip_path]);
+        if(error)throw error;
+      }catch(err){warnings.push('ลบสลิปไม่สำเร็จ: '+(err.message||err))}
+    }
+
+    // ลบ record เป็นขั้นสุดท้าย
+    const {error}=await db.from('donations').delete().eq('id',x.id);
+    if(error)throw error;
+    rows=rows.filter(r=>r.id!==x.id);
+    return warnings;
+  }
+
+  $('#review-delete').onclick=async()=>{
+    const x=rows.find(r=>r.id===currentReviewId);if(!x)return;
+    const label=[x.display_name,x.request_no,x.certificate_no].filter(Boolean).join(' • ');
+    if(!confirm(`ต้องการลบรายการนี้จริงหรือไม่?\n\n${label}\n\nการลบจะนำรายการออกจากระบบและไม่สามารถกู้คืนจากหน้าเว็บได้`))return;
+    const typed=prompt(`ยืนยันอีกครั้ง โดยพิมพ์เลขคำขอ\n${x.request_no}`);
+    if(typed===null)return;
+    if(String(typed).trim()!==String(x.request_no).trim()){modalStatus('ยกเลิกการลบ: เลขคำขอที่พิมพ์ไม่ตรง');return}
+    const btn=$('#review-delete');btn.disabled=true;const old=btn.innerHTML;btn.textContent='กำลังลบ...';
+    try{
+      const warnings=await deleteDonationRecord(x);
+      renderDashboard();renderDonationList();renderHistoryAll();
+      closeReview();
+      if(warnings.length)alert('ลบรายการออกจากฐานข้อมูลแล้ว แต่มีไฟล์บางส่วนที่ลบไม่สำเร็จ:\n- '+warnings.join('\n- '));
+      else alert('ลบรายการบริจาค สลิป และไฟล์ใบอนุโมทนาบัตรที่เกี่ยวข้องแล้ว');
+    }catch(err){modalStatus('ลบรายการไม่สำเร็จ: '+(err.message||err))}
+    finally{btn.disabled=false;btn.innerHTML=old;lucide.createIcons()}
   };
 
   function fillSettingsForm(){
@@ -212,7 +292,7 @@
     }catch(err){certStatus('ตรวจ Template ไม่สำเร็จ: '+(err.message||err))}finally{btn.disabled=false;btn.textContent='ตรวจ 3 Tag ใน Slides'}
   };
 
-  const views={dashboard:'ภาพรวม',donations:'รายการบริจาค',settings:'ตั้งค่าหน้าบริจาค',certificate:'ใบอนุโมทนาบัตร'};
+  const views={dashboard:'ภาพรวม',donations:'รายการบริจาค',history:'ประวัติรายการย้อนหลัง',settings:'ตั้งค่าหน้าบริจาค',certificate:'ใบอนุโมทนาบัตร'};
   function goView(view){$$('.nav-btn').forEach(b=>b.classList.toggle('active',b.dataset.view===view));Object.keys(views).forEach(v=>$(`#panel-${v}`).classList.toggle('hidden',v!==view));$('#page-title').textContent=views[view];if(view==='certificate')renderGoogleCertificateSettings();lucide.createIcons()}
   $$('.nav-btn').forEach(b=>b.onclick=()=>goView(b.dataset.view));$$('[data-go]').forEach(b=>b.onclick=()=>goView(b.dataset.go));
   document.addEventListener('keydown',e=>{if(e.key==='Escape')closeReview()});

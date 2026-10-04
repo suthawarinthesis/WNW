@@ -9,11 +9,41 @@
   const confirmSection = document.getElementById('confirm-section');
   const reminder = document.getElementById('return-reminder');
   let selectedSlip = null, previewUrl = '', donationSettings = null, paymentStageEntered = false;
-  const DRAFT_KEY = 'wnw-donation-form-draft-v9';
+  const DRAFT_KEY = 'wnw-donation-form-draft-v11';
 
   function showStatus(message, ok=false){ status.className=`rounded-2xl p-4 text-sm border ${ok?'bg-emerald-50 text-emerald-700 border-emerald-200':'bg-rose-50 text-rose-700 border-rose-200'}`; status.textContent=message; status.classList.remove('hidden'); }
   function clearStatus(){ status.classList.add('hidden'); }
   function donorType(){ return form.elements.donor_type.value; }
+  function normalizePhotoUrl(value=''){
+    const raw=String(value||'').trim();
+    if(!raw)return '';
+    try{
+      const u=new URL(raw);
+      if(!['http:','https:'].includes(u.protocol))return '';
+      if(/(^|\.)drive\.google\.com$/i.test(u.hostname)){
+        const m=raw.match(/\/file\/d\/([a-zA-Z0-9_-]+)/)||raw.match(/[?&]id=([a-zA-Z0-9_-]+)/);
+        if(m?.[1])return `https://drive.google.com/thumbnail?id=${encodeURIComponent(m[1])}&sz=w1200`;
+      }
+      return raw;
+    }catch(_){return ''}
+  }
+  function syncAlumni(){
+    const checked=!!form.elements.is_alumni?.checked;
+    const wrap=document.getElementById('alumni-batch-wrap'), select=form.elements.alumni_batch;
+    wrap?.classList.toggle('hidden',!checked);
+    if(select){select.required=checked;if(!checked)select.value='';}
+  }
+  function previewPhoto(){
+    const raw=form.elements.photo_url?.value.trim()||'';
+    const box=document.getElementById('donor-photo-preview-box'),img=document.getElementById('donor-photo-preview'),err=document.getElementById('donor-photo-preview-error');
+    if(!raw){box?.classList.add('hidden');if(img)img.removeAttribute('src');return}
+    const url=normalizePhotoUrl(raw);
+    box?.classList.remove('hidden');err?.classList.add('hidden');img?.classList.remove('hidden');
+    if(!url){img?.classList.add('hidden');err?.classList.remove('hidden');return}
+    img.src=url;
+    img.onload=()=>{img.classList.remove('hidden');err.classList.add('hidden')};
+    img.onerror=()=>{img.classList.add('hidden');err.classList.remove('hidden')};
+  }
   function showDonorStatus(message){ const el=document.getElementById('donor-status'); el.textContent=message; el.classList.remove('hidden'); }
   function clearDonorStatus(){ document.getElementById('donor-status').classList.add('hidden'); }
   function syncType(){
@@ -46,6 +76,7 @@
       const data={};
       new FormData(form).forEach((v,k)=>{ if(!(v instanceof File)) data[k]=v; });
       data.donor_type=donorType();
+      data.is_alumni=form.elements.is_alumni?.checked ?? false;
       data.show_public_name=form.elements.show_public_name?.checked ?? true;
       data.show_public_amount=form.elements.show_public_amount?.checked ?? true;
       data.savedAt=Date.now();
@@ -63,7 +94,7 @@
         else if(el.type==='checkbox') el.checked=!!v;
         else if(el.type!=='file') el.value=v ?? '';
       });
-      syncType();
+      syncType(); syncAlumni(); previewPhoto();
     }catch(_){ }
   }
 
@@ -74,6 +105,15 @@
       ? [form.elements.monastic_first_name,form.elements.temple_name,form.elements.monastic_subdistrict,form.elements.monastic_district,form.elements.monastic_province]
       : [form.elements.lay_first_name,form.elements.lay_last_name];
     for(const el of required){ if(!el.checkValidity()){ el.reportValidity(); return false; } }
+    if(form.elements.is_alumni?.checked && !form.elements.alumni_batch.value){
+      showDonorStatus('กรุณาเลือกรุ่นศิษย์เก่า');
+      form.elements.alumni_batch.focus(); return false;
+    }
+    const photoRaw=form.elements.photo_url?.value.trim()||'';
+    if(photoRaw && !normalizePhotoUrl(photoRaw)){
+      showDonorStatus('ลิงก์รูปภาพไม่ถูกต้อง กรุณาใช้ลิงก์ http/https หรือ Google Drive');
+      form.elements.photo_url.focus(); return false;
+    }
     if(!form.elements.phone.value.trim() && !form.elements.email.value.trim()){
       showDonorStatus('กรุณาระบุเบอร์โทรศัพท์หรือ Email อย่างน้อย 1 ช่อง เพื่อใช้ดูประวัติย้อนหลัง');
       form.elements.phone.focus(); return false;
@@ -100,6 +140,10 @@
   }
 
   form.querySelectorAll('[name=donor_type]').forEach(x=>x.addEventListener('change',()=>{syncType();saveDraft()}));
+  const batchSelect=form.elements.alumni_batch;
+  if(batchSelect && batchSelect.options.length<=1){for(let i=1;i<=50;i++){const o=document.createElement('option');o.value=String(i);o.textContent=`รุ่นที่ ${i}`;batchSelect.appendChild(o)}}
+  form.elements.is_alumni?.addEventListener('change',()=>{syncAlumni();saveDraft()});
+  form.elements.photo_url?.addEventListener('input',()=>{previewPhoto();saveDraft()});
   form.addEventListener('input',e=>{ if(e.target?.type!=='file') saveDraft(); });
   document.getElementById('go-payment-btn').addEventListener('click',enterPaymentStage);
   document.getElementById('back-donor-btn').addEventListener('click',leavePaymentStage);
@@ -148,7 +192,7 @@
   }
 
   async function init(){
-    restoreDraft(); syncType();
+    restoreDraft(); syncType(); syncAlumni(); previewPhoto();
     if(!form.elements.transfer_date.value || !form.elements.transfer_time.value) setNow();
     try{
       C.applyBranding(await C.loadBranding());
@@ -180,6 +224,9 @@
       province: monastic?form.elements.monastic_province.value.trim():form.elements.lay_province.value.trim(),
       postalCode: monastic?'':form.elements.postal_code.value.trim(),
       phone: form.elements.phone.value.trim(), email: form.elements.email.value.trim(),
+      isAlumni: !!form.elements.is_alumni?.checked,
+      alumniBatch: form.elements.is_alumni?.checked ? form.elements.alumni_batch.value : '',
+      photoUrl: form.elements.photo_url?.value.trim()||'',
       amount: form.elements.amount.value, transferDate: form.elements.transfer_date.value, transferTime: form.elements.transfer_time.value,
       donorNote: form.elements.donor_note.value.trim(), showPublicName: form.elements.show_public_name.checked, showPublicAmount: form.elements.show_public_amount.checked,
       consentAccepted: form.elements.consent.checked, historyCode
@@ -188,6 +235,11 @@
     try{
       const {data:start,error:startErr}=await db.rpc('create_donation_submission',{p_payload:payload}); if(startErr)throw startErr;
       const row=Array.isArray(start)?start[0]:start; if(!row?.id||!row?.upload_token)throw new Error('สร้างรายการไม่สำเร็จ');
+      const {data:extraOk,error:extraErr}=await db.rpc('set_donation_profile_extras',{
+        p_id:row.id,p_upload_token:row.upload_token,p_is_alumni:payload.isAlumni,p_alumni_batch:payload.alumniBatch,p_photo_url:payload.photoUrl
+      });
+      if(extraErr)throw extraErr;
+      if(extraOk!==true)throw new Error('บันทึกข้อมูลรูปภาพ/ศิษย์เก่าไม่สำเร็จ');
       const ext=(selectedSlip.name.split('.').pop()||'jpg').toLowerCase().replace(/[^a-z0-9]/g,'')||'jpg';
       const path=`${row.id}/${row.upload_token}/${crypto.randomUUID()}.${ext}`;
       const bucket=window.SCHOOL_APP_CONFIG?.DONATION_SLIP_BUCKET||'donation-slips';

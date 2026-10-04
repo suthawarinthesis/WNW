@@ -26,6 +26,7 @@ function doPost(e) {
     let data;
     if (action === 'validate') data = validateTemplate_(templateId, folderId);
     else if (action === 'generate') data = generateCertificate_(templateId, folderId, p);
+    else if (action === 'delete_certificate') data = deleteCertificate_(folderId, p);
     else throw new Error('action ไม่ถูกต้อง');
     return callbackHtml_(targetOrigin, requestId, true, data, '');
   } catch (err) {
@@ -110,6 +111,22 @@ function generateCertificate_(templateId, folderId, p) {
     try { if (workingCopy) workingCopy.setTrashed(true); } catch (_) {}
     lock.releaseLock();
   }
+}
+
+function deleteCertificate_(folderId, p) {
+  const fileId = safeId_(p.file_id);
+  if (!fileId) return { deleted:false, reason:'no_file_id' };
+
+  const folder = DriveApp.getFolderById(folderId);
+  const file = DriveApp.getFileById(fileId);
+  let belongsToFolder = false;
+  const parents = file.getParents();
+  while (parents.hasNext()) {
+    if (parents.next().getId() === folder.getId()) { belongsToFolder = true; break; }
+  }
+  if (!belongsToFolder) throw new Error('ไฟล์ PDF ไม่ได้อยู่ในโฟลเดอร์ใบอนุโมทนาบัตรที่กำหนด');
+  file.setTrashed(true);
+  return { deleted:true, file_id:fileId };
 }
 
 function collectPresentationText_(pres) {

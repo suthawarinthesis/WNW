@@ -81,11 +81,19 @@
   function bindReviewButtons(){$$('[data-review]').forEach(b=>b.onclick=()=>openReview(b.dataset.review))}
   $('#donation-search').addEventListener('input',renderDonationList);$('#status-filter').addEventListener('change',renderDonationList);
 
+  function donorIdentityName(x){
+    return normalize(x?.certificate_name_override || x?.display_name || '');
+  }
+
+  function uniqueDonorCount(list){
+    return new Set((list||[]).map(donorIdentityName).filter(Boolean)).size;
+  }
+
   function renderHistoryAll(){
     const verified=rows.filter(x=>x.status==='verified');
     if($('#h-total'))$('#h-total').textContent=rows.length.toLocaleString('th-TH');
-    if($('#h-donors'))$('#h-donors').textContent=new Set(rows.map(x=>x.history_code).filter(Boolean)).size.toLocaleString('th-TH');
-    if($('#h-alumni'))$('#h-alumni').textContent=new Set(rows.filter(x=>x.is_alumni).map(x=>x.history_code||x.display_name)).size.toLocaleString('th-TH');
+    if($('#h-donors'))$('#h-donors').textContent=uniqueDonorCount(rows).toLocaleString('th-TH');
+    if($('#h-alumni'))$('#h-alumni').textContent=uniqueDonorCount(rows.filter(x=>x.is_alumni)).toLocaleString('th-TH');
     if($('#h-amount'))$('#h-amount').textContent=C.formatTHB(verified.reduce((sum,x)=>sum+Number(x.amount||0),0));
     const q=normalize($('#history-all-search')?.value),stf=$('#history-status-filter')?.value||'',tf=$('#history-type-filter')?.value||'',af=$('#history-alumni-filter')?.value||'';
     const arr=rows.filter(x=>

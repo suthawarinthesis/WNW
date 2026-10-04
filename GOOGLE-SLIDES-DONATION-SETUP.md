@@ -1,48 +1,29 @@
-# ตั้งค่า Google Slides สำหรับระบบใบอนุโมทนาบัตร
+# Google Slides Donation Certificate — V15
 
-ตั้งค่าไว้แล้ว:
-- Template: https://docs.google.com/presentation/d/1N0OEEhnCdfqn5ohtZa47pUfenVYizdePtXo9vGsVGy4/edit
-- Output folder: https://drive.google.com/drive/folders/1JUTSXLLdR7X5KiV6KINe6Nk85DS-YdYk
-- Supabase: โปรเจกต์เดิมของโรงเรียน
+Template ต้องมี Text Box 4 จุด:
 
-## Tag ที่ต้องมีใน Google Slides
-`{{donor_name}}`  `{{donation_amount}}`  `{{certificate_no}}`
+- `{{donor_name}}`
+- `{{donation_amount}}`
+- `{{certificate_no}}`
+- `{{verify_qr}}`
 
-Tag ต้องเป็นข้อความใน Text Box จริง ห้ามแปลงเป็นรูปภาพ ระบบจะ Replace Tag เดิม ไม่ได้วางทับ จึงไม่เกิดตัวหนังสือซ้อน
+## QR ตรวจสอบ
 
-## ทำครั้งเดียว: Deploy Google Apps Script
-1. เปิด https://script.google.com/ ด้วยบัญชีที่แก้ Google Slides และโฟลเดอร์ Drive ข้างต้นได้
-2. New project
-3. เปิด Code.gs แล้ววางโค้ดจาก `google-apps-script/Code.gs`
-4. Deploy → New deployment → Web app
-5. Execute as: **Me**
-6. Who has access: **Anyone**
-7. กดยืนยันสิทธิ์ Google Drive / Google Slides / external request
-8. คัดลอก Web App URL ที่ลงท้าย `/exec`
+สร้าง Text Box ใหม่ใน Google Slides แล้วพิมพ์เฉพาะ `{{verify_qr}}` จากนั้นปรับกรอบ Text Box ให้มีขนาดและตำแหน่งเท่ากับ QR ที่ต้องการ ระบบจะลบ Text Box นี้แล้ววาง QR ลงในกรอบเดิมอัตโนมัติ
 
-## Supabase
-รัน `DONATION-GOOGLE-SLIDES-UPGRADE.sql` ใน SQL Editor หนึ่งครั้ง
+อย่า Group Text Box `{{verify_qr}}` กับวัตถุอื่น เพื่อให้ระบบแทนด้วยภาพ QR ได้แม่นยำ
 
-## เชื่อมใน Website Manager
-เข้า `/donation/manager/` → ใบอนุโมทนาบัตร
-- Template และ Folder ใส่ไว้ให้แล้ว
-- วาง Apps Script `/exec` URL
-- กด “บันทึกการเชื่อมต่อ”
-- กด “ตรวจ 3 Tag ใน Slides”
+QR ของแต่ละใบจะชี้ไปที่:
 
-เมื่อ Tag ครบ ระบบจะทำงานแบบ:
-ตรวจสลิป → ยืนยัน → Supabase ออกเลขใบ → Google Slides Replace Tag → Export PDF → เก็บ PDF ใน Drive → บันทึกลิงก์กลับ Supabase → ผู้บริจาคดาวน์โหลดจากหน้าประวัติ/หน้าตรวจสอบได้
+`https://wnw-vit.site/donation/verify/?no=<certificate_no>`
 
-หากสร้าง PDF ล้มเหลว เลขใบยังคงเดิมและ Manager กด “สร้างใบจาก Google Slides” ซ้ำได้ โดยไม่ออกเลขใหม่
+## Deploy Apps Script
 
-### สิทธิ์ไฟล์
-Apps Script จะพยายามตั้ง PDF เป็น “ทุกคนที่มีลิงก์สามารถดูได้” หาก Google Workspace ปิดการแชร์ภายนอก จะต้องปรับนโยบายหรือแชร์ไฟล์ด้วยวิธีขององค์กรก่อนผู้บริจาคภายนอกจะเปิด PDF ได้
+1. เปิด Apps Script เดิม
+2. แทน `Code.gs` ด้วยไฟล์ V15
+3. Deploy > Manage deployments > Edit
+4. เลือก New version
+5. Deploy
+6. URL `/exec` เดิมใช้ต่อได้
 
-
-## Donation V3 — Web App URL preconfigured
-
-แพ็กเกจ V3 ฝัง Google Apps Script Web App URL นี้ไว้เป็นค่าเริ่มต้นแล้ว:
-
-`https://script.google.com/macros/s/AKfycby2RD2z8dMwB3Ajp0JPCPHN_rKFIL1M5IckIN4VyUMG2yNAV_2gW4kWaGjx-49CXECJ4A/exec`
-
-หน้า Donation Manager จะใช้ URL นี้โดยอัตโนมัติแม้ค่า `google_apps_script_url` ใน Supabase ยังว่างอยู่ และเมื่อกดบันทึกการเชื่อมต่อ URL จะถูกบันทึกลง `donation_settings` ด้วย
+หลัง Deploy เข้า Donation Manager > ใบอนุโมทนาบัตร > “ตรวจ 4 Tag ใน Slides”

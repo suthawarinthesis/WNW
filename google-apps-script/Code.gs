@@ -1,16 +1,26 @@
 /**
- * WNW Donation Certificate Generator — Google Apps Script
+ * WNW Donation Certificate Generator — V15
+ * Google Slides tags:
+ *   {{donor_name}}
+ *   {{donation_amount}}
+ *   {{certificate_no}}
+ *   {{verify_qr}}  <-- put this tag in its own Text Box where the QR should appear
+ *
  * Deploy as Web App: Execute as Me / Who has access: Anyone
- * Every POST is verified against Supabase Auth before Drive/Slides access.
  */
 const SUPABASE_URL = 'https://pcapjltgscofrgfcvdkm.supabase.co';
 const SUPABASE_ANON_KEY = 'sb_publishable_NTJJiE0r1hojS-8DTRzWFA_3BPADfEH';
 const DEFAULT_TEMPLATE_ID = '1N0OEEhnCdfqn5ohtZa47pUfenVYizdePtXo9vGsVGy4';
 const DEFAULT_FOLDER_ID = '1JUTSXLLdR7X5KiV6KINe6Nk85DS-YdYk';
-const TAGS = { donor_name: '{{donor_name}}', donation_amount: '{{donation_amount}}', certificate_no: '{{certificate_no}}' };
+const TAGS = {
+  donor_name: '{{donor_name}}',
+  donation_amount: '{{donation_amount}}',
+  certificate_no: '{{certificate_no}}',
+  verify_qr: '{{verify_qr}}'
+};
 
 function doGet() {
-  return HtmlService.createHtmlOutput('<h3>WNW Donation Certificate Generator</h3><p>Web App พร้อมทำงาน</p>')
+  return HtmlService.createHtmlOutput('<h3>WNW Donation Certificate Generator V15</h3><p>Web App พร้อมทำงาน</p>')
     .setXFrameOptionsMode(HtmlService.XFrameOptionsMode.ALLOWALL);
 }
 
@@ -60,21 +70,28 @@ function validateTemplate_(templateId, folderId) {
   const tags = {
     donor_name: countText_(allText, TAGS.donor_name),
     donation_amount: countText_(allText, TAGS.donation_amount),
-    certificate_no: countText_(allText, TAGS.certificate_no)
+    certificate_no: countText_(allText, TAGS.certificate_no),
+    verify_qr: countText_(allText, TAGS.verify_qr)
   };
-  return { template_name: file.getName(), tags: tags, ready: tags.donor_name > 0 && tags.donation_amount > 0 && tags.certificate_no > 0 };
+  return {
+    template_name: file.getName(),
+    tags: tags,
+    ready: tags.donor_name > 0 && tags.donation_amount > 0 && tags.certificate_no > 0 && tags.verify_qr > 0
+  };
 }
 
 function generateCertificate_(templateId, folderId, p) {
   const donorName = String(p.donor_name || '').trim();
   const amount = String(p.donation_amount || '').trim();
   const certificateNo = String(p.certificate_no || '').trim().toUpperCase();
+  const verifyUrl = String(p.verify_url || '').trim();
   if (!donorName) throw new Error('ชื่อผู้บริจาคว่าง');
   if (!amount) throw new Error('จำนวนเงินว่าง');
   if (!/^[A-Z0-9-]{6,80}$/.test(certificateNo)) throw new Error('เลขใบอนุโมทนาบัตรไม่ถูกต้อง');
+  if (!/^https?:\/\//i.test(verifyUrl)) throw new Error('ลิงก์ตรวจสอบใบไม่ถูกต้อง');
 
   const check = validateTemplate_(templateId, folderId);
-  if (!check.ready) throw new Error('Google Slides Template มี Tag ไม่ครบ 3 รายการ');
+  if (!check.ready) throw new Error('Google Slides Template มี Tag ไม่ครบ 4 รายการ กรุณาเพิ่ม {{verify_qr}} เป็น Text Box แยก');
 
   const lock = LockService.getScriptLock();
   lock.waitLock(30000);
@@ -90,10 +107,11 @@ function generateCertificate_(templateId, folderId, p) {
     const n1 = pres.replaceAllText(TAGS.donor_name, donorName);
     const n2 = pres.replaceAllText(TAGS.donation_amount, amount);
     const n3 = pres.replaceAllText(TAGS.certificate_no, certificateNo);
+    const n4 = replaceQrPlaceholders_(pres, verifyUrl);
     pres.saveAndClose();
-    if (n1 < 1 || n2 < 1 || n3 < 1) throw new Error('Replace Tag ไม่ครบ กรุณาตรวจ Template');
+    if (n1 < 1 || n2 < 1 || n3 < 1 || n4 < 1) throw new Error('Replace Tag/QR ไม่ครบ กรุณาตรวจ Template');
 
-    Utilities.sleep(700);
+    Utilities.sleep(900);
     const blob = workingCopy.getAs(MimeType.PDF).setName(pdfName);
     const pdf = folder.createFile(blob);
     let publicSharing = true;
@@ -105,7 +123,8 @@ function generateCertificate_(templateId, folderId, p) {
       download_url: 'https://drive.google.com/uc?export=download&id=' + pdf.getId(),
       file_name: pdf.getName(),
       public_sharing: publicSharing,
-      replaced: { donor_name:n1, donation_amount:n2, certificate_no:n3 }
+      verify_url: verifyUrl,
+      replaced: { donor_name:n1, donation_amount:n2, certificate_no:n3, verify_qr:n4 }
     };
   } finally {
     try { if (workingCopy) workingCopy.setTrashed(true); } catch (_) {}
@@ -113,17 +132,65 @@ function generateCertificate_(templateId, folderId, p) {
   }
 }
 
+function replaceQrPlaceholders_(pres, verifyUrl) {
+  const targets = [];
+  pres.getSlides().forEach(function(slide) {
+    slide.getPageElements().forEach(function(el) { collectQrTargets_(slide, el, targets); });
+  });
+  if (!targets.length) return 0;
+
+  const qrBlob = fetchQrBlob_(verifyUrl);
+  targets.forEach(function(t) {
+    const el = t.element;
+    const left = el.getLeft();
+    const top = el.getTop();
+    const width = Math.max(28, el.getWidth());
+    const height = Math.max(28, el.getHeight());
+    const size = Math.min(width, height);
+    const x = left + (width - size) / 2;
+    const y = top + (height - size) / 2;
+    t.slide.insertImage(qrBlob.copyBlob(), x, y, size, size);
+    el.remove();
+  });
+  return targets.length;
+}
+
+function collectQrTargets_(slide, el, targets) {
+  try {
+    const t = el.getPageElementType();
+    if (t === SlidesApp.PageElementType.SHAPE) {
+      const text = el.asShape().getText().asString();
+      if (text.indexOf(TAGS.verify_qr) !== -1) targets.push({ slide:slide, element:el });
+    } else if (t === SlidesApp.PageElementType.GROUP) {
+      el.asGroup().getChildren().forEach(function(child) { collectQrTargets_(slide, child, targets); });
+    }
+  } catch (_) {}
+}
+
+function fetchQrBlob_(verifyUrl) {
+  const endpoints = [
+    'https://quickchart.io/qr?size=700&margin=1&format=png&text=' + encodeURIComponent(verifyUrl),
+    'https://api.qrserver.com/v1/create-qr-code/?size=700x700&margin=10&format=png&data=' + encodeURIComponent(verifyUrl)
+  ];
+  let lastError = '';
+  for (let i=0;i<endpoints.length;i++) {
+    try {
+      const res = UrlFetchApp.fetch(endpoints[i], { muteHttpExceptions:true, followRedirects:true });
+      if (res.getResponseCode() >= 200 && res.getResponseCode() < 300) return res.getBlob().setName('verify-qr.png');
+      lastError = 'HTTP ' + res.getResponseCode();
+    } catch (err) { lastError = err && err.message ? err.message : String(err); }
+  }
+  throw new Error('สร้าง QR ไม่สำเร็จ: ' + lastError);
+}
+
 function deleteCertificate_(folderId, p) {
   const fileId = safeId_(p.file_id);
   if (!fileId) return { deleted:false, reason:'no_file_id' };
-
   const folder = DriveApp.getFolderById(folderId);
   const file = DriveApp.getFileById(fileId);
   let belongsToFolder = false;
   const parents = file.getParents();
-  while (parents.hasNext()) {
-    if (parents.next().getId() === folder.getId()) { belongsToFolder = true; break; }
-  }
+  while (parents.hasNext()) { if (parents.next().getId() === folder.getId()) { belongsToFolder = true; break; } }
   if (!belongsToFolder) throw new Error('ไฟล์ PDF ไม่ได้อยู่ในโฟลเดอร์ใบอนุโมทนาบัตรที่กำหนด');
   file.setTrashed(true);
   return { deleted:true, file_id:fileId };
@@ -161,6 +228,5 @@ function callbackHtml_(origin, requestId, ok, data, error) {
     'receiver.postMessage(message,target);' +
     '})();<\/script>' +
     '<p style="font-family:sans-serif">ดำเนินการเสร็จแล้ว</p>';
-  return HtmlService.createHtmlOutput(html)
-    .setXFrameOptionsMode(HtmlService.XFrameOptionsMode.ALLOWALL);
+  return HtmlService.createHtmlOutput(html).setXFrameOptionsMode(HtmlService.XFrameOptionsMode.ALLOWALL);
 }

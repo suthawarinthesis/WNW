@@ -185,7 +185,7 @@
 
   function renderGoogleCertificateSettings(){
     $('#cert-prefix').value=settings?.certificate_prefix||'WNW-DN';
-    $('#google-template-url').value=slidesUrl(settings?.google_slides_template_id||'180GXEdZA9C1VCdmqp9qA0-tK17SHG93s0ZsLpS8ZuY8');
+    $('#google-template-url').value=slidesUrl(settings?.google_slides_template_id||'1N0OEEhnCdfqn5ohtZa47pUfenVYizdePtXo9vGsVGy4');
     $('#google-folder-url').value=folderUrl(settings?.google_drive_folder_id||'1JUTSXLLdR7X5KiV6KINe6Nk85DS-YdYk');
     $('#google-script-url').value=googleScriptUrl();
     const tid=parseGoogleId($('#google-template-url').value,'presentation'),fid=parseGoogleId($('#google-folder-url').value,'folder');

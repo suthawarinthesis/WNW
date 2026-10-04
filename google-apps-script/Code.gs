@@ -5,7 +5,7 @@
  */
 const SUPABASE_URL = 'https://pcapjltgscofrgfcvdkm.supabase.co';
 const SUPABASE_ANON_KEY = 'sb_publishable_NTJJiE0r1hojS-8DTRzWFA_3BPADfEH';
-const DEFAULT_TEMPLATE_ID = '180GXEdZA9C1VCdmqp9qA0-tK17SHG93s0ZsLpS8ZuY8';
+const DEFAULT_TEMPLATE_ID = '1N0OEEhnCdfqn5ohtZa47pUfenVYizdePtXo9vGsVGy4';
 const DEFAULT_FOLDER_ID = '1JUTSXLLdR7X5KiV6KINe6Nk85DS-YdYk';
 const TAGS = { donor_name: '{{donor_name}}', donation_amount: '{{donation_amount}}', certificate_no: '{{certificate_no}}' };
 

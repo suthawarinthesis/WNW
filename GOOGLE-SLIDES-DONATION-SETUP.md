@@ -1,7 +1,7 @@
 # ตั้งค่า Google Slides สำหรับระบบใบอนุโมทนาบัตร
 
 ตั้งค่าไว้แล้ว:
-- Template: https://docs.google.com/presentation/d/180GXEdZA9C1VCdmqp9qA0-tK17SHG93s0ZsLpS8ZuY8/edit
+- Template: https://docs.google.com/presentation/d/1N0OEEhnCdfqn5ohtZa47pUfenVYizdePtXo9vGsVGy4/edit
 - Output folder: https://drive.google.com/drive/folders/1JUTSXLLdR7X5KiV6KINe6Nk85DS-YdYk
 - Supabase: โปรเจกต์เดิมของโรงเรียน
 

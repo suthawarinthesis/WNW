@@ -63,7 +63,7 @@ insert into public.donation_settings (id)
 values (1)
 on conflict (id) do nothing;
 
-update public.donation_settings set certificate_provider='google_slides', google_slides_template_id='180GXEdZA9C1VCdmqp9qA0-tK17SHG93s0ZsLpS8ZuY8', google_drive_folder_id='1JUTSXLLdR7X5KiV6KINe6Nk85DS-YdYk' where id=1;
+update public.donation_settings set certificate_provider='google_slides', google_slides_template_id='1N0OEEhnCdfqn5ohtZa47pUfenVYizdePtXo9vGsVGy4', google_drive_folder_id='1JUTSXLLdR7X5KiV6KINe6Nk85DS-YdYk' where id=1;
 
 alter table public.donation_settings enable row level security;
 

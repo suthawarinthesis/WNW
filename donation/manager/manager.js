@@ -75,7 +75,7 @@
     const arr=rows.filter(x=>(!filter||x.status===filter)&&(!q||normalize([x.display_name,x.request_no,x.certificate_no,x.temple_name,x.organization,x.phone,x.email].join(' ')).includes(q)));
     const box=$('#donation-list');
     if(!arr.length){box.innerHTML='<div class="glass rounded-2xl p-10 text-center text-slate-400">ไม่พบรายการที่ตรงกับตัวกรอง</div>';return}
-    box.innerHTML=arr.map(x=>{const st=C.normalizeStatus(x.status);return `<article class="glass rounded-2xl p-4 sm:p-5"><div class="flex flex-col lg:flex-row lg:items-center gap-4"><div class="flex items-start gap-3 min-w-0 flex-1">${avatarHtml(x)}<div class="min-w-0"><div class="flex flex-wrap items-center gap-2"><h3 class="font-extrabold truncate">${esc(x.display_name)}</h3>${alumniBadge(x)}<span class="text-[10px] border px-2 py-0.5 rounded-full ${st.classes}">${st.label}</span></div><p class="text-xs text-slate-400 mt-1">${esc(x.request_no)} • ${C.formatDateTH(x.transfer_date)} ${String(x.transfer_time||'').slice(0,5)} น.${x.temple_name?' • '+esc(x.temple_name):''}</p>${x.certificate_no?`<p class="text-xs text-emerald-700 font-bold mt-1">${esc(x.certificate_no)}</p>`:''}</div></div><div class="flex items-center justify-between lg:justify-end gap-3"><p class="text-xl font-extrabold text-orange-700">${C.formatTHB(x.amount)}</p><button data-review="${x.id}" class="px-4 py-2.5 rounded-xl bg-slate-900 text-white text-sm font-bold">ตรวจสอบ</button></div></div></article>`}).join('');
+    box.innerHTML=arr.map(x=>{const st=C.normalizeStatus(x.status);return `<article class="glass rounded-2xl p-4 sm:p-5"><div class="flex flex-col lg:flex-row lg:items-center gap-4"><div class="flex items-start gap-3 min-w-0 flex-1">${avatarHtml(x)}<div class="min-w-0"><div class="flex flex-wrap items-center gap-2"><h3 class="font-extrabold truncate">${esc(x.display_name)}</h3>${alumniBadge(x)}<span class="text-[10px] border px-2 py-0.5 rounded-full ${st.classes}">${st.label}</span></div><p class="text-xs text-slate-400 mt-1">${esc(x.request_no)} • ${C.formatDateTH(x.transfer_date)} ${String(x.transfer_time||'').slice(0,5)} น.${x.temple_name?' • '+esc(x.temple_name):''}</p>${x.certificate_no?`<p class="text-xs text-emerald-700 font-bold mt-1">${esc(x.certificate_no)}</p>`:''}</div></div><div class="flex items-center justify-between lg:justify-end gap-3"><p class="text-xl font-extrabold text-orange-700">${C.formatTHB(x.amount)}</p><button data-review="${x.id}" class="px-4 py-2.5 rounded-xl bg-slate-900 text-white text-sm font-bold">ตรวจสอบ / ออกใบ</button></div></div></article>`}).join('');
     bindReviewButtons();lucide.createIcons();
   }
   function bindReviewButtons(){$$('[data-review]').forEach(b=>b.onclick=()=>openReview(b.dataset.review))}
@@ -117,8 +117,12 @@
     $('#review-cert-box').classList.toggle('hidden',!hasNo);
     $('#review-cert-no').textContent=x.certificate_no||'';
     const link=$('#review-open-pdf'); link.classList.toggle('hidden',!hasPdf); if(hasPdf)link.href=x.certificate_pdf_url; else link.removeAttribute('href');
-    const gen=$('#review-generate-pdf'); gen.classList.toggle('hidden',!hasNo);
-    const text=x.certificate_generation_status==='ready'?'สร้าง PDF จาก Google Slides แล้ว':x.certificate_generation_status==='generating'?'กำลังสร้าง PDF...':x.certificate_generation_status==='error'?'สร้าง PDF ไม่สำเร็จ — กดสร้างใบอีกครั้งได้':hasNo?'ยังไม่ได้สร้างไฟล์ PDF':'';
+    const gen=$('#review-generate-pdf');
+    const generationStatus=String(x.certificate_generation_status||'');
+    const showRetry=hasNo && !hasPdf && generationStatus!=='generating';
+    gen.classList.toggle('hidden',!showRetry);
+    if(showRetry)gen.textContent='ลองสร้าง PDF อีกครั้ง';
+    const text=generationStatus==='ready'?'สร้าง PDF จาก Google Slides แล้ว':generationStatus==='generating'?'กำลังสร้าง PDF อัตโนมัติ...':generationStatus==='error'?'สร้าง PDF อัตโนมัติไม่สำเร็จ — สามารถลองสร้างอีกครั้งได้':hasNo?'กำลังเตรียมสร้างไฟล์ PDF อัตโนมัติ':'';
     $('#review-cert-generation').textContent=text;
     gen.textContent=hasPdf?'สร้างใบใหม่จาก Google Slides':'สร้างใบจาก Google Slides';
   }
@@ -181,19 +185,19 @@
   }
   $('#review-save').onclick=async()=>{try{await saveReview(true)}catch(err){modalStatus('บันทึกไม่สำเร็จ: '+(err.message||err))}};
   $('#review-approve').onclick=async()=>{
-    if(!currentReviewId||!confirm('ยืนยันว่าตรวจสอบสลิปถูกต้อง และออกเลขใบอนุโมทนาบัตรให้รายการนี้?'))return;
-    const btn=$('#review-approve');btn.disabled=true;btn.textContent='กำลังออกเลขใบ...';
+    if(!currentReviewId||!confirm('ยืนยันว่าตรวจสอบสลิปถูกต้อง? ระบบจะยืนยันรายการ ออกเลขใบ และสร้าง PDF จาก Google Slides ให้อัตโนมัติทันที'))return;
+    const btn=$('#review-approve');btn.disabled=true;btn.textContent='กำลังยืนยันและสร้างใบ...';
     try{
       await saveReview(false);
       const {error}=await db.rpc('approve_donation',{p_id:currentReviewId});if(error)throw error;
       await loadAll(); let x=rows.find(r=>r.id===currentReviewId);
       if(x){
         refreshReviewCertificateUI(x);$('#review-approve').classList.add('hidden');$('#review-reject').classList.add('hidden');
-        modalStatus('ออกเลขใบแล้ว กำลังสร้าง PDF จาก Google Slides...',true);
-        try{x=await generateGoogleCertificate(x);refreshReviewCertificateUI(x);renderDashboard();renderDonationList();modalStatus('ยืนยันรายการ ออกเลขใบ และสร้าง PDF เรียบร้อยแล้ว',true)}
+        modalStatus('ตรวจสอบผ่านแล้ว กำลังสร้างใบอนุโมทนาบัตรจาก Google Slides อัตโนมัติ...',true);
+        try{x=await generateGoogleCertificate(x);refreshReviewCertificateUI(x);renderDashboard();renderDonationList();modalStatus('ตรวจสอบและสร้างใบอนุโมทนาบัตรเรียบร้อยแล้ว',true)}
         catch(genErr){refreshReviewCertificateUI(rows.find(r=>r.id===currentReviewId)||x);modalStatus('ออกเลขใบเรียบร้อยแล้ว แต่ยังสร้าง PDF ไม่สำเร็จ: '+(genErr.message||genErr))}
       }
-    }catch(err){modalStatus('อนุมัติไม่สำเร็จ: '+(err.message||err))}finally{btn.disabled=false;btn.textContent='ยืนยันและออกเลขใบ'}
+    }catch(err){modalStatus('อนุมัติไม่สำเร็จ: '+(err.message||err))}finally{btn.disabled=false;btn.textContent='ตรวจสอบแล้ว • ยืนยันและสร้างใบ'}
   };
   $('#review-reject').onclick=async()=>{
     if(!currentReviewId||!confirm('ยืนยันว่าไม่อนุมัติรายการนี้?'))return;

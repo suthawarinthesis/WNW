@@ -571,7 +571,7 @@ begin
   select
     coalesce(sum(d.amount), 0),
     count(*),
-    count(distinct d.history_code)
+    count(distinct lower(btrim(regexp_replace(coalesce(nullif(d.certificate_name_override, ''), d.display_name), '[[:space:]]+', ' ', 'g'))))
   into v_total, v_donation_count, v_donor_count
   from public.donations d
   where d.status = 'verified'

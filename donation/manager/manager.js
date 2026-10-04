@@ -97,9 +97,10 @@
       Object.entries(fields).forEach(([k,v])=>{const i=document.createElement('input');i.type='hidden';i.name=k;i.value=String(v??'');form.appendChild(i)});
       let timer;
       const cleanup=()=>{clearTimeout(timer);window.removeEventListener('message',onMessage);form.remove();setTimeout(()=>iframe.remove(),100)};
-      const onMessage=(ev)=>{if(ev.origin&&!/^https:\/\/(?:script\.google\.com|script\.googleusercontent\.com)$/i.test(ev.origin))return;const m=ev.data;if(!m||m.source!=='wnw-donation-google-slides'||m.request_id!==requestId)return;cleanup();m.ok?resolve(m.data||{}):reject(new Error(m.error||'Google Slides ทำงานไม่สำเร็จ'))};
+      const trustedGoogleOrigin=(origin)=>{try{const u=new URL(origin);return u.protocol==='https:'&&(u.hostname==='script.google.com'||u.hostname==='script.googleusercontent.com'||u.hostname.endsWith('.googleusercontent.com'));}catch(_){return false}};
+      const onMessage=(ev)=>{if(!trustedGoogleOrigin(ev.origin))return;const m=ev.data;if(!m||m.source!=='wnw-donation-google-slides'||m.request_id!==requestId)return;cleanup();m.ok?resolve(m.data||{}):reject(new Error(m.error||'Google Slides ทำงานไม่สำเร็จ'))};
       window.addEventListener('message',onMessage);
-      timer=setTimeout(()=>{cleanup();reject(new Error('Google Apps Script ใช้เวลานานเกินไป กรุณาลองอีกครั้ง'))},90000);
+      timer=setTimeout(()=>{cleanup();reject(new Error('Google Apps Script ใช้เวลานานเกินไป กรุณาลองอีกครั้ง'))},120000);
       form.submit();
     });
   }

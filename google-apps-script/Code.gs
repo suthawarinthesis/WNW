@@ -136,6 +136,14 @@ function countText_(text, needle) { return needle ? String(text).split(needle).l
 function callbackHtml_(origin, requestId, ok, data, error) {
   const payload = JSON.stringify({ source:'wnw-donation-google-slides', request_id:requestId, ok:ok, data:data, error:error }).replace(/</g, '\\u003c');
   const safeOrigin = JSON.stringify(origin);
-  return HtmlService.createHtmlOutput('<!doctype html><meta charset="utf-8"><script>window.parent.postMessage(' + payload + ',' + safeOrigin + ');<\/script><p style="font-family:sans-serif">ดำเนินการเสร็จแล้ว</p>')
+  const html = '<!doctype html><meta charset="utf-8">' +
+    '<script>(function(){' +
+    'var message=' + payload + ';' +
+    'var target=' + safeOrigin + ';' +
+    'var receiver=(window.top&&window.top!==window)?window.top:window.parent;' +
+    'receiver.postMessage(message,target);' +
+    '})();<\/script>' +
+    '<p style="font-family:sans-serif">ดำเนินการเสร็จแล้ว</p>';
+  return HtmlService.createHtmlOutput(html)
     .setXFrameOptionsMode(HtmlService.XFrameOptionsMode.ALLOWALL);
 }

@@ -1,0 +1,15 @@
+WNW Donation V8 - Google Apps Script callback fix
+
+แก้ปัญหา:
+- postMessage target origin mismatch
+- รองรับ hostname แบบ *.googleusercontent.com
+- callback ใช้ window.top แทน window.parent
+
+สิ่งที่ต้องทำ:
+1) นำ google-apps-script/Code.gs ไปแทน Code.gs ใน Apps Script เดิม
+2) Deploy > Manage deployments > Edit > New version > Deploy
+3) URL /exec เดิมใช้ต่อได้
+4) อัปโหลดไฟล์เว็บชุดนี้ทับเว็บไซต์เดิม
+5) เข้า Donation Manager แล้วกดสร้างใบอีกครั้ง
+
+ไม่ต้องรัน SQL เพิ่ม

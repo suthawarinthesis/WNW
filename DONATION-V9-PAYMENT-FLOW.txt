@@ -1,0 +1,10 @@
+Donation V9 – QR-first payment flow
+
+Changes:
+- Homepage payment section now opens a dedicated guided donation flow instead of showing the QR immediately.
+- Form is a 2-stage flow: donor details -> QR payment + slip upload.
+- QR, bank account, PromptPay and note are loaded from donation_settings.
+- After returning from a banking app, the page reminds the donor to attach the slip.
+- “Transfer completed” sets current date/time and reveals slip upload immediately.
+- Donor form draft is preserved in sessionStorage while switching to the banking app.
+- No SQL changes required.

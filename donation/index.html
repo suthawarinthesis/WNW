@@ -66,13 +66,15 @@
 
     <section class="max-w-7xl mx-auto px-4 sm:px-6 pb-8 grid lg:grid-cols-[1.05fr_.95fr] gap-6">
       <article class="glass rounded-[2rem] p-6 sm:p-8">
-        <div class="flex items-start justify-between gap-4"><div><p class="text-xs font-bold uppercase tracking-[.2em] text-orange-500">ช่องทางร่วมบุญ</p><h2 class="mt-2 text-2xl font-extrabold">ข้อมูลการโอนเงิน</h2></div><div class="w-12 h-12 rounded-2xl bg-orange-50 text-orange-600 flex items-center justify-center"><i data-lucide="landmark"></i></div></div>
-        <div class="mt-6 grid sm:grid-cols-2 gap-4">
-          <div class="rounded-2xl bg-orange-50/70 border border-orange-100 p-5"><p class="text-xs text-slate-500">ธนาคาร</p><p id="bank-name" class="font-bold mt-1">—</p><p class="text-xs text-slate-500 mt-4">ชื่อบัญชี</p><p id="bank-account-name" class="font-bold mt-1">—</p><p class="text-xs text-slate-500 mt-4">เลขที่บัญชี</p><p id="bank-account-no" class="text-xl font-extrabold text-orange-700 mt-1">—</p><p id="promptpay-row" class="text-sm mt-3 hidden">พร้อมเพย์: <span id="promptpay" class="font-bold"></span></p></div>
-          <div id="qr-wrap" class="rounded-2xl bg-white border border-slate-100 p-4 flex items-center justify-center min-h-48"><div id="qr-empty" class="text-center text-slate-400 text-sm"><i data-lucide="qr-code" class="w-10 h-10 mx-auto mb-2"></i>ยังไม่ได้ตั้ง QR Code</div><img id="qr-image" class="hidden max-h-56 max-w-full object-contain rounded-xl" alt="QR Code สำหรับบริจาค"></div>
+        <div class="flex items-start justify-between gap-4"><div><p class="text-xs font-bold uppercase tracking-[.2em] text-orange-500">ช่องทางร่วมบุญ</p><h2 class="mt-2 text-2xl font-extrabold">สแกน QR และแจ้งการโอน</h2><p class="mt-2 text-sm text-slate-500">กดเข้าไปเพื่อกรอกข้อมูล จากนั้นระบบจะแสดง QR ขนาดใหญ่และพาแนบสลิปต่อทันที</p></div><div class="w-12 h-12 rounded-2xl bg-orange-50 text-orange-600 flex items-center justify-center"><i data-lucide="qr-code"></i></div></div>
+        <div class="mt-6 rounded-[1.6rem] bg-gradient-to-br from-orange-50 to-amber-50 border border-orange-100 p-5 sm:p-6">
+          <div class="flex items-center gap-4"><div class="w-14 h-14 rounded-2xl bg-white text-orange-600 shadow-sm flex items-center justify-center shrink-0"><i data-lucide="scan-line" class="w-7 h-7"></i></div><div><p class="font-extrabold text-lg">โอนและส่งสลิปในขั้นตอนเดียว</p><p class="text-sm text-slate-500 mt-1">ลดปัญหาสแกนเสร็จแล้วลืมกลับมาแจ้งหลักฐาน</p></div></div>
+          <div class="mt-5 grid sm:grid-cols-3 gap-2 text-sm"><div class="rounded-xl bg-white/80 p-3"><b class="text-orange-600">1.</b> กรอกข้อมูลผู้บริจาค</div><div class="rounded-xl bg-white/80 p-3"><b class="text-orange-600">2.</b> สแกน QR โอนเงิน</div><div class="rounded-xl bg-white/80 p-3"><b class="text-orange-600">3.</b> แนบสลิปและส่ง</div></div>
         </div>
-        <p id="donation-note" class="mt-5 text-sm text-slate-500 leading-relaxed hidden"></p>
-        <a href="./form/" class="mt-6 w-full inline-flex items-center justify-center gap-2 px-5 py-3.5 rounded-2xl bg-orange-500 text-white font-extrabold hover:bg-orange-600"><i data-lucide="upload-cloud" class="w-5 h-5"></i> โอนแล้ว แจ้งหลักฐานการร่วมบุญ</a>
+        <div class="mt-5 rounded-2xl bg-slate-50 border border-slate-100 p-4 text-sm text-slate-600"><span class="font-bold">บัญชีรับบริจาค:</span> <span id="bank-name">—</span> · <span id="bank-account-name">—</span> · <span id="bank-account-no" class="font-bold text-orange-700">—</span><span id="promptpay-row" class="hidden"> · พร้อมเพย์ <span id="promptpay" class="font-bold"></span></span></div>
+        <p id="donation-note" class="mt-4 text-sm text-slate-500 leading-relaxed hidden"></p>
+        <a href="./form/" class="mt-6 w-full inline-flex items-center justify-center gap-2 px-5 py-4 rounded-2xl bg-orange-500 text-white font-extrabold hover:bg-orange-600 shadow-lg shadow-orange-100"><i data-lucide="qr-code" class="w-5 h-5"></i> เปิดหน้าสแกน QR และร่วมบุญ</a>
+        <div class="hidden"><div id="qr-empty"></div><img id="qr-image" alt=""></div>
       </article>
 
       <article class="glass rounded-[2rem] p-6 sm:p-8">

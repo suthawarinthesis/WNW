@@ -23,7 +23,7 @@
       document.getElementById('bank-account-name').textContent = settings.bank_account_name || '—';
       document.getElementById('bank-account-no').textContent = settings.bank_account_no || '—';
       if (settings.promptpay) { document.getElementById('promptpay').textContent=settings.promptpay; document.getElementById('promptpay-row').classList.remove('hidden'); }
-      if (settings.qr_image_url) { const img=document.getElementById('qr-image'); img.src=settings.qr_image_url; img.classList.remove('hidden'); document.getElementById('qr-empty').classList.add('hidden'); }
+      if (settings.qr_image_url) { const img=document.getElementById('qr-image'); if(img){img.src=settings.qr_image_url; img.classList.remove('hidden');} document.getElementById('qr-empty')?.classList.add('hidden'); }
       if (settings.donation_note) { const note=document.getElementById('donation-note'); note.textContent=settings.donation_note; note.classList.remove('hidden'); }
     }
 

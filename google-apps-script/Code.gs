@@ -1,5 +1,5 @@
 /**
- * WNW Donation Certificate Generator — V19
+ * WNW Donation Certificate Generator — V21.2
  * Google Slides tags:
  *   {{donor_name}}
  *   {{donation_amount}}
@@ -12,11 +12,15 @@ const SUPABASE_URL = 'https://pcapjltgscofrgfcvdkm.supabase.co';
 const SUPABASE_ANON_KEY = 'sb_publishable_NTJJiE0r1hojS-8DTRzWFA_3BPADfEH';
 const DEFAULT_TEMPLATE_ID = '1N0OEEhnCdfqn5ohtZa47pUfenVYizdePtXo9vGsVGy4';
 const DEFAULT_FOLDER_ID = '1JUTSXLLdR7X5KiV6KINe6Nk85DS-YdYk';
+const DEFAULT_PROMO_TEMPLATE_ID = '1aj3h3pMB-Ulz1SuldI-ckBlddfralVwF7sfx0x65cNE';
+const DEFAULT_PROMO_FOLDER_ID = '1H_PEfawTOnn7LM4Pi6CSWJ6CYVnTo-iF';
+const DEFAULT_PROMO_FALLBACK_PHOTO_URL = 'https://i.postimg.cc/Kz6vK8gM/Screenshot-2026-10-04-181000.png';
 const TAGS = {
   donor_name: '{{donor_name}}',
   donation_amount: '{{donation_amount}}',
   certificate_no: '{{certificate_no}}',
-  verify_qr: '{{verify_qr}}'
+  verify_qr: '{{verify_qr}}',
+  photo: '{{photo}}'
 };
 
 function doGet() {
@@ -36,6 +40,8 @@ function doPost(e) {
     let data;
     if (action === 'validate') data = validateTemplate_(templateId, folderId);
     else if (action === 'generate') data = generateCertificate_(templateId, folderId, p);
+    else if (action === 'validate_promo') data = validatePromoTemplate_(safeId_(p.template_id) || DEFAULT_PROMO_TEMPLATE_ID, safeId_(p.folder_id) || DEFAULT_PROMO_FOLDER_ID);
+    else if (action === 'generate_promo') data = generatePromoImage_(safeId_(p.template_id) || DEFAULT_PROMO_TEMPLATE_ID, safeId_(p.folder_id) || DEFAULT_PROMO_FOLDER_ID, p);
     else if (action === 'delete_certificate') data = deleteCertificate_(folderId, p);
     else throw new Error('action ไม่ถูกต้อง');
     return callbackHtml_(targetOrigin, requestId, true, data, '');
@@ -77,6 +83,24 @@ function validateTemplate_(templateId, folderId) {
     template_name: file.getName(),
     tags: tags,
     ready: tags.donor_name > 0 && tags.donation_amount > 0 && tags.certificate_no > 0 && tags.verify_qr > 0
+  };
+}
+
+function validatePromoTemplate_(templateId, folderId) {
+  const file = DriveApp.getFileById(templateId);
+  if (file.getMimeType() !== MimeType.GOOGLE_SLIDES) throw new Error('Template ต้องเป็น Google Slides');
+  DriveApp.getFolderById(folderId).getName();
+  const pres = SlidesApp.openById(templateId);
+  const allText = collectPresentationText_(pres);
+  const tags = {
+    donor_name: countText_(allText, TAGS.donor_name),
+    donation_amount: countText_(allText, TAGS.donation_amount),
+    photo: countText_(allText, TAGS.photo)
+  };
+  return {
+    template_name: file.getName(),
+    tags: tags,
+    ready: tags.donor_name > 0 && tags.donation_amount > 0 && tags.photo > 0
   };
 }
 
@@ -138,7 +162,7 @@ function generateCertificate_(templateId, folderId, p) {
       file_name: pdf.getName(),
       public_sharing: publicSharing,
       image_file_id: image ? image.getId() : '',
-      image_url: image ? ('https://drive.google.com/uc?export=view&id=' + image.getId()) : '',
+      image_url: image ? ('https://drive.google.com/thumbnail?id=' + image.getId() + '&sz=w1600') : '',
       image_download_url: image ? ('https://drive.google.com/uc?export=download&id=' + image.getId()) : '',
       image_file_name: image ? image.getName() : '',
       image_public_sharing: image ? imagePublicSharing : false,
@@ -152,30 +176,168 @@ function generateCertificate_(templateId, folderId, p) {
   }
 }
 
+
+function generatePromoImage_(templateId, folderId, p) {
+  const donorName = String(p.donor_name || '').trim();
+  const amount = String(p.donation_amount || '').trim();
+  const certificateNo = String(p.certificate_no || p.request_no || ('DONATION-' + Date.now())).trim().toUpperCase();
+  const sourcePhotoUrl = normalizePublicImageUrl_(String(p.photo_url || '').trim()) || normalizePublicImageUrl_(String(p.fallback_photo_url || '').trim()) || DEFAULT_PROMO_FALLBACK_PHOTO_URL;
+  if (!donorName) throw new Error('ชื่อผู้บริจาคว่าง');
+  if (!amount) throw new Error('จำนวนเงินว่าง');
+
+  const check = validatePromoTemplate_(templateId, folderId);
+  if (!check.ready) throw new Error('Template ภาพประชาสัมพันธ์มี Tag ไม่ครบ กรุณาตรวจ {{donor_name}}, {{donation_amount}}, {{photo}}');
+
+  const lock = LockService.getScriptLock();
+  lock.waitLock(30000);
+  let workingCopy = null;
+  try {
+    const folder = DriveApp.getFolderById(folderId);
+    const imageName = 'nikorn-' + certificateNo + '.png';
+    trashFilesByName_(folder, imageName);
+
+    workingCopy = DriveApp.getFileById(templateId).makeCopy('_promo_' + certificateNo + '_' + Date.now(), folder);
+    const pres = SlidesApp.openById(workingCopy.getId());
+    const n1 = pres.replaceAllText(TAGS.donor_name, donorName);
+    const n2 = pres.replaceAllText(TAGS.donation_amount, amount);
+    const photoBlob = fetchRemoteImageBlob_(sourcePhotoUrl);
+    const n3 = replaceImagePlaceholders_(pres, TAGS.photo, photoBlob);
+    const slideId = pres.getSlides()[0].getObjectId();
+    pres.saveAndClose();
+    if (n1 < 1 || n2 < 1 || n3 < 1) throw new Error('Replace ข้อมูลภาพประชาสัมพันธ์ไม่ครบ กรุณาตรวจ Template');
+
+    Utilities.sleep(700);
+    const pngBlob = fetchSlideThumbnailBlob_(workingCopy.getId(), slideId).setName(imageName);
+    const image = folder.createFile(pngBlob);
+    let publicSharing = true;
+    try { image.setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.VIEW); } catch (shareErr) { publicSharing = false; }
+
+    return {
+      image_file_id: image.getId(),
+      image_url: 'https://drive.google.com/thumbnail?id=' + image.getId() + '&sz=w1600',
+      image_download_url: 'https://drive.google.com/uc?export=download&id=' + image.getId(),
+      image_file_name: image.getName(),
+      public_sharing: publicSharing,
+      source_photo_url: sourcePhotoUrl,
+      replaced: { donor_name:n1, donation_amount:n2, photo:n3 }
+    };
+  } finally {
+    try { if (workingCopy) workingCopy.setTrashed(true); } catch (_) {}
+    lock.releaseLock();
+  }
+}
+
 function trashFilesByName_(folder, fileName) {
   const files = folder.getFilesByName(fileName);
   while (files.hasNext()) files.next().setTrashed(true);
 }
 
 function fetchSlideThumbnailBlob_(presentationId, slideObjectId) {
-  const endpoint = 'https://slides.googleapis.com/v1/presentations/' + encodeURIComponent(presentationId) + '/pages/' + encodeURIComponent(slideObjectId) + '/thumbnail?thumbnailProperties.mimeType=PNG&thumbnailProperties.thumbnailSize=LARGE';
+  const token = ScriptApp.getOAuthToken();
+
+  // วิธีหลัก: ใช้ Google Slides export URL โดยตรง
+  // วิธีนี้ไม่ต้องพึ่ง presentations.pages.getThumbnail ของ Slides REST API
+  // จึงช่วยแก้กรณี HTTP 403 จาก slides.googleapis.com
+  const exportUrl =
+    'https://docs.google.com/presentation/d/' +
+    encodeURIComponent(presentationId) +
+    '/export/png?pageid=' +
+    encodeURIComponent(slideObjectId);
+
+  const exportRes = UrlFetchApp.fetch(exportUrl, {
+    method: 'get',
+    muteHttpExceptions: true,
+    followRedirects: true,
+    headers: { Authorization: 'Bearer ' + token }
+  });
+
+  const exportCode = exportRes.getResponseCode();
+  const exportType = String(exportRes.getHeaders()['Content-Type'] || exportRes.getBlob().getContentType() || '');
+
+  if (exportCode >= 200 && exportCode < 300 && exportType.toLowerCase().indexOf('image/') === 0) {
+    return exportRes.getBlob().setName('slide-image.png');
+  }
+
+  // Fallback: Slides REST API แบบเดิม
+  const endpoint =
+    'https://slides.googleapis.com/v1/presentations/' +
+    encodeURIComponent(presentationId) +
+    '/pages/' +
+    encodeURIComponent(slideObjectId) +
+    '/thumbnail?thumbnailProperties.mimeType=PNG&thumbnailProperties.thumbnailSize=LARGE';
+
   const res = UrlFetchApp.fetch(endpoint, {
     method: 'get',
     muteHttpExceptions: true,
-    headers: { Authorization: 'Bearer ' + ScriptApp.getOAuthToken() }
+    headers: { Authorization: 'Bearer ' + token }
   });
-  if (res.getResponseCode() < 200 || res.getResponseCode() >= 300) {
-    throw new Error('ดึงภาพจาก Google Slides ไม่สำเร็จ: HTTP ' + res.getResponseCode());
+
+  if (res.getResponseCode() >= 200 && res.getResponseCode() < 300) {
+    const payload = JSON.parse(res.getContentText() || '{}');
+    if (payload.contentUrl) {
+      const imgRes = UrlFetchApp.fetch(payload.contentUrl, {
+        muteHttpExceptions: true,
+        followRedirects: true
+      });
+      if (imgRes.getResponseCode() >= 200 && imgRes.getResponseCode() < 300) {
+        return imgRes.getBlob().setName('slide-image.png');
+      }
+    }
   }
-  const payload = JSON.parse(res.getContentText() || '{}');
-  if (!payload.contentUrl) throw new Error('Google Slides ไม่ได้ส่ง contentUrl ของภาพกลับมา');
-  const imgRes = UrlFetchApp.fetch(payload.contentUrl, { muteHttpExceptions: true, followRedirects: true });
-  if (imgRes.getResponseCode() < 200 || imgRes.getResponseCode() >= 300) {
-    throw new Error('ดาวน์โหลดภาพใบอนุโมทนาบัตรไม่สำเร็จ: HTTP ' + imgRes.getResponseCode());
-  }
-  return imgRes.getBlob().setName('certificate-image.png');
+
+  const exportBody = String(exportRes.getContentText() || '').slice(0, 300).replace(/\s+/g, ' ');
+  const apiBody = String(res.getContentText() || '').slice(0, 300).replace(/\s+/g, ' ');
+  throw new Error(
+    'สร้างภาพจาก Google Slides ไม่สำเร็จ ' +
+    '(export HTTP ' + exportCode +
+    ', Slides API HTTP ' + res.getResponseCode() + '). ' +
+    'export=' + exportBody + ' api=' + apiBody
+  );
 }
 
+
+
+function replaceImagePlaceholders_(pres, tag, imageBlob) {
+  const targets = [];
+  pres.getSlides().forEach(function(slide) {
+    slide.getPageElements().forEach(function(el) { collectTagTargets_(slide, el, tag, targets); });
+  });
+  if (!targets.length) return 0;
+  targets.forEach(function(t) {
+    const el = t.element;
+    t.slide.insertImage(imageBlob.copyBlob(), el.getLeft(), el.getTop(), Math.max(28, el.getWidth()), Math.max(28, el.getHeight()));
+    el.remove();
+  });
+  return targets.length;
+}
+
+function collectTagTargets_(slide, el, tag, targets) {
+  try {
+    const t = el.getPageElementType();
+    if (t === SlidesApp.PageElementType.SHAPE) {
+      const text = el.asShape().getText().asString();
+      if (text.indexOf(tag) !== -1) targets.push({ slide:slide, element:el });
+    } else if (t === SlidesApp.PageElementType.GROUP) {
+      el.asGroup().getChildren().forEach(function(child) { collectTagTargets_(slide, child, tag, targets); });
+    }
+  } catch (_) {}
+}
+
+function normalizePublicImageUrl_(raw) {
+  const value = String(raw || '').trim();
+  if (!value) return '';
+  const driveMatch = value.match(/\/file\/d\/([A-Za-z0-9_-]+)/) || value.match(/[?&]id=([A-Za-z0-9_-]+)/);
+  if (driveMatch && driveMatch[1]) return 'https://drive.google.com/uc?export=download&id=' + driveMatch[1];
+  return value;
+}
+
+function fetchRemoteImageBlob_(url) {
+  const target = normalizePublicImageUrl_(url);
+  if (!/^https?:\/\//i.test(target)) throw new Error('ลิงก์รูปภาพไม่ถูกต้อง');
+  const res = UrlFetchApp.fetch(target, { muteHttpExceptions:true, followRedirects:true, headers:{'User-Agent':'Mozilla/5.0'} });
+  if (res.getResponseCode() < 200 || res.getResponseCode() >= 300) throw new Error('ดาวน์โหลดรูปภาพไม่สำเร็จ: HTTP ' + res.getResponseCode());
+  return res.getBlob().setName('donor-photo');
+}
 
 function replaceQrPlaceholders_(pres, verifyUrl) {
   const targets = [];

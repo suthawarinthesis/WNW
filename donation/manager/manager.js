@@ -11,6 +11,28 @@
 
   function esc(v){return C.escapeHtml(v)}
   function normalize(v){return String(v||'').toLowerCase().replace(/\s+/g,' ').trim()}
+  function driveFileId(value=''){
+    const raw=String(value||'').trim();
+    if(!raw)return '';
+    const m=raw.match(/\/file\/d\/([a-zA-Z0-9_-]+)/)||raw.match(/[?&]id=([a-zA-Z0-9_-]+)/)||raw.match(/\/thumbnail\?id=([a-zA-Z0-9_-]+)/);
+    return m?.[1]||'';
+  }
+  function nikornDisplayUrl(x){
+    const id=String(x?.nikorn_image_drive_file_id||'').trim()||driveFileId(x?.nikorn_image_url||'');
+    if(id)return `https://drive.google.com/thumbnail?id=${encodeURIComponent(id)}&sz=w1600`;
+    return String(x?.nikorn_image_url||'').trim();
+  }
+  function nikornOpenUrl(x){
+    const id=String(x?.nikorn_image_drive_file_id||'').trim()||driveFileId(x?.nikorn_image_url||'');
+    if(id)return `https://drive.google.com/file/d/${encodeURIComponent(id)}/view`;
+    return String(x?.nikorn_image_url||'').trim();
+  }
+  function nikornDownloadUrl(x){
+    const id=String(x?.nikorn_image_drive_file_id||'').trim()||driveFileId(x?.nikorn_image_url||'');
+    if(id)return `https://drive.google.com/uc?export=download&id=${encodeURIComponent(id)}`;
+    return String(x?.nikorn_image_url||'').trim();
+  }
+
   function normalizePhotoUrl(value=''){
     const raw=String(value||'').trim();if(!raw)return '';
     try{
@@ -157,7 +179,7 @@
     $('#review-cert-no').textContent=x.certificate_no||'';
     const link=$('#review-open-pdf'); link.classList.toggle('hidden',!hasPdf); if(hasPdf)link.href=x.certificate_pdf_url; else link.removeAttribute('href');
     const imageLink=$('#review-open-image'); if(imageLink){ imageLink.classList.toggle('hidden',!hasImage); if(hasImage) imageLink.href=x.certificate_image_url; else imageLink.removeAttribute('href'); }
-    const nikornLink=$('#review-open-nikorn-image'); if(nikornLink){ nikornLink.classList.toggle('hidden',!hasNikorn); if(hasNikorn) nikornLink.href=x.nikorn_image_url; else nikornLink.removeAttribute('href'); }
+    const nikornLink=$('#review-open-nikorn-image'); if(nikornLink){ nikornLink.classList.toggle('hidden',!hasNikorn); if(hasNikorn) nikornLink.href=nikornOpenUrl(x); else nikornLink.removeAttribute('href'); }
     const gen=$('#review-generate-pdf');
     const genNikorn=$('#review-generate-nikorn');
     const generationStatus=String(x.certificate_generation_status||'');
@@ -411,11 +433,11 @@
     const {data,error}=await db.from('donation_settings').update(payload).eq('id',1).select('*').single();if(error)throw error;settings={...settings,...data};renderNikornSettings();if(showSuccess)nikornStatus('บันทึกการเชื่อมต่อระบบของพม.นิกรแล้ว',true);return data;
   }
   function nikornCard(x){
-    const image=x.nikorn_image_url?`<img src="${esc(x.nikorn_image_url)}" class="w-full h-44 object-cover rounded-2xl border border-slate-100 bg-slate-50" alt="${esc(x.display_name)}">`:`<div class="w-full h-44 rounded-2xl border border-dashed border-slate-200 bg-slate-50 flex items-center justify-center text-slate-400 text-sm">ยังไม่มีภาพ</div>`;
+    const image=x.nikorn_image_url?`<img src="${esc(nikornDisplayUrl(x))}" class="w-full aspect-[5/7] object-contain rounded-2xl border border-slate-100 bg-slate-50" alt="${esc(x.display_name)}" loading="lazy">`:`<div class="w-full h-44 rounded-2xl border border-dashed border-slate-200 bg-slate-50 flex items-center justify-center text-slate-400 text-sm">ยังไม่มีภาพ</div>`;
     const st=String(x.nikorn_generation_status||'not_generated');
     const label=st==='ready'?'พร้อมใช้':st==='generating'?'กำลังสร้าง':st==='error'?'ผิดพลาด':'ยังไม่สร้าง';
     const badge=st==='ready'?'bg-emerald-50 text-emerald-700 border-emerald-200':st==='generating'?'bg-amber-50 text-amber-700 border-amber-200':st==='error'?'bg-rose-50 text-rose-700 border-rose-200':'bg-slate-50 text-slate-600 border-slate-200';
-    return `<article class="rounded-[1.4rem] border border-slate-200 bg-white p-4"><div class="flex items-start justify-between gap-3"><label class="inline-flex items-center gap-2 text-sm font-bold"><input type="checkbox" class="nikorn-check rounded" value="${x.id}"> เลือก</label><span class="text-[11px] px-2 py-0.5 rounded-full border ${badge}">${label}</span></div><div class="mt-3">${image}</div><div class="mt-3"><p class="font-extrabold text-slate-800 line-clamp-2">${esc(x.certificate_name_override||x.display_name||'-')}</p><p class="text-sm text-orange-700 font-bold mt-1">${C.formatTHB(x.amount)}</p><p class="text-xs text-slate-400 mt-1">${esc(x.certificate_no||x.request_no||'-')}</p></div><div class="mt-4 flex flex-wrap gap-2"><button type="button" class="nikorn-generate-one px-3 py-2 rounded-xl bg-orange-500 text-white text-xs font-bold" data-id="${x.id}">สร้างภาพ</button>${x.nikorn_image_url?`<a href="${esc(x.nikorn_image_url)}" target="_blank" rel="noopener" class="px-3 py-2 rounded-xl bg-fuchsia-600 text-white text-xs font-bold">เปิดภาพ</a><a href="${esc(x.nikorn_image_url)}" target="_blank" rel="noopener" class="px-3 py-2 rounded-xl bg-white border border-slate-200 text-xs font-bold">ดาวน์โหลด</a>`:''}</div>${x.nikorn_generation_error?`<p class="mt-2 text-xs text-rose-600">${esc(x.nikorn_generation_error)}</p>`:''}</article>`;
+    return `<article class="rounded-[1.4rem] border border-slate-200 bg-white p-4"><div class="flex items-start justify-between gap-3"><label class="inline-flex items-center gap-2 text-sm font-bold"><input type="checkbox" class="nikorn-check rounded" value="${x.id}"> เลือก</label><span class="text-[11px] px-2 py-0.5 rounded-full border ${badge}">${label}</span></div><div class="mt-3">${image}</div><div class="mt-3"><p class="font-extrabold text-slate-800 line-clamp-2">${esc(x.certificate_name_override||x.display_name||'-')}</p><p class="text-sm text-orange-700 font-bold mt-1">${C.formatTHB(x.amount)}</p><p class="text-xs text-slate-400 mt-1">${esc(x.certificate_no||x.request_no||'-')}</p></div><div class="mt-4 flex flex-wrap gap-2"><button type="button" class="nikorn-generate-one px-3 py-2 rounded-xl bg-orange-500 text-white text-xs font-bold" data-id="${x.id}">สร้างภาพ</button>${x.nikorn_image_url?`<a href="${esc(nikornOpenUrl(x))}" target="_blank" rel="noopener" class="px-3 py-2 rounded-xl bg-fuchsia-600 text-white text-xs font-bold">เปิดภาพ</a><a href="${esc(nikornDownloadUrl(x))}" target="_blank" rel="noopener" class="px-3 py-2 rounded-xl bg-white border border-slate-200 text-xs font-bold">ดาวน์โหลด</a>`:''}</div>${x.nikorn_generation_error?`<p class="mt-2 text-xs text-rose-600">${esc(x.nikorn_generation_error)}</p>`:''}</article>`;
   }
   function renderNikornList(){
     const box=$('#nikorn-list'); if(!box) return;
@@ -433,7 +455,7 @@
   $('#nikorn-select-all').onclick=()=>{$$('.nikorn-check').forEach(i=>i.checked=true)};
   $('#nikorn-refresh-list').onclick=()=>renderNikornList();
   $('#nikorn-generate-selected').onclick=async()=>{const list=selectedNikornRows();if(!list.length){nikornStatus('กรุณาเลือกรายการก่อน');return;}let done=0,fail=0;for(const item of list){try{await generateNikornImage(item);done++;}catch(_){fail++;}}renderNikornList();renderDashboard();nikornStatus(`สร้างภาพเสร็จ ${done} รายการ${fail?` / ไม่สำเร็จ ${fail} รายการ`:''}`,done>0&&fail===0)};
-  $('#nikorn-download-selected').onclick=()=>{const list=selectedNikornRows().filter(x=>x.nikorn_image_url);if(!list.length){nikornStatus('ยังไม่มีภาพในรายการที่เลือก');return;}list.forEach((item,idx)=>setTimeout(()=>{const a=document.createElement('a');a.href=item.nikorn_image_url;a.target='_blank';a.rel='noopener';document.body.appendChild(a);a.click();a.remove();},idx*250));nikornStatus(`กำลังเปิดลิงก์ดาวน์โหลด ${list.length} ภาพ`,true)};
+  $('#nikorn-download-selected').onclick=()=>{const list=selectedNikornRows().filter(x=>x.nikorn_image_url);if(!list.length){nikornStatus('ยังไม่มีภาพในรายการที่เลือก');return;}list.forEach((item,idx)=>setTimeout(()=>{const a=document.createElement('a');a.href=nikornDownloadUrl(item);a.target='_blank';a.rel='noopener';document.body.appendChild(a);a.click();a.remove();},idx*250));nikornStatus(`กำลังเปิดลิงก์ดาวน์โหลด ${list.length} ภาพ`,true)};
 
   const views={dashboard:'ภาพรวม',donations:'รายการบริจาค',history:'ประวัติรายการย้อนหลัง',settings:'ตั้งค่าหน้าบริจาค',certificate:'ใบอนุโมทนาบัตร',nikorn:'ระบบของพม.นิกร'};
   function goView(view){$$('.nav-btn').forEach(b=>b.classList.toggle('active',b.dataset.view===view));Object.keys(views).forEach(v=>$(`#panel-${v}`).classList.toggle('hidden',v!==view));$('#page-title').textContent=views[view];if(view==='certificate')renderGoogleCertificateSettings();if(view==='nikorn')renderNikornSettings();lucide.createIcons()}

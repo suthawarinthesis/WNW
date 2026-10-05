@@ -4,6 +4,11 @@
   let dashboard = { periods:{}, latest:[] };
   let activePeriod = 'all';
   let nikornAutoTimer = null;
+  function nikornImageUrl(x){
+    const raw=String(x?.image_url||'').trim();
+    const m=raw.match(/\/file\/d\/([a-zA-Z0-9_-]+)/)||raw.match(/[?&]id=([a-zA-Z0-9_-]+)/)||raw.match(/\/thumbnail\?id=([a-zA-Z0-9_-]+)/);
+    return m?.[1]?`https://drive.google.com/thumbnail?id=${encodeURIComponent(m[1])}&sz=w1600`:raw;
+  }
 
   const periodLabels={today:'วันนี้',month:'เดือนนี้',year:'ปีนี้',all:'ทั้งหมด'};
   function renderPeriod(){
@@ -30,7 +35,7 @@
     if(!section||!track||!dots) return;
     if(!items?.length){section.classList.add('hidden'); return;}
     section.classList.remove('hidden');
-    track.innerHTML=items.map(x=>`<article class="nikorn-slide rounded-[1.7rem] border border-slate-100 bg-white p-3"><img src="${C.escapeHtml(x.image_url)}" alt="${C.escapeHtml(x.donor_name||'ผู้ร่วมบุญ')}" loading="lazy"><div class="pt-3"><p class="font-extrabold text-slate-800 truncate">${C.escapeHtml(x.donor_name||'ผู้ไม่ประสงค์ออกนาม')}</p><p class="text-xs text-slate-500 mt-1">${x.campaign_name?C.escapeHtml(x.campaign_name)+' • ':''}${C.formatDateTH(x.generated_at||new Date().toISOString())}</p><p class="mt-2 text-sm font-extrabold text-orange-700">${x.amount==null?'ร่วมอนุโมทนา':C.formatTHB(x.amount)}</p></div></article>`).join('');
+    track.innerHTML=items.map(x=>`<article class="nikorn-slide rounded-[1.7rem] border border-slate-100 bg-white p-3"><img src="${C.escapeHtml(nikornImageUrl(x))}" alt="${C.escapeHtml(x.donor_name||'ผู้ร่วมบุญ')}" loading="lazy"><div class="pt-3"><p class="font-extrabold text-slate-800 truncate">${C.escapeHtml(x.donor_name||'ผู้ไม่ประสงค์ออกนาม')}</p><p class="text-xs text-slate-500 mt-1">${x.campaign_name?C.escapeHtml(x.campaign_name)+' • ':''}${C.formatDateTH(x.generated_at||new Date().toISOString())}</p><p class="mt-2 text-sm font-extrabold text-orange-700">${x.amount==null?'ร่วมอนุโมทนา':C.formatTHB(x.amount)}</p></div></article>`).join('');
     dots.innerHTML=items.map((_,i)=>`<button class="nikorn-dot w-2.5 h-2.5 rounded-full ${i===0?'bg-orange-500':'bg-orange-100'}" data-index="${i}"></button>`).join('');
     let current=0;
     const apply=()=>{const step=track.children[0]?.getBoundingClientRect().width||300;track.style.transform=`translateX(-${current*(step+16)}px)`;[...dots.children].forEach((d,idx)=>d.className=`nikorn-dot w-2.5 h-2.5 rounded-full ${idx===current?'bg-orange-500':'bg-orange-100'}`)};

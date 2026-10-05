@@ -7,11 +7,12 @@
     const db=supabase.createClient(cfg.SUPABASE_URL,cfg.SUPABASE_ANON_KEY);
     const {data,error}=await db.rpc('get_donation_nikorn_gallery',{p_limit:8});
     if(error||!Array.isArray(data)||!data.length)return;
+    const nikornImageUrl=x=>{const raw=String(x?.image_url||'').trim();const m=raw.match(/\/file\/d\/([a-zA-Z0-9_-]+)/)||raw.match(/[?&]id=([a-zA-Z0-9_-]+)/)||raw.match(/\/thumbnail\?id=([a-zA-Z0-9_-]+)/);return m?.[1]?`https://drive.google.com/thumbnail?id=${encodeURIComponent(m[1])}&sz=w1600`:raw;};
     const formatTHB=v=>new Intl.NumberFormat('th-TH',{style:'currency',currency:'THB',minimumFractionDigits:2}).format(Number(v||0));
     const esc=s=>String(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
     const dth=v=>{const d=new Date(v);return Number.isNaN(d.getTime())?'':d.toLocaleDateString('th-TH',{year:'numeric',month:'short',day:'numeric'});};
     section.classList.remove('hidden');
-    track.innerHTML=data.map(x=>`<article class="nikorn-main-card rounded-[1.7rem] bg-white border border-slate-100 p-3 shadow-sm"><img src="${esc(x.image_url)}" alt="${esc(x.donor_name||'ผู้ร่วมบุญ')}" loading="lazy"><div class="pt-3"><p class="font-extrabold text-slate-800 truncate">${esc(x.donor_name||'ผู้ไม่ประสงค์ออกนาม')}</p><p class="text-xs text-slate-500 mt-1">${x.campaign_name?esc(x.campaign_name)+' • ':''}${dth(x.generated_at)}</p><p class="mt-2 text-sm font-extrabold text-orange-700">${x.amount==null?'ร่วมอนุโมทนา':formatTHB(x.amount)}</p></div></article>`).join('');
+    track.innerHTML=data.map(x=>`<article class="nikorn-main-card rounded-[1.7rem] bg-white border border-slate-100 p-3 shadow-sm"><img src="${esc(nikornImageUrl(x))}" alt="${esc(x.donor_name||'ผู้ร่วมบุญ')}" loading="lazy"><div class="pt-3"><p class="font-extrabold text-slate-800 truncate">${esc(x.donor_name||'ผู้ไม่ประสงค์ออกนาม')}</p><p class="text-xs text-slate-500 mt-1">${x.campaign_name?esc(x.campaign_name)+' • ':''}${dth(x.generated_at)}</p><p class="mt-2 text-sm font-extrabold text-orange-700">${x.amount==null?'ร่วมอนุโมทนา':formatTHB(x.amount)}</p></div></article>`).join('');
     dots.innerHTML=data.map((_,i)=>`<button class="w-2.5 h-2.5 rounded-full ${i===0?'bg-orange-500':'bg-orange-100'}" data-index="${i}"></button>`).join('');
     let current=0; let timer=null;
     const apply=()=>{const step=track.children[0]?.getBoundingClientRect().width||320;track.style.transform=`translateX(-${current*(step+16)}px)`;[...dots.children].forEach((d,idx)=>d.className=`w-2.5 h-2.5 rounded-full ${idx===current?'bg-orange-500':'bg-orange-100'}`);};

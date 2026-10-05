@@ -13,6 +13,24 @@
 
   function showStatus(message, ok=false){ status.className=`rounded-2xl p-4 text-sm border ${ok?'bg-emerald-50 text-emerald-700 border-emerald-200':'bg-rose-50 text-rose-700 border-rose-200'}`; status.textContent=message; status.classList.remove('hidden'); }
   function clearStatus(){ status.classList.add('hidden'); }
+
+  function isValidGoogleScriptUrl(url=''){return /^https:\/\/script\.google\.com\/macros\/s\/.+\/exec(?:\?.*)?$/i.test(String(url||'').trim())}
+  function isAutoProcessEnabled(){return donationSettings?.auto_process_on_submit!==false && isValidGoogleScriptUrl(donationSettings?.google_apps_script_url)}
+  function updateSuccessCard(autoStarted){
+    const desc=document.querySelector('#success-card h2 + p');
+    const hint=document.querySelector('#success-card .mt-4.text-xs.text-slate-500');
+    if(desc)desc.textContent=autoStarted
+      ? 'ระบบได้รับสลิปแล้ว และกำลังสร้างใบอนุโมทนาบัตรพร้อมภาพผู้บริจาคอัตโนมัติในพื้นหลัง คุณสามารถติดตามสถานะได้ทันที'
+      : 'ระบบได้รับสลิปแล้ว กรุณารอเจ้าหน้าที่ตรวจสอบก่อนออกใบอนุโมทนาบัตร';
+    if(hint)hint.textContent=autoStarted
+      ? 'โปรดเก็บรหัสประวัติไว้ ระบบบันทึกไว้ในเบราว์เซอร์เครื่องนี้ให้แล้ว และสามารถตรวจสอบสถานะได้จากหน้าประวัติ'
+      : 'โปรดเก็บรหัสประวัติไว้ ระบบบันทึกไว้ในเบราว์เซอร์เครื่องนี้ให้แล้ว';
+  }
+  function triggerAutoProcessing(submission={}){
+    // V23: งานสร้างใบ/ภาพถูก enqueue จาก Supabase trigger หลัง finalize โดยตรง
+    // ไม่พึ่งแท็บ browser จึงทำงานต่อได้แม้ผู้บริจาคปิดหน้าเว็บทันที
+    return donationSettings?.auto_process_on_submit!==false;
+  }
   function formatFileSize(bytes){
     const n=Number(bytes)||0;
     if(n<1024)return `${n} B`;
@@ -343,7 +361,7 @@
       const {data:v15Ok,error:v15Err}=await db.rpc('set_donation_v15_extras',{p_id:row.id,p_upload_token:row.upload_token,p_giving_as_type:payload.givingAsType,p_giving_name:payload.givingName,p_contact_name:payload.contactName,p_campaign_id:payload.campaignId});if(v15Err)throw v15Err;if(v15Ok!==true)throw new Error('บันทึกข้อมูลรูปแบบการร่วมบุญ/โครงการไม่สำเร็จ');
       const ext=(selectedSlip.name.split('.').pop()||'jpg').toLowerCase().replace(/[^a-z0-9]/g,'')||'jpg';const path=`${row.id}/${row.upload_token}/${crypto.randomUUID()}.${ext}`;const bucket=window.SCHOOL_APP_CONFIG?.DONATION_SLIP_BUCKET||'donation-slips';const {error:uploadErr}=await db.storage.from(bucket).upload(path,selectedSlip,{upsert:false,contentType:selectedSlip.type});if(uploadErr)throw uploadErr;
       const {data:final,error:finalErr}=await db.rpc('finalize_donation_submission',{p_id:row.id,p_upload_token:row.upload_token,p_slip_path:path});if(finalErr)throw finalErr;const saved=Array.isArray(final)?final[0]:final;
-      localStorage.setItem('wnw-donation-history-code',saved.history_code||row.history_code);localStorage.setItem('wnw-donation-last-request',saved.request_no||row.request_no);sessionStorage.removeItem(DRAFT_KEY);form.classList.add('hidden');reminder.classList.add('hidden');document.getElementById('success-card').classList.remove('hidden');document.getElementById('success-request').textContent=saved.request_no||row.request_no;document.getElementById('success-history').textContent=saved.history_code||row.history_code;window.scrollTo({top:0,behavior:'smooth'});lucide.createIcons();
+      localStorage.setItem('wnw-donation-history-code',saved.history_code||row.history_code);localStorage.setItem('wnw-donation-last-request',saved.request_no||row.request_no);sessionStorage.removeItem(DRAFT_KEY);form.classList.add('hidden');reminder.classList.add('hidden');document.getElementById('success-card').classList.remove('hidden');document.getElementById('success-request').textContent=saved.request_no||row.request_no;document.getElementById('success-history').textContent=saved.history_code||row.history_code;const autoStarted=triggerAutoProcessing({id:saved.id||row.id,auto_process_token:saved.auto_process_token||''});updateSuccessCard(autoStarted);window.scrollTo({top:0,behavior:'smooth'});lucide.createIcons();
     }catch(err){console.error(err);showStatus('ส่งข้อมูลไม่สำเร็จ: '+(err.message||err));btn.disabled=false;btn.innerHTML='<span class="inline-flex items-center gap-2"><i data-lucide="send" class="w-5 h-5"></i> ส่งสลิปและข้อมูลการร่วมบุญ</span>';lucide.createIcons()}
   });
   init();

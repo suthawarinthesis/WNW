@@ -55,6 +55,9 @@
   function nikornStatus(msg,ok=false){const el=$('#nikorn-status');if(!el)return;el.className=`mt-5 rounded-xl p-3 text-sm border ${ok?'bg-emerald-50 text-emerald-700 border-emerald-200':'bg-rose-50 text-rose-700 border-rose-200'}`;el.textContent=msg;el.classList.remove('hidden')}
   function settingsStatus(msg,ok=false){const el=$('#settings-status');el.className=`rounded-xl p-3 text-sm border ${ok?'bg-emerald-50 text-emerald-700 border-emerald-200':'bg-rose-50 text-rose-700 border-rose-200'}`;el.textContent=msg;el.classList.remove('hidden')}
 
+  function reviewPhotoStatus(msg,ok=false){const el=$('#review-photo-upload-status');if(!el)return;el.className=`mt-2 text-xs ${ok?'text-emerald-700':'text-slate-500'}`;el.textContent=msg}
+  function updateReviewPhotoPreview(url=''){const box=$('#review-photo-preview');if(!box)return;const src=normalizePhotoUrl(url);if(src){box.innerHTML=`<img src="${esc(src)}" alt="รูปผู้บริจาค" class="w-full h-full object-cover">`; }else{box.innerHTML='<div class="px-3 text-center text-slate-400 text-xs leading-5">ยังไม่มีรูป</div>'}}
+
   async function ensureAuth(){
     if(!db){$('#login-status').textContent='ยังไม่ได้ตั้งค่า Supabase';$('#login-status').classList.remove('hidden');return}
     const {data:{user}}=await db.auth.getUser();
@@ -237,6 +240,75 @@
     }
   }
 
+
+  async function deleteOldGeneratedFiles(oldFiles, newRow){
+    const warnings=[];
+    const tasks=[];
+
+    const tryDelete=(fileId, folderId, label)=>{
+      if(!fileId)return;
+      const newIds=new Set([
+        String(newRow?.certificate_drive_file_id||''),
+        String(newRow?.certificate_image_drive_file_id||''),
+        String(newRow?.nikorn_image_drive_file_id||'')
+      ].filter(Boolean));
+      if(newIds.has(String(fileId)))return;
+
+      tasks.push((async()=>{
+        try{
+          await callGoogleSlidesBridge('delete_certificate',{file_id:fileId,folder_id:folderId});
+        }catch(err){
+          warnings.push(`${label}: ${err.message||err}`);
+        }
+      })());
+    };
+
+    tryDelete(oldFiles.certificate_drive_file_id, settings?.google_drive_folder_id||'', 'ลบ PDF เก่าไม่สำเร็จ');
+    tryDelete(oldFiles.certificate_image_drive_file_id, settings?.google_drive_folder_id||'', 'ลบภาพใบเก่าไม่สำเร็จ');
+    tryDelete(oldFiles.nikorn_image_drive_file_id, nikornFolderId(), 'ลบภาพ พม.นิกรเก่าไม่สำเร็จ');
+
+    if(tasks.length)await Promise.allSettled(tasks);
+    return warnings;
+  }
+
+  function reviewEditPayload(){
+    const displayName=$('#review-display-name').value.trim();
+    const isAlumni=$('#review-is-alumni').value==='true';
+    const alumniBatch=$('#review-alumni-batch').value.trim();
+    if(!displayName)throw new Error('กรุณาระบุชื่อผู้บริจาค');
+
+    return {
+      display_name:displayName,
+      certificate_name_override:$('#review-cert-name').value.trim(),
+      is_alumni:isAlumni,
+      alumni_batch:isAlumni?alumniBatch:'',
+      amount:Number($('#review-amount').value),
+      transfer_date:$('#review-date').value,
+      transfer_time:$('#review-time').value,
+      photo_url:$('#review-photo-url').value.trim(),
+      admin_note:$('#review-note').value.trim()
+    };
+  }
+
+  async function regenerateAfterEdit(oldRow, savedRow){
+    if(savedRow.status!=='verified' || !savedRow.certificate_no)return {row:savedRow,warnings:[]};
+
+    const oldFiles={
+      certificate_drive_file_id:oldRow.certificate_drive_file_id||'',
+      certificate_image_drive_file_id:oldRow.certificate_image_drive_file_id||'',
+      nikorn_image_drive_file_id:oldRow.nikorn_image_drive_file_id||''
+    };
+
+    modalStatus('บันทึกข้อมูลแล้ว กำลังสร้างใบอนุโมทนาบัตรชุดใหม่...',true);
+
+    let latest=await generateGoogleCertificate(savedRow);
+    modalStatus('สร้างใบอนุโมทนาบัตรใหม่แล้ว กำลังสร้างภาพ พม.นิกรใหม่...',true);
+    latest=await generateNikornImage(latest);
+
+    const warnings=await deleteOldGeneratedFiles(oldFiles,latest);
+    return {row:latest,warnings};
+  }
+
   async function generateGoogleCertificate(x){
     if(!x?.certificate_no)throw new Error('รายการนี้ยังไม่มีเลขใบอนุโมทนาบัตร');
     try{await db.from('donations').update({certificate_generation_status:'generating',certificate_generation_error:''}).eq('id',x.id)}catch(_){ }
@@ -255,7 +327,7 @@
   }
   async function openReview(id){
     currentReviewId=id;const x=rows.find(r=>r.id===id);if(!x)return;
-    $('#review-title').textContent=x.request_no;$('#review-cert-name').value=x.certificate_name_override||'';$('#review-amount').value=x.amount;$('#review-date').value=x.transfer_date||'';$('#review-time').value=String(x.transfer_time||'').slice(0,5);$('#review-note').value=x.admin_note||'';$('#review-status').classList.add('hidden');
+    $('#review-title').textContent=x.request_no;$('#review-display-name').value=x.display_name||'';$('#review-is-alumni').value=x.is_alumni?'true':'false';$('#review-alumni-batch').value=x.alumni_batch||'';$('#review-alumni-batch').disabled=!x.is_alumni;$('#review-cert-name').value=x.certificate_name_override||'';$('#review-amount').value=x.amount;$('#review-date').value=x.transfer_date||'';$('#review-time').value=String(x.transfer_time||'').slice(0,5);$('#review-note').value=x.admin_note||'';$('#review-photo-url').value=x.photo_url||'';$('#review-status').classList.add('hidden');reviewPhotoStatus(x.photo_url?'พบรูปผู้บริจาคแล้ว สามารถสร้างภาพ พม.นิกรได้':'ยังไม่มีรูปผู้บริจาค — ผู้ดูแลสามารถวางลิงก์หรืออัปโหลดรูปแทนได้');updateReviewPhotoPreview(x.photo_url||'');const f=$('#review-photo-file');if(f)f.value='';const saveBtn=$('#review-save');if(saveBtn)saveBtn.textContent=(x.status==='verified'&&x.certificate_no)?'บันทึก • สร้างใบและภาพใหม่':'บันทึกข้อมูลที่แก้ไข';
     const address=[x.address_line,x.subdistrict&&`ต.${x.subdistrict}`,x.district&&`อ.${x.district}`,x.province&&`จ.${x.province}`,x.postal_code].filter(Boolean).join(' ');
     $('#review-donor').innerHTML=`<div class="flex flex-col sm:flex-row gap-4"><div>${avatarHtml(x,'w-24 h-24')}</div><div class="grid sm:grid-cols-2 gap-x-5 gap-y-3 flex-1"><div><span class="text-slate-400 text-xs">ชื่อผู้บริจาค</span><p class="font-bold mt-0.5">${esc(x.display_name)}</p>${x.is_alumni?`<p class="mt-1 text-xs font-bold text-fuchsia-700">ศิษย์เก่า${x.alumni_batch?' รุ่น '+esc(x.alumni_batch):''}</p>`:''}</div><div><span class="text-slate-400 text-xs">ร่วมบุญในนาม</span><p class="font-bold mt-0.5">${esc(({person:'บุคคล',family:'ครอบครัว',shop:'ร้านค้า',company:'บริษัท',alumni_group:'คณะศิษย์เก่า',host_group:'คณะเจ้าภาพ'})[x.giving_as_type]||'บุคคล')}</p></div><div><span class="text-slate-400 text-xs">โครงการ / งาน</span><p class="font-bold mt-0.5">${esc(x.campaign_name||'-')} ${x.campaign_prefix?`<span class="text-orange-600">(${esc(x.campaign_prefix)})</span>`:''}</p></div>${x.temple_name?`<div><span class="text-slate-400 text-xs">วัด</span><p class="font-bold mt-0.5">${esc(x.temple_name)}</p></div>`:''}${x.organization?`<div><span class="text-slate-400 text-xs">หน่วยงาน</span><p class="font-bold mt-0.5">${esc(x.organization)}</p></div>`:''}<div><span class="text-slate-400 text-xs">ติดต่อ</span><p class="font-bold mt-0.5">${esc(x.phone||x.email||'-')}</p></div><div><span class="text-slate-400 text-xs">ที่อยู่</span><p class="font-bold mt-0.5">${esc(address||'-')}</p></div>${x.photo_url?`<div class="sm:col-span-2"><span class="text-slate-400 text-xs">ลิงก์รูปภาพ</span><p class="mt-0.5"><a href="${esc(x.photo_url)}" target="_blank" rel="noopener" class="font-bold text-orange-600 break-all">เปิดรูปต้นฉบับ ↗</a></p></div>`:''}${x.donor_note?`<div class="sm:col-span-2"><span class="text-slate-400 text-xs">หมายเหตุผู้บริจาค</span><p class="font-bold mt-0.5">${esc(x.donor_note)}</p></div>`:''}</div></div>`;
     refreshReviewCertificateUI(x);
@@ -271,12 +343,50 @@
 
   async function saveReview(showMessage=true){
     const x=rows.find(r=>r.id===currentReviewId);if(!x)return null;
-    const payload={certificate_name_override:$('#review-cert-name').value.trim(),amount:Number($('#review-amount').value),transfer_date:$('#review-date').value,transfer_time:$('#review-time').value,admin_note:$('#review-note').value.trim()};
+    const oldRow={...x};
+    const payload=reviewEditPayload();
     if(!payload.amount||payload.amount<=0)throw new Error('จำนวนเงินไม่ถูกต้อง');
-    const {data,error}=await db.from('donations').update(payload).eq('id',x.id).select('*').single();if(error)throw error;
-    const idx=rows.findIndex(r=>r.id===x.id);if(idx>=0)rows[idx]=data;if(showMessage)modalStatus('บันทึกข้อมูลแล้ว',true);renderDashboard();renderDonationList();renderHistoryAll();return data;
+
+    const {data,error}=await db.from('donations').update(payload).eq('id',x.id).select('*').single();
+    if(error)throw error;
+
+    const idx=rows.findIndex(r=>r.id===x.id);if(idx>=0)rows[idx]=data;
+    if(showMessage)modalStatus('บันทึกข้อมูลแล้ว',true);
+    renderDashboard();renderDonationList();renderHistoryAll();
+    return {oldRow,savedRow:data};
   }
-  $('#review-save').onclick=async()=>{try{await saveReview(true)}catch(err){modalStatus('บันทึกไม่สำเร็จ: '+(err.message||err))}};
+
+  $('#review-save').onclick=async()=>{
+    const btn=$('#review-save');const original=btn.textContent;btn.disabled=true;btn.textContent='กำลังบันทึก...';
+    try{
+      const result=await saveReview(false);if(!result)return;
+      let latest=result.savedRow;
+
+      if(latest.status==='verified'&&latest.certificate_no){
+        btn.textContent='กำลังสร้างไฟล์ใหม่...';
+        const regen=await regenerateAfterEdit(result.oldRow,latest);
+        latest=regen.row;
+        refreshReviewCertificateUI(latest);
+        renderDashboard();renderDonationList();renderHistoryAll();renderNikornList();
+
+        const warn=regen.warnings.length?` แต่มีไฟล์เก่าบางรายการลบไม่สำเร็จ: ${regen.warnings.join(' | ')}`:'';
+        modalStatus('บันทึกข้อมูล สร้างใบอนุโมทนาบัตรใหม่ และสร้างภาพ พม.นิกรใหม่เรียบร้อยแล้ว'+warn,true);
+      }else{
+        modalStatus('บันทึกข้อมูลที่แก้ไขแล้ว',true);
+        openReview(latest.id);
+      }
+    }catch(err){
+      modalStatus('บันทึก/สร้างไฟล์ใหม่ไม่สำเร็จ: '+(err.message||err));
+    }finally{
+      btn.disabled=false;
+      const now=rows.find(r=>r.id===currentReviewId);
+      btn.textContent=(now?.status==='verified'&&now?.certificate_no)?'บันทึก • สร้างใบและภาพใหม่':'บันทึกข้อมูลที่แก้ไข';
+    }
+  };
+  $('#review-is-alumni')?.addEventListener('change',e=>{const on=e.target.value==='true';$('#review-alumni-batch').disabled=!on;if(!on)$('#review-alumni-batch').value=''});
+  $('#review-photo-url')?.addEventListener('input',e=>{updateReviewPhotoPreview(e.target.value.trim())});
+  $('#review-photo-remove')?.addEventListener('click',()=>{$('#review-photo-url').value='';updateReviewPhotoPreview('');reviewPhotoStatus('ลบลิงก์รูปออกแล้ว กรุณากดบันทึก หรือกดยืนยันรายการเพื่อบันทึก',true)});
+  $('#review-photo-file')?.addEventListener('change',async e=>{const file=e.target.files?.[0];if(!file)return;try{reviewPhotoStatus('กำลังอัปโหลดรูปผู้บริจาค...');const url=await uploadAsset(file,'donor-photos');$('#review-photo-url').value=url;updateReviewPhotoPreview(url);reviewPhotoStatus('อัปโหลดรูปแล้ว กรุณากดบันทึก หรือกดยืนยันรายการเพื่อใช้รูปนี้',true)}catch(err){reviewPhotoStatus('อัปโหลดรูปไม่สำเร็จ: '+(err.message||err))}finally{e.target.value=''}});
   $('#review-approve').onclick=async()=>{
     if(!currentReviewId||!confirm('ยืนยันว่าตรวจสอบสลิปถูกต้อง? ระบบจะยืนยันรายการ ออกเลขใบ และสร้าง PDF จาก Google Slides ให้อัตโนมัติทันที'))return;
     const btn=$('#review-approve');btn.disabled=true;btn.textContent='กำลังยืนยันและสร้างใบ...';
@@ -329,6 +439,21 @@
         const {error}=await db.storage.from(bucket).remove([x.slip_path]);
         if(error)throw error;
       }catch(err){warnings.push('ลบสลิปไม่สำเร็จ: '+(err.message||err))}
+    }
+
+    // ลบรูปผู้บริจาคที่แอดมินอัปโหลดเข้า donation-assets แบบ best-effort
+    if(x.photo_url){
+      try{
+        const u=new URL(x.photo_url);
+        const bucket=window.SCHOOL_APP_CONFIG?.DONATION_ASSETS_BUCKET||'donation-assets';
+        const marker=`/storage/v1/object/public/${bucket}/`;
+        const idx=u.pathname.indexOf(marker);
+        if(idx>=0){
+          const path=decodeURIComponent(u.pathname.slice(idx+marker.length));
+          const {error}=await db.storage.from(bucket).remove([path]);
+          if(error)throw error;
+        }
+      }catch(err){warnings.push('ลบรูปผู้บริจาคไม่สำเร็จ: '+(err.message||err))}
     }
 
     // ลบ record เป็นขั้นสุดท้าย

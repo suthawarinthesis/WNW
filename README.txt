@@ -1,6 +1,4 @@
-V24.1 SAFE FIX
-1) รัน DONATION-V24-1-SAFE-PATCH.sql ใน Supabase SQL Editor โดยไม่เลือกเฉพาะบางบรรทัด
-2) ใช้ google-apps-script/Code.gs แทนตัวเดิม แล้ว Deploy > New version
-3) ใช้ donation/history/history.js ทับตัวเดิม
-4) Ctrl+F5
-หมายเหตุ: SQL ตัวนี้ไม่มี $fn$ จึงแก้ error unterminated dollar-quoted string
+ลากโฟลเดอร์ donation/ ไปวางทับเว็บเดิม
+ไม่ต้องรัน SQL
+ไม่ต้อง Deploy Apps Script ใหม่ ถ้าใช้อยู่ที่ Manual V21.5 แล้ว
+รายการ verified: กดบันทึก -> สร้างใบใหม่ + ภาพ พม.นิกรใหม่ -> ลบไฟล์เก่า

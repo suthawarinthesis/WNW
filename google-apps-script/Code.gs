@@ -1,5 +1,5 @@
 /**
- * WNW Donation Certificate Generator — V23 Backend Auto Process
+ * WNW Donation Certificate Generator — V24 Auto Nikorn + Photo 403 Fix
  * Google Slides tags:
  *   {{donor_name}}
  *   {{donation_amount}}
@@ -24,7 +24,7 @@ const TAGS = {
 };
 
 function doGet() {
-  return HtmlService.createHtmlOutput('<h3>WNW Donation Certificate Generator V23</h3><p>Web App พร้อมทำงาน</p>')
+  return HtmlService.createHtmlOutput('<h3>WNW Donation Certificate Generator V24</h3><p>Web App พร้อมทำงาน</p>')
     .setXFrameOptionsMode(HtmlService.XFrameOptionsMode.ALLOWALL);
 }
 
@@ -329,7 +329,8 @@ function generatePromoImage_(templateId, folderId, p) {
   const donorName = String(p.donor_name || '').trim();
   const amount = String(p.donation_amount || '').trim();
   const certificateNo = String(p.certificate_no || p.request_no || ('DONATION-' + Date.now())).trim().toUpperCase();
-  const sourcePhotoUrl = normalizePublicImageUrl_(String(p.photo_url || '').trim()) || normalizePublicImageUrl_(String(p.fallback_photo_url || '').trim()) || DEFAULT_PROMO_FALLBACK_PHOTO_URL;
+  const primaryPhotoUrl = String(p.photo_url || '').trim();
+  const fallbackPhotoUrl = String(p.fallback_photo_url || '').trim() || DEFAULT_PROMO_FALLBACK_PHOTO_URL;
   if (!donorName) throw new Error('ชื่อผู้บริจาคว่าง');
   if (!amount) throw new Error('จำนวนเงินว่าง');
 
@@ -348,13 +349,22 @@ function generatePromoImage_(templateId, folderId, p) {
     const pres = SlidesApp.openById(workingCopy.getId());
     const n1 = pres.replaceAllText(TAGS.donor_name, donorName);
     const n2 = pres.replaceAllText(TAGS.donation_amount, amount);
-    const photoBlob = fetchRemoteImageBlob_(sourcePhotoUrl);
-    const n3 = replaceImagePlaceholders_(pres, TAGS.photo, photoBlob);
+
+    // รูปผู้บริจาค: Drive จะดึงด้วย DriveApp/OAuth ก่อน เพื่อไม่ติด 403 จาก uc?export=download
+    // ถ้ารูปผู้บริจาคเปิดไม่ได้ จะลองรูป fallback และถ้ายังไม่ได้อีกจะสร้างโปสเตอร์ต่อโดยเว้นช่องรูปไว้
+    const photoResult = fetchPromoPhotoBlob_(primaryPhotoUrl, fallbackPhotoUrl);
+    let n3 = 0;
+    if (photoResult.blob) {
+      n3 = replaceImagePlaceholders_(pres, TAGS.photo, photoResult.blob);
+    } else {
+      n3 = pres.replaceAllText(TAGS.photo, '');
+    }
+
     const slideId = pres.getSlides()[0].getObjectId();
     pres.saveAndClose();
     if (n1 < 1 || n2 < 1 || n3 < 1) throw new Error('Replace ข้อมูลภาพประชาสัมพันธ์ไม่ครบ กรุณาตรวจ Template');
 
-    Utilities.sleep(700);
+    Utilities.sleep(900);
     const pngBlob = fetchSlideThumbnailBlob_(workingCopy.getId(), slideId).setName(imageName);
     const image = folder.createFile(pngBlob);
     let publicSharing = true;
@@ -366,7 +376,9 @@ function generatePromoImage_(templateId, folderId, p) {
       image_download_url: 'https://drive.google.com/uc?export=download&id=' + image.getId(),
       image_file_name: image.getName(),
       public_sharing: publicSharing,
-      source_photo_url: sourcePhotoUrl,
+      source_photo_url: photoResult.used_url || '',
+      photo_fallback_used: photoResult.fallback_used === true,
+      photo_warning: photoResult.warning || '',
       replaced: { donor_name:n1, donation_amount:n2, photo:n3 }
     };
   } finally {
@@ -471,20 +483,102 @@ function collectTagTargets_(slide, el, tag, targets) {
   } catch (_) {}
 }
 
+function extractDriveFileId_(raw) {
+  const value = String(raw || '').trim();
+  if (!value) return '';
+  const m = value.match(/\/file\/d\/([A-Za-z0-9_-]+)/) ||
+            value.match(/[?&]id=([A-Za-z0-9_-]+)/) ||
+            value.match(/\/thumbnail\?id=([A-Za-z0-9_-]+)/);
+  return m && m[1] ? m[1] : '';
+}
+
 function normalizePublicImageUrl_(raw) {
   const value = String(raw || '').trim();
   if (!value) return '';
-  const driveMatch = value.match(/\/file\/d\/([A-Za-z0-9_-]+)/) || value.match(/[?&]id=([A-Za-z0-9_-]+)/);
-  if (driveMatch && driveMatch[1]) return 'https://drive.google.com/uc?export=download&id=' + driveMatch[1];
+  const id = extractDriveFileId_(value);
+  if (id) return 'https://drive.google.com/thumbnail?id=' + id + '&sz=w1600';
   return value;
 }
 
+function ensureImageBlob_(blob, name) {
+  if (!blob) throw new Error('ไม่พบข้อมูลรูปภาพ');
+  const type = String(blob.getContentType() || '').toLowerCase();
+  if (type && type.indexOf('image/') !== 0) throw new Error('ไฟล์ที่ดึงมาไม่ใช่รูปภาพ (' + type + ')');
+  return blob.setName(name || 'donor-photo');
+}
+
+function fetchDriveImageBlob_(fileId) {
+  let lastError = '';
+  try {
+    const file = DriveApp.getFileById(fileId);
+    return ensureImageBlob_(file.getBlob(), 'donor-photo');
+  } catch (err) {
+    lastError = err && err.message ? err.message : String(err);
+  }
+
+  try {
+    const apiUrl = 'https://www.googleapis.com/drive/v3/files/' + encodeURIComponent(fileId) + '?alt=media&supportsAllDrives=true';
+    const res = UrlFetchApp.fetch(apiUrl, {
+      method:'get', muteHttpExceptions:true, followRedirects:true,
+      headers:{Authorization:'Bearer ' + ScriptApp.getOAuthToken()}
+    });
+    if (res.getResponseCode() >= 200 && res.getResponseCode() < 300) {
+      return ensureImageBlob_(res.getBlob(), 'donor-photo');
+    }
+    lastError = 'Google Drive HTTP ' + res.getResponseCode();
+  } catch (err2) {
+    lastError = err2 && err2.message ? err2.message : String(err2);
+  }
+  throw new Error('ดึงรูปจาก Google Drive ไม่สำเร็จ: ' + lastError);
+}
+
 function fetchRemoteImageBlob_(url) {
-  const target = normalizePublicImageUrl_(url);
-  if (!/^https?:\/\//i.test(target)) throw new Error('ลิงก์รูปภาพไม่ถูกต้อง');
-  const res = UrlFetchApp.fetch(target, { muteHttpExceptions:true, followRedirects:true, headers:{'User-Agent':'Mozilla/5.0'} });
-  if (res.getResponseCode() < 200 || res.getResponseCode() >= 300) throw new Error('ดาวน์โหลดรูปภาพไม่สำเร็จ: HTTP ' + res.getResponseCode());
-  return res.getBlob().setName('donor-photo');
+  const raw = String(url || '').trim();
+  if (!raw) throw new Error('ลิงก์รูปภาพว่าง');
+
+  const driveId = extractDriveFileId_(raw);
+  if (driveId) return fetchDriveImageBlob_(driveId);
+
+  if (!/^https?:\/\//i.test(raw)) throw new Error('ลิงก์รูปภาพไม่ถูกต้อง');
+  const attempts = [
+    { 'User-Agent':'Mozilla/5.0', 'Accept':'image/avif,image/webp,image/apng,image/*,*/*;q=0.8' },
+    { 'Accept':'image/*,*/*;q=0.8' },
+    {}
+  ];
+  let lastCode = 0;
+  for (let i=0;i<attempts.length;i++) {
+    try {
+      const res = UrlFetchApp.fetch(raw, { muteHttpExceptions:true, followRedirects:true, headers:attempts[i] });
+      lastCode = res.getResponseCode();
+      if (lastCode >= 200 && lastCode < 300) return ensureImageBlob_(res.getBlob(), 'donor-photo');
+    } catch (_) {}
+  }
+  throw new Error('ดาวน์โหลดรูปภาพไม่สำเร็จ: HTTP ' + lastCode);
+}
+
+function fetchPromoPhotoBlob_(primaryUrl, fallbackUrl) {
+  const candidates = [];
+  [primaryUrl, fallbackUrl, DEFAULT_PROMO_FALLBACK_PHOTO_URL].forEach(function(u) {
+    const v = String(u || '').trim();
+    if (v && candidates.indexOf(v) === -1) candidates.push(v);
+  });
+
+  const errors = [];
+  for (let i=0;i<candidates.length;i++) {
+    try {
+      return {
+        blob: fetchRemoteImageBlob_(candidates[i]),
+        used_url: candidates[i],
+        fallback_used: i > 0,
+        warning: errors.length ? errors.join(' | ') : ''
+      };
+    } catch (err) {
+      errors.push((i===0?'รูปผู้บริจาค':'รูปสำรอง') + ': ' + (err && err.message ? err.message : String(err)));
+    }
+  }
+
+  // ไม่ให้ทั้งงาน พม.นิกรล้มเพราะรูปอย่างเดียว
+  return { blob:null, used_url:'', fallback_used:true, warning:errors.join(' | ') };
 }
 
 function replaceQrPlaceholders_(pres, verifyUrl) {

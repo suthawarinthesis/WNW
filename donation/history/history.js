@@ -7,7 +7,15 @@
   function message(text,ok=false){status.className=`mt-4 rounded-2xl p-4 text-sm border ${ok?'bg-emerald-50 text-emerald-700 border-emerald-200':'bg-rose-50 text-rose-700 border-rose-200'}`;status.textContent=text;status.classList.remove('hidden')}
   function normalizePhotoUrl(value=''){
     const raw=String(value||'').trim();if(!raw)return '';
-    try{const u=new URL(raw);if(!['http:','https:'].includes(u.protocol))return '';if(/(^|\.)drive\.google\.com$/i.test(u.hostname)){const m=raw.match(/\/file\/d\/([a-zA-Z0-9_-]+)/)||raw.match(/[?&]id=([a-zA-Z0-9_-]+)/);if(m?.[1])return `https://drive.google.com/thumbnail?id=${encodeURIComponent(m[1])}&sz=w1200`;}return raw}catch(_){return ''}
+    try{
+      const u=new URL(raw);if(!['http:','https:'].includes(u.protocol))return '';
+      if(/(^|\.)drive\.google\.com$/i.test(u.hostname)||/(^|\.)drive\.usercontent\.google\.com$/i.test(u.hostname)){
+        const m=raw.match(/\/file\/d\/([a-zA-Z0-9_-]+)/)||raw.match(/[?&]id=([a-zA-Z0-9_-]+)/)||raw.match(/\/d\/([a-zA-Z0-9_-]+)(?:[=/]|$)/);
+        const rk=raw.match(/[?&]resourcekey=([^&#]+)/i);
+        if(m?.[1])return `https://drive.google.com/thumbnail?id=${encodeURIComponent(m[1])}&sz=w1200${rk?.[1]?`&resourcekey=${encodeURIComponent(decodeURIComponent(rk[1]))}`:''}`;
+      }
+      return raw;
+    }catch(_){return ''}
   }
   function countdownText(startValue){
     const start=startValue?new Date(startValue).getTime():Date.now();
@@ -21,8 +29,8 @@
     const certStatus=String(x.certificate_generation_status||'not_generated');
     const nikornStatus=String(x.nikorn_generation_status||'not_generated');
     const start=C.escapeHtml(x.auto_process_started_at||x.certificate_issued_at||new Date().toISOString());
-    const certReady=!!x.certificate_pdf_url||!!x.certificate_image_url;
-    const nikornReady=!!x.nikorn_image_url;
+    const certReady=!!x.certificate_pdf_url||!!x.certificate_image_url||certStatus==='ready';
+    const nikornReady=!!x.nikorn_image_url||nikornStatus==='ready';
     const certLine=certReady
       ? '<span class="text-emerald-700 font-bold">✓ ใบอนุโมทนาบัตรพร้อมแล้ว</span>'
       : certStatus==='error'
@@ -62,7 +70,7 @@
     if(!rows.length){clearResults();if(!silent)message('ไม่พบประวัติที่ตรงกับข้อมูล กรุณาตรวจสอบข้อมูลอีกครั้ง');return;}
     if(!silent)message(successText||`พบประวัติ ${rows.length} รายการ`,true);render();
   }
-  function hasGenerating(){return rows.some(x=>x.status==='verified'&&((!x.certificate_pdf_url&&!x.certificate_image_url&&x.certificate_generation_status!=='error')||(!x.nikorn_image_url&&x.nikorn_generation_status!=='error')))}
+  function hasGenerating(){return rows.some(x=>{if(x.status!=='verified')return false;const cs=String(x.certificate_generation_status||'not_generated'),ns=String(x.nikorn_generation_status||'not_generated');const certBusy=!x.certificate_pdf_url&&!x.certificate_image_url&&!['ready','error'].includes(cs);const nikornBusy=!x.nikorn_image_url&&!['ready','error'].includes(ns);return certBusy||nikornBusy})}
   function stopAutoWatch(){if(refreshTimer){clearTimeout(refreshTimer);refreshTimer=null}if(countdownTimer){clearInterval(countdownTimer);countdownTimer=null}}
   function startAutoWatch(){
     if(countdownTimer)clearInterval(countdownTimer);

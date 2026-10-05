@@ -1,5 +1,5 @@
 /**
- * WNW Donation Certificate Generator — V24 Auto Nikorn + Photo 403 Fix
+ * WNW Donation Certificate Generator — V27 PHOTO + STATUS SYNC
  * Google Slides tags:
  *   {{donor_name}}
  *   {{donation_amount}}
@@ -15,6 +15,7 @@ const DEFAULT_FOLDER_ID = '1JUTSXLLdR7X5KiV6KINe6Nk85DS-YdYk';
 const DEFAULT_PROMO_TEMPLATE_ID = '1aj3h3pMB-Ulz1SuldI-ckBlddfralVwF7sfx0x65cNE';
 const DEFAULT_PROMO_FOLDER_ID = '1H_PEfawTOnn7LM4Pi6CSWJ6CYVnTo-iF';
 const DEFAULT_PROMO_FALLBACK_PHOTO_URL = 'https://i.postimg.cc/Kz6vK8gM/Screenshot-2026-10-04-181000.png';
+const BUILTIN_PROMO_FALLBACK_PNG_BASE64 = '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';
 const TAGS = {
   donor_name: '{{donor_name}}',
   donation_amount: '{{donation_amount}}',
@@ -24,7 +25,7 @@ const TAGS = {
 };
 
 function doGet() {
-  return HtmlService.createHtmlOutput('<h3>WNW Donation Certificate Generator V24</h3><p>Web App พร้อมทำงาน</p>')
+  return HtmlService.createHtmlOutput('<h3>WNW Donation V27 PHOTO + STATUS SYNC</h3><p>Auto Certificate + Auto Nikorn + Drive resource-key photo support</p>')
     .setXFrameOptionsMode(HtmlService.XFrameOptionsMode.ALLOWALL);
 }
 
@@ -353,12 +354,7 @@ function generatePromoImage_(templateId, folderId, p) {
     // รูปผู้บริจาค: Drive จะดึงด้วย DriveApp/OAuth ก่อน เพื่อไม่ติด 403 จาก uc?export=download
     // ถ้ารูปผู้บริจาคเปิดไม่ได้ จะลองรูป fallback และถ้ายังไม่ได้อีกจะสร้างโปสเตอร์ต่อโดยเว้นช่องรูปไว้
     const photoResult = fetchPromoPhotoBlob_(primaryPhotoUrl, fallbackPhotoUrl);
-    let n3 = 0;
-    if (photoResult.blob) {
-      n3 = replaceImagePlaceholders_(pres, TAGS.photo, photoResult.blob);
-    } else {
-      n3 = pres.replaceAllText(TAGS.photo, '');
-    }
+    const n3 = replaceImagePlaceholders_(pres, TAGS.photo, photoResult.blob);
 
     const slideId = pres.getSlides()[0].getObjectId();
     pres.saveAndClose();
@@ -378,6 +374,7 @@ function generatePromoImage_(templateId, folderId, p) {
       public_sharing: publicSharing,
       source_photo_url: photoResult.used_url || '',
       photo_fallback_used: photoResult.fallback_used === true,
+      photo_builtin_fallback_used: photoResult.builtin_fallback_used === true,
       photo_warning: photoResult.warning || '',
       replaced: { donor_name:n1, donation_amount:n2, photo:n3 }
     };
@@ -488,15 +485,28 @@ function extractDriveFileId_(raw) {
   if (!value) return '';
   const m = value.match(/\/file\/d\/([A-Za-z0-9_-]+)/) ||
             value.match(/[?&]id=([A-Za-z0-9_-]+)/) ||
-            value.match(/\/thumbnail\?id=([A-Za-z0-9_-]+)/);
+            value.match(/\/thumbnail\?id=([A-Za-z0-9_-]+)/) ||
+            value.match(/\/d\/([A-Za-z0-9_-]+)(?:[=/]|$)/);
   return m && m[1] ? m[1] : '';
+}
+
+function extractDriveResourceKey_(raw) {
+  const value = String(raw || '').trim();
+  if (!value) return '';
+  const m = value.match(/[?&]resourcekey=([^&#]+)/i);
+  if (!m || !m[1]) return '';
+  try { return decodeURIComponent(m[1]); } catch (_) { return m[1]; }
 }
 
 function normalizePublicImageUrl_(raw) {
   const value = String(raw || '').trim();
   if (!value) return '';
   const id = extractDriveFileId_(value);
-  if (id) return 'https://drive.google.com/thumbnail?id=' + id + '&sz=w1600';
+  if (id) {
+    const rk = extractDriveResourceKey_(value);
+    return 'https://drive.google.com/thumbnail?id=' + encodeURIComponent(id) +
+      '&sz=w1600' + (rk ? '&resourcekey=' + encodeURIComponent(rk) : '');
+  }
   return value;
 }
 
@@ -507,10 +517,15 @@ function ensureImageBlob_(blob, name) {
   return blob.setName(name || 'donor-photo');
 }
 
-function fetchDriveImageBlob_(fileId) {
+function fetchDriveImageBlob_(fileId, resourceKey) {
   let lastError = '';
   try {
-    const file = DriveApp.getFileById(fileId);
+    let file;
+    if (resourceKey && typeof DriveApp.getFileByIdAndResourceKey === 'function') {
+      file = DriveApp.getFileByIdAndResourceKey(fileId, resourceKey);
+    } else {
+      file = DriveApp.getFileById(fileId);
+    }
     return ensureImageBlob_(file.getBlob(), 'donor-photo');
   } catch (err) {
     lastError = err && err.message ? err.message : String(err);
@@ -518,17 +533,42 @@ function fetchDriveImageBlob_(fileId) {
 
   try {
     const apiUrl = 'https://www.googleapis.com/drive/v3/files/' + encodeURIComponent(fileId) + '?alt=media&supportsAllDrives=true';
+    const headers = {Authorization:'Bearer ' + ScriptApp.getOAuthToken()};
+    if (resourceKey) headers['X-Goog-Drive-Resource-Keys'] = fileId + '/' + resourceKey;
     const res = UrlFetchApp.fetch(apiUrl, {
-      method:'get', muteHttpExceptions:true, followRedirects:true,
-      headers:{Authorization:'Bearer ' + ScriptApp.getOAuthToken()}
+      method:'get', muteHttpExceptions:true, followRedirects:true, headers:headers
     });
     if (res.getResponseCode() >= 200 && res.getResponseCode() < 300) {
       return ensureImageBlob_(res.getBlob(), 'donor-photo');
     }
-    lastError = 'Google Drive HTTP ' + res.getResponseCode();
+    lastError = 'Google Drive API HTTP ' + res.getResponseCode();
   } catch (err2) {
     lastError = err2 && err2.message ? err2.message : String(err2);
   }
+
+  const suffix = resourceKey ? '&resourcekey=' + encodeURIComponent(resourceKey) : '';
+  const publicUrls = [
+    'https://drive.google.com/thumbnail?id=' + encodeURIComponent(fileId) + '&sz=w1600' + suffix,
+    'https://drive.usercontent.google.com/download?id=' + encodeURIComponent(fileId) + '&export=download&confirm=t' + suffix,
+    'https://drive.google.com/uc?export=download&id=' + encodeURIComponent(fileId) + suffix,
+    'https://lh3.googleusercontent.com/d/' + encodeURIComponent(fileId) + '=w1600'
+  ];
+  for (let i=0;i<publicUrls.length;i++) {
+    try {
+      const res = UrlFetchApp.fetch(publicUrls[i], {
+        muteHttpExceptions:true,
+        followRedirects:true,
+        headers:{'User-Agent':'Mozilla/5.0','Accept':'image/*,*/*;q=0.8'}
+      });
+      if (res.getResponseCode() >= 200 && res.getResponseCode() < 300) {
+        return ensureImageBlob_(res.getBlob(), 'donor-photo');
+      }
+      lastError = 'Google Drive public HTTP ' + res.getResponseCode();
+    } catch (err3) {
+      lastError = err3 && err3.message ? err3.message : String(err3);
+    }
+  }
+
   throw new Error('ดึงรูปจาก Google Drive ไม่สำเร็จ: ' + lastError);
 }
 
@@ -537,11 +577,14 @@ function fetchRemoteImageBlob_(url) {
   if (!raw) throw new Error('ลิงก์รูปภาพว่าง');
 
   const driveId = extractDriveFileId_(raw);
-  if (driveId) return fetchDriveImageBlob_(driveId);
+  if (driveId) return fetchDriveImageBlob_(driveId, extractDriveResourceKey_(raw));
 
   if (!/^https?:\/\//i.test(raw)) throw new Error('ลิงก์รูปภาพไม่ถูกต้อง');
+  let referer = '';
+  try { const u = new URL(raw); referer = u.protocol + '//' + u.host + '/'; } catch (_) {}
   const attempts = [
-    { 'User-Agent':'Mozilla/5.0', 'Accept':'image/avif,image/webp,image/apng,image/*,*/*;q=0.8' },
+    { 'User-Agent':'Mozilla/5.0', 'Accept':'image/avif,image/webp,image/apng,image/*,*/*;q=0.8', ...(referer?{'Referer':referer}:{}) },
+    { 'User-Agent':'Mozilla/5.0', 'Accept':'image/*,*/*;q=0.8' },
     { 'Accept':'image/*,*/*;q=0.8' },
     {}
   ];
@@ -554,6 +597,14 @@ function fetchRemoteImageBlob_(url) {
     } catch (_) {}
   }
   throw new Error('ดาวน์โหลดรูปภาพไม่สำเร็จ: HTTP ' + lastCode);
+}
+
+function builtinPromoFallbackBlob_() {
+  return Utilities.newBlob(
+    Utilities.base64Decode(BUILTIN_PROMO_FALLBACK_PNG_BASE64),
+    'image/png',
+    'nikorn-built-in-fallback.png'
+  );
 }
 
 function fetchPromoPhotoBlob_(primaryUrl, fallbackUrl) {
@@ -570,6 +621,7 @@ function fetchPromoPhotoBlob_(primaryUrl, fallbackUrl) {
         blob: fetchRemoteImageBlob_(candidates[i]),
         used_url: candidates[i],
         fallback_used: i > 0,
+        builtin_fallback_used: false,
         warning: errors.length ? errors.join(' | ') : ''
       };
     } catch (err) {
@@ -577,8 +629,15 @@ function fetchPromoPhotoBlob_(primaryUrl, fallbackUrl) {
     }
   }
 
-  // ไม่ให้ทั้งงาน พม.นิกรล้มเพราะรูปอย่างเดียว
-  return { blob:null, used_url:'', fallback_used:true, warning:errors.join(' | ') };
+  // ขั้นสุดท้าย: ใช้ PNG ที่ฝังอยู่ใน Code.gs เอง
+  // จึงไม่ทำให้ภาพ พม.นิกรล้มเพราะ URL รูปภายนอกตอบ 403
+  return {
+    blob: builtinPromoFallbackBlob_(),
+    used_url: 'builtin://nikorn-fallback',
+    fallback_used: true,
+    builtin_fallback_used: true,
+    warning: errors.join(' | ')
+  };
 }
 
 function replaceQrPlaceholders_(pres, verifyUrl) {

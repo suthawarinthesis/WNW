@@ -37,9 +37,10 @@
     const raw=String(value||'').trim();if(!raw)return '';
     try{
       const u=new URL(raw);if(!['http:','https:'].includes(u.protocol))return '';
-      if(/(^|\.)drive\.google\.com$/i.test(u.hostname)){
-        const m=raw.match(/\/file\/d\/([a-zA-Z0-9_-]+)/)||raw.match(/[?&]id=([a-zA-Z0-9_-]+)/);
-        if(m?.[1])return `https://drive.google.com/thumbnail?id=${encodeURIComponent(m[1])}&sz=w1200`;
+      if(/(^|\.)drive\.google\.com$/i.test(u.hostname)||/(^|\.)drive\.usercontent\.google\.com$/i.test(u.hostname)){
+        const m=raw.match(/\/file\/d\/([a-zA-Z0-9_-]+)/)||raw.match(/[?&]id=([a-zA-Z0-9_-]+)/)||raw.match(/\/d\/([a-zA-Z0-9_-]+)(?:[=/]|$)/);
+        const rk=raw.match(/[?&]resourcekey=([^&#]+)/i);
+        if(m?.[1])return `https://drive.google.com/thumbnail?id=${encodeURIComponent(m[1])}&sz=w1200${rk?.[1]?`&resourcekey=${encodeURIComponent(decodeURIComponent(rk[1]))}`:''}`;
       }
       return raw;
     }catch(_){return ''}

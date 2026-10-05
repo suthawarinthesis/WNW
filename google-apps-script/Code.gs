@@ -111,7 +111,7 @@ function generateCertificate_(templateId, folderId, p) {
     const n4 = replaceQrPlaceholders_(pres, verifyUrl);
     const slideId = pres.getSlides()[0].getObjectId();
     pres.saveAndClose();
-    if (n1 < 1 || n2 < 1 || n3 < 1 || n4 < 1 || n5 < 1) throw new Error('Replace Tag/QR ไม่ครบ กรุณาตรวจ Template');
+    if (n1 < 1 || n2 < 1 || n3 < 1 || n4 < 1) throw new Error('Replace Tag/QR ไม่ครบ กรุณาตรวจ Template');
 
     Utilities.sleep(900);
     const pdfBlob = workingCopy.getAs(MimeType.PDF).setName(pdfName);

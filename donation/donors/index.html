@@ -10,28 +10,29 @@
   <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <style>
-    *{font-family:'Sarabun',sans-serif}body{background:#fffaf4;color:#1f2937}.glass{background:rgba(255,255,255,.94);border:1px solid rgba(255,255,255,.92);box-shadow:0 18px 60px rgba(154,52,18,.08)}
-    .field{width:100%;border:1px solid #e2e8f0;border-radius:1rem;padding:.78rem 1rem;outline:none;background:#fff}.field:focus{border-color:#fb923c;box-shadow:0 0 0 4px #ffedd5}
+    *{font-family:'Sarabun',sans-serif;box-sizing:border-box}html,body{max-width:100%;overflow-x:hidden}body{background:#fffaf4;color:#1f2937}.glass{background:rgba(255,255,255,.94);border:1px solid rgba(255,255,255,.92);box-shadow:0 18px 60px rgba(154,52,18,.08)}
+    .field{width:100%;max-width:100%;border:1px solid #e2e8f0;border-radius:1rem;padding:.78rem 1rem;outline:none;background:#fff}.field:focus{border-color:#fb923c;box-shadow:0 0 0 4px #ffedd5}
     .donor-table th{position:sticky;top:0;z-index:5;background:#fff7ed}.donor-table tbody tr{transition:.18s}.donor-table tbody tr:hover{background:#fffaf3}
     [data-logo-frame].has-logo{background:transparent!important;box-shadow:none!important}
+    .mobile-donor-card{background:#fff;border:1px solid #ffedd5;border-radius:1.25rem;padding:1rem;box-shadow:0 10px 30px rgba(154,52,18,.06)}
   </style>
 </head>
 <body class="min-h-screen">
 <header class="sticky top-0 z-40 border-b border-orange-100 bg-white/90 backdrop-blur-xl">
-  <div class="max-w-7xl mx-auto px-4 sm:px-6 h-20 flex items-center justify-between gap-4">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 py-3 sm:h-20 flex flex-wrap items-center justify-between gap-4">
     <a href="../" class="flex items-center gap-3 min-w-0">
       <div data-logo-frame class="w-11 h-11 rounded-2xl bg-orange-500 flex items-center justify-center overflow-hidden shrink-0 shadow-lg shadow-orange-200"><img data-school-logo class="hidden w-full h-full object-contain" alt="โลโก้โรงเรียน"><i data-lucide="landmark" class="w-5 h-5 text-white"></i></div>
       <div class="min-w-0"><p data-school-name class="font-extrabold text-slate-800 truncate">โรงเรียนวัดหนองแวงวิทยา</p><p class="text-xs text-orange-600 font-semibold">รายนามผู้ร่วมบุญ</p></div>
     </a>
     <nav class="hidden md:flex items-center gap-2 text-sm font-semibold"><a href="../" class="px-4 py-2 rounded-full hover:bg-orange-50">หน้าหลักบริจาค</a><a href="./" class="px-4 py-2 rounded-full bg-orange-50 text-orange-700 inline-flex items-center gap-1.5"><i data-lucide="table-properties" class="w-4 h-4"></i> รายนามผู้บริจาค</a><a href="../history/" class="px-4 py-2 rounded-full hover:bg-orange-50">ประวัติของฉัน</a><a href="../verify/" class="px-4 py-2 rounded-full hover:bg-orange-50">ตรวจสอบใบ</a><a href="../form/" class="px-5 py-2.5 rounded-full bg-orange-500 text-white hover:bg-orange-600">ร่วมทำบุญ</a></nav>
-    <a href="../form/" class="md:hidden px-4 py-2.5 rounded-full bg-orange-500 text-white text-sm font-bold">ร่วมทำบุญ</a>
+    <div class="md:hidden flex items-center gap-2 ml-auto"><a href="../history/" class="px-3 py-2.5 rounded-full text-slate-600 bg-orange-50 text-sm font-bold inline-flex items-center justify-center"><i data-lucide="history" class="w-5 h-5"></i></a><a href="../form/" class="px-4 py-2.5 rounded-full bg-orange-500 text-white text-sm font-bold">ร่วมทำบุญ</a></div>
   </div>
 </header>
 
 <main class="max-w-7xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
   <section class="flex flex-col lg:flex-row lg:items-end justify-between gap-5">
     <div class="max-w-3xl"><span class="inline-flex items-center gap-2 rounded-full bg-orange-50 text-orange-700 px-3 py-1.5 text-xs font-bold"><i data-lucide="heart-handshake" class="w-4 h-4"></i> ร่วมอนุโมทนาบุญ</span><h1 class="mt-3 text-3xl sm:text-4xl font-extrabold text-slate-900">รายนามผู้บริจาค</h1><p class="mt-2 text-slate-500 leading-relaxed">แสดงรายการที่โรงเรียนตรวจสอบและยืนยันแล้ว พร้อมวันเวลา จำนวนเงิน และหลักฐานใบอนุโมทนาบัตร โดยไม่เปิดเผยเบอร์โทร อีเมล หรือที่อยู่</p></div>
-    <div class="grid grid-cols-2 gap-3 min-w-[280px]"><div class="glass rounded-2xl p-4"><p class="text-xs text-slate-500">รายการที่พบ</p><p id="total-count" class="mt-1 text-2xl font-extrabold">—</p></div><div class="glass rounded-2xl p-4"><p class="text-xs text-slate-500">หน้าปัจจุบัน</p><p id="page-indicator" class="mt-1 text-2xl font-extrabold text-orange-700">1</p></div></div>
+    <div class="grid grid-cols-2 gap-3 w-full sm:w-auto sm:min-w-[280px]"><div class="glass rounded-2xl p-4"><p class="text-xs text-slate-500">รายการที่พบ</p><p id="total-count" class="mt-1 text-2xl font-extrabold">—</p></div><div class="glass rounded-2xl p-4"><p class="text-xs text-slate-500">หน้าปัจจุบัน</p><p id="page-indicator" class="mt-1 text-2xl font-extrabold text-orange-700">1</p></div></div>
   </section>
 
   <section class="glass rounded-[2rem] p-4 sm:p-5 mt-7">
@@ -41,7 +42,7 @@
   <section class="glass rounded-[2rem] mt-4 overflow-hidden">
     <div id="table-loading" class="p-10 text-center text-slate-500"><div class="w-10 h-10 rounded-full border-4 border-orange-100 border-t-orange-500 animate-spin mx-auto"></div><p class="mt-3">กำลังโหลดรายนามผู้บริจาค...</p></div>
     <div id="table-error" class="hidden p-7 text-center text-rose-700 bg-rose-50"></div>
-    <div id="table-wrap" class="hidden overflow-auto max-h-[68vh]">
+    <div id="mobile-list" class="hidden md:hidden p-3 space-y-3 bg-[#fffdf9]"></div><div id="table-wrap" class="hidden overflow-auto max-h-[68vh] md:block">
       <table class="donor-table w-full min-w-[940px] text-sm">
         <thead><tr class="text-left text-slate-600"><th class="px-5 py-4 w-16 text-center">#</th><th class="px-5 py-4 min-w-[150px]">วัน–เวลา</th><th class="px-5 py-4 min-w-[260px]">ชื่อ–สกุล</th><th class="px-5 py-4 min-w-[140px] text-right">จำนวน</th><th class="px-5 py-4 min-w-[280px]">หลักฐานใบอนุโมทนาบัตร</th></tr></thead>
         <tbody id="donor-tbody" class="divide-y divide-slate-100"></tbody>

@@ -29,11 +29,23 @@
     if(x.certificate_no) actions.push(`<a href="../verify/?no=${encodeURIComponent(x.certificate_no)}" class="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl bg-white text-slate-700 border border-slate-200 text-xs font-bold hover:bg-slate-50"><i data-lucide="badge-check" class="w-3.5 h-3.5"></i> ตรวจสอบใบ</a>`);
     return `${no}<div class="mt-2 flex flex-wrap gap-2">${actions.join('')}</div>`;
   }
+  function mobileCard(x,i){
+    const src=normalizePhotoUrl(x.photo_url);
+    const avatar=src?`<img src="${esc(src)}" class="w-14 h-14 rounded-2xl object-cover bg-slate-100 border border-slate-100 shrink-0" alt="${esc(x.display_name||'ผู้บริจาค')}" onerror="this.style.display='none';this.nextElementSibling.classList.remove('hidden')">`:'';
+    const fallback=`<div class="${src?'hidden ':''}w-14 h-14 rounded-2xl bg-orange-50 text-orange-600 flex items-center justify-center shrink-0"><i data-lucide="user-round" class="w-6 h-6"></i></div>`;
+    const alumni=x.is_alumni?`<span class="inline-flex mt-1 text-[10px] px-2 py-0.5 rounded-full bg-fuchsia-50 text-fuchsia-700 border border-fuchsia-100 font-bold">ศิษย์เก่า${x.alumni_batch?' รุ่น '+esc(x.alumni_batch):''}</span>`:'';
+    const amount=x.amount==null?'ไม่เปิดเผย':C.formatTHB(x.amount);
+    return `<article class="mobile-donor-card"><div class="flex items-start gap-3"><div class="w-8 text-sm font-extrabold text-orange-600 pt-2">${((page-1)*PAGE_SIZE+i+1).toLocaleString('th-TH')}</div><div class="flex items-start gap-3 min-w-0 flex-1">${avatar}${fallback}<div class="min-w-0 flex-1"><div class="flex flex-wrap items-center gap-2"><p class="font-extrabold text-slate-800 break-words">${esc(x.display_name||'ผู้ไม่ประสงค์ออกนาม')}</p>${alumni}</div><p class="mt-1 text-xs text-slate-500">${C.formatDateTH(x.transfer_date)} • ${formatTime(x.transfer_time)}</p><p class="mt-2 text-lg font-extrabold text-orange-700 break-words">${amount}</p><div class="mt-3 rounded-2xl bg-slate-50 border border-slate-100 p-3">${certificateCell(x)}</div></div></div></div></article>`;
+  }
   function render(rows){
     const body=$('#donor-tbody');
+    const mobile=$('#mobile-list');
     $('#table-loading').classList.add('hidden');$('#table-error').classList.add('hidden');
-    $('#table-wrap').classList.toggle('hidden',!rows.length);$('#empty-state').classList.toggle('hidden',!!rows.length);$('#pager').classList.toggle('hidden',!total);
+    $('#table-wrap').classList.toggle('hidden',!rows.length);
+    mobile.classList.toggle('hidden',!rows.length);
+    $('#empty-state').classList.toggle('hidden',!!rows.length);$('#pager').classList.toggle('hidden',!total);
     body.innerHTML=rows.map((x,i)=>`<tr><td class="px-5 py-4 text-center text-slate-400 font-semibold">${((page-1)*PAGE_SIZE+i+1).toLocaleString('th-TH')}</td><td class="px-5 py-4"><p class="font-bold text-slate-700">${C.formatDateTH(x.transfer_date)}</p><p class="text-xs text-slate-400 mt-1">${formatTime(x.transfer_time)}</p></td><td class="px-5 py-4">${donorCell(x)}</td><td class="px-5 py-4 text-right"><p class="font-extrabold text-orange-700 text-base">${x.amount==null?'ไม่เปิดเผย':C.formatTHB(x.amount)}</p></td><td class="px-5 py-4">${certificateCell(x)}</td></tr>`).join('');
+    mobile.innerHTML=rows.map((x,i)=>mobileCard(x,i)).join('');
     $('#total-count').textContent=total.toLocaleString('th-TH')+' รายการ';
     const pages=Math.max(1,Math.ceil(total/PAGE_SIZE)); $('#page-indicator').textContent=`${page}/${pages}`;$('#page-text').textContent=`หน้า ${page} จาก ${pages}`;
     const start=total?((page-1)*PAGE_SIZE+1):0,end=Math.min(page*PAGE_SIZE,total);$('#range-text').textContent=total?`แสดง ${start.toLocaleString('th-TH')}–${end.toLocaleString('th-TH')} จาก ${total.toLocaleString('th-TH')} รายการ`:'';

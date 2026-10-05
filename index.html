@@ -88,7 +88,9 @@
             .alumni-home-viewport { -webkit-mask-image: none; mask-image: none; }
         }
         @media (prefers-reduced-motion: reduce) { .alumni-home-viewport { scroll-behavior: smooth; } }
-    </style>
+    
+        .nikorn-main-viewport{overflow:hidden}.nikorn-main-track{display:flex;gap:1rem;transition:transform .45s ease}.nikorn-main-card{width:320px;flex:0 0 320px}.nikorn-main-card img{width:100%;height:220px;object-fit:cover;border-radius:1.5rem}@media (max-width:640px){.nikorn-main-card{width:84vw;flex-basis:84vw}}
+</style>
 </head>
 <body class="intro-boot min-h-screen text-slate-800 selection:bg-orange-200 selection:text-orange-900 relative overflow-x-hidden pt-10">
 
@@ -707,6 +709,21 @@
         </div>
     </section>
 
+
+    <section id="nikorn-main-section" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-14 hidden">
+        <div class="glass-panel rounded-[2rem] p-6 sm:p-8">
+            <div class="flex flex-col sm:flex-row sm:items-end justify-between gap-3 mb-5">
+                <div>
+                    <p class="text-xs font-bold uppercase tracking-[.2em] text-orange-500">ระบบของพม.นิกร</p>
+                    <h2 class="text-2xl sm:text-3xl font-bold mt-2">ภาพประชาสัมพันธ์ผู้ร่วมทำบุญ</h2>
+                    <p class="text-sm text-slate-500 mt-2">ภาพล่าสุดจากระบบบริจาคของโรงเรียน จะเลื่อนอัตโนมัติบนหน้าแรกเว็บไซต์</p>
+                </div>
+                <a href="./donation/" class="inline-flex items-center gap-2 px-4 py-2.5 rounded-2xl bg-orange-500 text-white font-bold"><i data-lucide="heart-handshake" class="w-4 h-4"></i> ไปหน้าบริจาค</a>
+            </div>
+            <div class="nikorn-main-viewport"><div id="nikorn-main-track" class="nikorn-main-track"></div></div>
+            <div id="nikorn-main-dots" class="flex items-center gap-2 mt-4"></div>
+        </div>
+    </section>
     <footer class="bg-slate-900/95 backdrop-blur-xl text-slate-300 py-12 mt-12 border-t-4 border-orange-500 relative z-10">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 grid grid-cols-1 md:grid-cols-3 gap-8">
             <div>
@@ -2007,5 +2024,6 @@
         updateDateTime(); setInterval(updateDateTime, 60000);
         document.getElementById('current-year').textContent = new Date().getFullYear();
     </script>
+  <script src="./assets/nikorn-home-gallery.js?v=20261005"></script>
 </body>
 </html>

@@ -30,6 +30,7 @@
   function alumniBadge(x){return x?.is_alumni?`<span class="text-[10px] px-2 py-0.5 rounded-full bg-fuchsia-50 text-fuchsia-700 border border-fuchsia-100 font-bold">ศิษย์เก่า${x.alumni_batch?' รุ่น '+esc(x.alumni_batch):''}</span>`:''}
   function modalStatus(msg, ok=false){const el=$('#review-status');el.className=`rounded-xl p-3 text-sm border ${ok?'bg-emerald-50 text-emerald-700 border-emerald-200':'bg-rose-50 text-rose-700 border-rose-200'}`;el.textContent=msg;el.classList.remove('hidden')}
   function certStatus(msg,ok=false){const el=$('#cert-status');el.className=`rounded-xl p-3 text-sm border ${ok?'bg-emerald-50 text-emerald-700 border-emerald-200':'bg-rose-50 text-rose-700 border-rose-200'}`;el.textContent=msg;el.classList.remove('hidden')}
+  function nikornStatus(msg,ok=false){const el=$('#nikorn-status');if(!el)return;el.className=`mt-5 rounded-xl p-3 text-sm border ${ok?'bg-emerald-50 text-emerald-700 border-emerald-200':'bg-rose-50 text-rose-700 border-rose-200'}`;el.textContent=msg;el.classList.remove('hidden')}
   function settingsStatus(msg,ok=false){const el=$('#settings-status');el.className=`rounded-xl p-3 text-sm border ${ok?'bg-emerald-50 text-emerald-700 border-emerald-200':'bg-rose-50 text-rose-700 border-rose-200'}`;el.textContent=msg;el.classList.remove('hidden')}
 
   async function ensureAuth(){
@@ -59,7 +60,7 @@
     ]);
     if(setRes.error) throw setRes.error;if(donRes.error)throw donRes.error;if(campRes.error)throw campRes.error;
     settings=setRes.data||{};rows=donRes.data||[];campaigns=campRes.data||[];
-    renderDashboard();renderDonationList();renderHistoryAll();fillSettingsForm();renderGoogleCertificateSettings();renderCampaigns();
+    renderDashboard();renderDonationList();renderHistoryAll();fillSettingsForm();renderGoogleCertificateSettings();renderNikornSettings();renderCampaigns();
   }
 
   function donorIdentityName(x){
@@ -146,21 +147,29 @@
   function formatTagAmount(value){return new Intl.NumberFormat('th-TH',{minimumFractionDigits:2,maximumFractionDigits:2}).format(Number(value||0))}
   function defaultGoogleScriptUrl(){return String(window.SCHOOL_APP_CONFIG?.DONATION_GOOGLE_APPS_SCRIPT_URL||'').trim()}
   function googleScriptUrl(){return String(settings?.google_apps_script_url||defaultGoogleScriptUrl()||'').trim()}
+  function nikornTemplateId(){return String(settings?.nikorn_google_slides_template_id||'1aj3h3pMB-Ulz1SuldI-ckBlddfralVwF7sfx0x65cNE').trim()}
+  function nikornFolderId(){return String(settings?.nikorn_google_drive_folder_id||'1H_PEfawTOnn7LM4Pi6CSWJ6CYVnTo-iF').trim()}
+  function nikornFallbackPhoto(){return String(settings?.nikorn_fallback_photo_url||'https://i.postimg.cc/Kz6vK8gM/Screenshot-2026-10-04-181000.png').trim()}
   function refreshReviewCertificateUI(x){
     if(!x)return;
-    const hasNo=!!x.certificate_no, hasPdf=!!x.certificate_pdf_url, hasImage=!!x.certificate_image_url;
+    const hasNo=!!x.certificate_no, hasPdf=!!x.certificate_pdf_url, hasImage=!!x.certificate_image_url, hasNikorn=!!x.nikorn_image_url;
     $('#review-cert-box').classList.toggle('hidden',!hasNo);
     $('#review-cert-no').textContent=x.certificate_no||'';
     const link=$('#review-open-pdf'); link.classList.toggle('hidden',!hasPdf); if(hasPdf)link.href=x.certificate_pdf_url; else link.removeAttribute('href');
     const imageLink=$('#review-open-image'); if(imageLink){ imageLink.classList.toggle('hidden',!hasImage); if(hasImage) imageLink.href=x.certificate_image_url; else imageLink.removeAttribute('href'); }
+    const nikornLink=$('#review-open-nikorn-image'); if(nikornLink){ nikornLink.classList.toggle('hidden',!hasNikorn); if(hasNikorn) nikornLink.href=x.nikorn_image_url; else nikornLink.removeAttribute('href'); }
     const gen=$('#review-generate-pdf');
+    const genNikorn=$('#review-generate-nikorn');
     const generationStatus=String(x.certificate_generation_status||'');
+    const nikornStatusText=String(x.nikorn_generation_status||'');
     const showRetry=hasNo && (!hasPdf || !hasImage) && generationStatus!=='generating';
     gen.classList.toggle('hidden',!showRetry);
-    if(showRetry)gen.textContent='ลองสร้างใบใหม่อีกครั้ง';
-    const text=generationStatus==='ready'?(hasPdf&&hasImage?'สร้าง PDF และภาพใบอนุโมทนาบัตรแล้ว':hasPdf?'สร้าง PDF แล้ว และกำลังรอภาพใบอนุโมทนาบัตร':'สร้างข้อมูลใบแล้ว'):(generationStatus==='generating'?'กำลังสร้างใบอนุโมทนาบัตรอัตโนมัติ...':generationStatus==='error'?'สร้างใบอัตโนมัติไม่สำเร็จ — สามารถลองสร้างอีกครั้งได้':hasNo?'กำลังเตรียมสร้างไฟล์ใบอนุโมทนาบัตรอัตโนมัติ':'');
-    $('#review-cert-generation').textContent=text;
+    if(genNikorn) genNikorn.classList.toggle('hidden',!hasNo || nikornStatusText==='generating');
+    const certText=generationStatus==='ready'?(hasPdf&&hasImage?'สร้าง PDF และภาพใบอนุโมทนาบัตรแล้ว':hasPdf?'สร้าง PDF แล้ว และกำลังรอภาพใบอนุโมทนาบัตร':'สร้างข้อมูลใบแล้ว'):(generationStatus==='generating'?'กำลังสร้างใบอนุโมทนาบัตรอัตโนมัติ...':generationStatus==='error'?'สร้างใบอัตโนมัติไม่สำเร็จ — สามารถลองสร้างอีกครั้งได้':hasNo?'กำลังเตรียมสร้างไฟล์ใบอนุโมทนาบัตรอัตโนมัติ':'');
+    const nikornText=nikornStatusText==='ready'?(hasNikorn?'สร้างภาพ พม.นิกรแล้ว':'สร้างข้อมูลภาพแล้ว'):nikornStatusText==='generating'?'กำลังสร้างภาพ พม.นิกรอัตโนมัติ...':nikornStatusText==='error'?'ภาพ พม.นิกรยังไม่สำเร็จ — สามารถลองใหม่ได้':hasNo?'ยังไม่ได้สร้างภาพ พม.นิกร':'';
+    $('#review-cert-generation').textContent=[certText,nikornText].filter(Boolean).join(' • ');
     gen.textContent=(hasPdf||hasImage)?'สร้างใบใหม่จาก Google Slides':'สร้างใบจาก Google Slides';
+    if(genNikorn) genNikorn.textContent=hasNikorn?'สร้างภาพ พม.นิกรใหม่':'สร้างภาพ พม.นิกร';
   }
   async function callGoogleSlidesBridge(action,payload={}){
     const url=googleScriptUrl(); if(!url)throw new Error('ยังไม่ได้ตั้งค่า Google Apps Script Web App URL');
@@ -180,6 +189,32 @@
       form.submit();
     });
   }
+  async function generateNikornImage(x){
+    if(!x?.certificate_no)throw new Error('รายการนี้ยังไม่มีเลขใบอนุโมทนาบัตร');
+    try{await db.from('donations').update({nikorn_generation_status:'generating',nikorn_generation_error:''}).eq('id',x.id)}catch(_){ }
+    try{
+      const result=await callGoogleSlidesBridge('generate_promo',{
+        template_id:nikornTemplateId(),
+        folder_id:nikornFolderId(),
+        donor_name:x.certificate_name_override||x.display_name,
+        donation_amount:formatTagAmount(x.amount),
+        certificate_no:x.certificate_no,
+        request_no:x.request_no,
+        photo_url:x.photo_url||'',
+        fallback_photo_url:nikornFallbackPhoto()
+      });
+      if(!result.image_url)throw new Error('Google Apps Script ไม่ได้ส่งลิงก์ภาพกลับมา');
+      if(result.public_sharing===false)throw new Error('สร้างภาพแล้ว แต่ Google Drive ไม่อนุญาตให้แชร์แบบทุกคนที่มีลิงก์');
+      const patch={nikorn_image_url:result.image_url||'',nikorn_image_drive_file_id:result.image_file_id||'',nikorn_generated_at:new Date().toISOString(),nikorn_generation_status:'ready',nikorn_generation_error:''};
+      const {data,error}=await db.from('donations').update(patch).eq('id',x.id).select('*').single(); if(error)throw error;
+      const idx=rows.findIndex(r=>r.id===x.id);if(idx>=0)rows[idx]=data;
+      return data;
+    }catch(err){
+      try{await db.from('donations').update({nikorn_generation_status:'error',nikorn_generation_error:String(err.message||err).slice(0,1000)}).eq('id',x.id)}catch(_){ }
+      throw err;
+    }
+  }
+
   async function generateGoogleCertificate(x){
     if(!x?.certificate_no)throw new Error('รายการนี้ยังไม่มีเลขใบอนุโมทนาบัตร');
     try{await db.from('donations').update({certificate_generation_status:'generating',certificate_generation_error:''}).eq('id',x.id)}catch(_){ }
@@ -230,8 +265,8 @@
       if(x){
         refreshReviewCertificateUI(x);$('#review-approve').classList.add('hidden');$('#review-reject').classList.add('hidden');
         modalStatus('ตรวจสอบผ่านแล้ว กำลังสร้าง PDF และภาพใบอนุโมทนาบัตรจาก Google Slides อัตโนมัติ...',true);
-        try{x=await generateGoogleCertificate(x);refreshReviewCertificateUI(x);renderDashboard();renderDonationList();modalStatus('ตรวจสอบและสร้างใบอนุโมทนาบัตรเรียบร้อยแล้ว',true)}
-        catch(genErr){refreshReviewCertificateUI(rows.find(r=>r.id===currentReviewId)||x);modalStatus('ออกเลขใบเรียบร้อยแล้ว แต่ยังสร้างไฟล์ใบอนุโมทนาบัตรไม่สำเร็จ: '+(genErr.message||genErr))}
+        try{x=await generateGoogleCertificate(x);try{x=await generateNikornImage(x)}catch(nikErr){console.warn(nikErr)}refreshReviewCertificateUI(x);renderDashboard();renderDonationList();renderNikornList();modalStatus('ตรวจสอบ สร้างใบอนุโมทนาบัตร และสร้างภาพ พม.นิกรเรียบร้อยแล้ว',true)}
+        catch(genErr){refreshReviewCertificateUI(rows.find(r=>r.id===currentReviewId)||x);modalStatus('ออกเลขใบเรียบร้อยแล้ว แต่การสร้างไฟล์อัตโนมัติบางส่วนไม่สำเร็จ: '+(genErr.message||genErr))}
       }
     }catch(err){modalStatus('อนุมัติไม่สำเร็จ: '+(err.message||err))}finally{btn.disabled=false;btn.textContent='ตรวจสอบแล้ว • ยืนยันและสร้างใบ'}
   };
@@ -245,6 +280,8 @@
     try{const updated=await generateGoogleCertificate(x);refreshReviewCertificateUI(updated);renderDashboard();renderDonationList();modalStatus('สร้าง PDF และภาพใบอนุโมทนาบัตรจาก Google Slides แล้ว',true)}catch(err){modalStatus('สร้างใบไม่สำเร็จ: '+(err.message||err))}finally{btn.disabled=false;const now=rows.find(r=>r.id===currentReviewId);btn.textContent=(now?.certificate_pdf_url||now?.certificate_image_url)?'สร้างใบใหม่จาก Google Slides':'สร้างใบจาก Google Slides'}
   };
 
+  $('#review-generate-nikorn').onclick=async()=>{const x=rows.find(r=>r.id===currentReviewId);if(!x?.certificate_no)return;const btn=$('#review-generate-nikorn');btn.disabled=true;btn.textContent='กำลังสร้างภาพ...';try{const updated=await generateNikornImage(x);refreshReviewCertificateUI(updated);renderNikornList();modalStatus('สร้างภาพ พม.นิกรแล้ว',true)}catch(err){modalStatus('สร้างภาพ พม.นิกรไม่สำเร็จ: '+(err.message||err))}finally{btn.disabled=false;const now=rows.find(r=>r.id===currentReviewId);btn.textContent=(now?.nikorn_image_url)?'สร้างภาพ พม.นิกรใหม่':'สร้างภาพ พม.นิกร'}};
+
   async function deleteDonationRecord(x){
     if(!x)throw new Error('ไม่พบรายการบริจาค');
     const warnings=[];
@@ -257,6 +294,10 @@
     if(x.certificate_image_drive_file_id){
       try{await callGoogleSlidesBridge('delete_certificate',{file_id:x.certificate_image_drive_file_id})}
       catch(err){warnings.push('ลบไฟล์ภาพใน Google Drive ไม่สำเร็จ: '+(err.message||err))}
+    }
+    if(x.nikorn_image_drive_file_id){
+      try{await callGoogleSlidesBridge('delete_certificate',{file_id:x.nikorn_image_drive_file_id})}
+      catch(err){warnings.push('ลบไฟล์ภาพ พม.นิกรใน Google Drive ไม่สำเร็จ: '+(err.message||err))}
     }
 
     // ลบสลิปออกจาก Supabase Storage แบบ best-effort
@@ -351,8 +392,51 @@
     }catch(err){certStatus('ตรวจ Template ไม่สำเร็จ: '+(err.message||err))}finally{btn.disabled=false;btn.textContent='ตรวจ 4 Tag ใน Slides'}
   };
 
-  const views={dashboard:'ภาพรวม',donations:'รายการบริจาค',history:'ประวัติรายการย้อนหลัง',settings:'ตั้งค่าหน้าบริจาค',certificate:'ใบอนุโมทนาบัตร'};
-  function goView(view){$$('.nav-btn').forEach(b=>b.classList.toggle('active',b.dataset.view===view));Object.keys(views).forEach(v=>$(`#panel-${v}`).classList.toggle('hidden',v!==view));$('#page-title').textContent=views[view];if(view==='certificate')renderGoogleCertificateSettings();lucide.createIcons()}
+  function renderNikornSettings(){
+    const inputTemplate=$('#nikorn-template-url'),inputFolder=$('#nikorn-folder-url'),inputFallback=$('#nikorn-fallback-photo');
+    if(!inputTemplate)return;
+    inputTemplate.value=slidesUrl(nikornTemplateId());
+    inputFolder.value=folderUrl(nikornFolderId());
+    inputFallback.value=nikornFallbackPhoto();
+    const tid=parseGoogleId(inputTemplate.value,'presentation'),fid=parseGoogleId(inputFolder.value,'folder');
+    $('#open-nikorn-template').href=slidesUrl(tid)||'#'; $('#open-nikorn-folder').href=folderUrl(fid)||'#';
+    renderNikornList();
+  }
+  async function saveNikornSettings(showSuccess=true){
+    const templateId=parseGoogleId($('#nikorn-template-url').value,'presentation'),folderId=parseGoogleId($('#nikorn-folder-url').value,'folder'),fallbackPhoto=$('#nikorn-fallback-photo').value.trim();
+    if(!templateId)throw new Error('ลิงก์ Google Slides Template ภาพไม่ถูกต้อง');
+    if(!folderId)throw new Error('ลิงก์โฟลเดอร์ Google Drive สำหรับภาพไม่ถูกต้อง');
+    if(fallbackPhoto && !/^https?:\/\//i.test(fallbackPhoto)) throw new Error('ลิงก์รูปสำรองต้องขึ้นต้นด้วย http หรือ https');
+    const payload={nikorn_enabled:true,nikorn_google_slides_template_id:templateId,nikorn_google_drive_folder_id:folderId,nikorn_fallback_photo_url:fallbackPhoto,updated_at:new Date().toISOString()};
+    const {data,error}=await db.from('donation_settings').update(payload).eq('id',1).select('*').single();if(error)throw error;settings={...settings,...data};renderNikornSettings();if(showSuccess)nikornStatus('บันทึกการเชื่อมต่อระบบของพม.นิกรแล้ว',true);return data;
+  }
+  function nikornCard(x){
+    const image=x.nikorn_image_url?`<img src="${esc(x.nikorn_image_url)}" class="w-full h-44 object-cover rounded-2xl border border-slate-100 bg-slate-50" alt="${esc(x.display_name)}">`:`<div class="w-full h-44 rounded-2xl border border-dashed border-slate-200 bg-slate-50 flex items-center justify-center text-slate-400 text-sm">ยังไม่มีภาพ</div>`;
+    const st=String(x.nikorn_generation_status||'not_generated');
+    const label=st==='ready'?'พร้อมใช้':st==='generating'?'กำลังสร้าง':st==='error'?'ผิดพลาด':'ยังไม่สร้าง';
+    const badge=st==='ready'?'bg-emerald-50 text-emerald-700 border-emerald-200':st==='generating'?'bg-amber-50 text-amber-700 border-amber-200':st==='error'?'bg-rose-50 text-rose-700 border-rose-200':'bg-slate-50 text-slate-600 border-slate-200';
+    return `<article class="rounded-[1.4rem] border border-slate-200 bg-white p-4"><div class="flex items-start justify-between gap-3"><label class="inline-flex items-center gap-2 text-sm font-bold"><input type="checkbox" class="nikorn-check rounded" value="${x.id}"> เลือก</label><span class="text-[11px] px-2 py-0.5 rounded-full border ${badge}">${label}</span></div><div class="mt-3">${image}</div><div class="mt-3"><p class="font-extrabold text-slate-800 line-clamp-2">${esc(x.certificate_name_override||x.display_name||'-')}</p><p class="text-sm text-orange-700 font-bold mt-1">${C.formatTHB(x.amount)}</p><p class="text-xs text-slate-400 mt-1">${esc(x.certificate_no||x.request_no||'-')}</p></div><div class="mt-4 flex flex-wrap gap-2"><button type="button" class="nikorn-generate-one px-3 py-2 rounded-xl bg-orange-500 text-white text-xs font-bold" data-id="${x.id}">สร้างภาพ</button>${x.nikorn_image_url?`<a href="${esc(x.nikorn_image_url)}" target="_blank" rel="noopener" class="px-3 py-2 rounded-xl bg-fuchsia-600 text-white text-xs font-bold">เปิดภาพ</a><a href="${esc(x.nikorn_image_url)}" target="_blank" rel="noopener" class="px-3 py-2 rounded-xl bg-white border border-slate-200 text-xs font-bold">ดาวน์โหลด</a>`:''}</div>${x.nikorn_generation_error?`<p class="mt-2 text-xs text-rose-600">${esc(x.nikorn_generation_error)}</p>`:''}</article>`;
+  }
+  function renderNikornList(){
+    const box=$('#nikorn-list'); if(!box) return;
+    const verified=rows.filter(x=>x.status==='verified').sort((a,b)=>new Date(b.verified_at||b.updated_at)-new Date(a.verified_at||a.updated_at));
+    if(!verified.length){box.innerHTML='<div class="rounded-2xl bg-slate-50 p-8 text-center text-slate-400">ยังไม่มีรายการที่ยืนยันแล้ว</div>'; return;}
+    box.innerHTML=verified.map(nikornCard).join('');
+    $$('.nikorn-generate-one').forEach(btn=>btn.onclick=async()=>{const x=rows.find(r=>r.id===btn.dataset.id); if(!x)return; const old=btn.textContent; btn.disabled=true; btn.textContent='กำลังสร้าง...'; try{await generateNikornImage(x); renderNikornList(); renderDashboard(); const current=rows.find(r=>r.id===currentReviewId); if(current) refreshReviewCertificateUI(current); nikornStatus('สร้างภาพผู้บริจาคแล้ว',true)}catch(err){nikornStatus('สร้างภาพไม่สำเร็จ: '+(err.message||err))} finally{btn.disabled=false; btn.textContent=old}});
+  }
+  function selectedNikornRows(){ const ids=$$('.nikorn-check:checked').map(i=>i.value); return rows.filter(r=>ids.includes(r.id) && r.status==='verified'); }
+  $('#save-nikorn-settings').onclick=async()=>{try{await saveNikornSettings(true)}catch(err){nikornStatus('บันทึกไม่สำเร็จ: '+(err.message||err))}};
+  $('#validate-nikorn-template').onclick=async()=>{
+    const btn=$('#validate-nikorn-template');btn.disabled=true;btn.textContent='กำลังตรวจ Template...';
+    try{await saveNikornSettings(false);const r=await callGoogleSlidesBridge('validate_promo',{template_id:nikornTemplateId(),folder_id:nikornFolderId()});const c=r.tags||{};setTagResult('#nikorn-tag-donor-status',c.donor_name||0);setTagResult('#nikorn-tag-amount-status',c.donation_amount||0);setTagResult('#nikorn-tag-photo-status',c.photo||0);if((c.donor_name||0)<1||(c.donation_amount||0)<1||(c.photo||0)<1)throw new Error('Template ยังมี Tag ไม่ครบ 3 รายการ');nikornStatus('ตรวจเทมเพลตภาพเรียบร้อยแล้ว พร้อมสร้างภาพผู้บริจาค',true)}catch(err){nikornStatus('ตรวจ Template ไม่สำเร็จ: '+(err.message||err))}finally{btn.disabled=false;btn.textContent='ตรวจ Tag ของเทมเพลต'}
+  };
+  $('#nikorn-select-all').onclick=()=>{$$('.nikorn-check').forEach(i=>i.checked=true)};
+  $('#nikorn-refresh-list').onclick=()=>renderNikornList();
+  $('#nikorn-generate-selected').onclick=async()=>{const list=selectedNikornRows();if(!list.length){nikornStatus('กรุณาเลือกรายการก่อน');return;}let done=0,fail=0;for(const item of list){try{await generateNikornImage(item);done++;}catch(_){fail++;}}renderNikornList();renderDashboard();nikornStatus(`สร้างภาพเสร็จ ${done} รายการ${fail?` / ไม่สำเร็จ ${fail} รายการ`:''}`,done>0&&fail===0)};
+  $('#nikorn-download-selected').onclick=()=>{const list=selectedNikornRows().filter(x=>x.nikorn_image_url);if(!list.length){nikornStatus('ยังไม่มีภาพในรายการที่เลือก');return;}list.forEach((item,idx)=>setTimeout(()=>{const a=document.createElement('a');a.href=item.nikorn_image_url;a.target='_blank';a.rel='noopener';document.body.appendChild(a);a.click();a.remove();},idx*250));nikornStatus(`กำลังเปิดลิงก์ดาวน์โหลด ${list.length} ภาพ`,true)};
+
+  const views={dashboard:'ภาพรวม',donations:'รายการบริจาค',history:'ประวัติรายการย้อนหลัง',settings:'ตั้งค่าหน้าบริจาค',certificate:'ใบอนุโมทนาบัตร',nikorn:'ระบบของพม.นิกร'};
+  function goView(view){$$('.nav-btn').forEach(b=>b.classList.toggle('active',b.dataset.view===view));Object.keys(views).forEach(v=>$(`#panel-${v}`).classList.toggle('hidden',v!==view));$('#page-title').textContent=views[view];if(view==='certificate')renderGoogleCertificateSettings();if(view==='nikorn')renderNikornSettings();lucide.createIcons()}
   $$('.nav-btn').forEach(b=>b.onclick=()=>goView(b.dataset.view));$$('[data-go]').forEach(b=>b.onclick=()=>goView(b.dataset.go));
   document.addEventListener('keydown',e=>{if(e.key==='Escape')closeReview()});
 

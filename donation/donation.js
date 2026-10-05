@@ -3,6 +3,7 @@
   const db = C.db;
   let dashboard = { periods:{}, latest:[] };
   let activePeriod = 'all';
+  let nikornAutoTimer = null;
 
   const periodLabels={today:'วันนี้',month:'เดือนนี้',year:'ปีนี้',all:'ทั้งหมด'};
   function renderPeriod(){
@@ -22,6 +23,22 @@
 
   document.querySelectorAll('.period-btn').forEach(b=>b.addEventListener('click',()=>{activePeriod=b.dataset.period||'all';renderPeriod()}));
 
+  function renderNikornGallery(items){
+    const section=document.getElementById('nikorn-gallery-section');
+    const track=document.getElementById('nikorn-gallery-track');
+    const dots=document.getElementById('nikorn-gallery-dots');
+    if(!section||!track||!dots) return;
+    if(!items?.length){section.classList.add('hidden'); return;}
+    section.classList.remove('hidden');
+    track.innerHTML=items.map(x=>`<article class="nikorn-slide rounded-[1.7rem] border border-slate-100 bg-white p-3"><img src="${C.escapeHtml(x.image_url)}" alt="${C.escapeHtml(x.donor_name||'ผู้ร่วมบุญ')}" loading="lazy"><div class="pt-3"><p class="font-extrabold text-slate-800 truncate">${C.escapeHtml(x.donor_name||'ผู้ไม่ประสงค์ออกนาม')}</p><p class="text-xs text-slate-500 mt-1">${x.campaign_name?C.escapeHtml(x.campaign_name)+' • ':''}${C.formatDateTH(x.generated_at||new Date().toISOString())}</p><p class="mt-2 text-sm font-extrabold text-orange-700">${x.amount==null?'ร่วมอนุโมทนา':C.formatTHB(x.amount)}</p></div></article>`).join('');
+    dots.innerHTML=items.map((_,i)=>`<button class="nikorn-dot w-2.5 h-2.5 rounded-full ${i===0?'bg-orange-500':'bg-orange-100'}" data-index="${i}"></button>`).join('');
+    let current=0;
+    const apply=()=>{const step=track.children[0]?.getBoundingClientRect().width||300;track.style.transform=`translateX(-${current*(step+16)}px)`;[...dots.children].forEach((d,idx)=>d.className=`nikorn-dot w-2.5 h-2.5 rounded-full ${idx===current?'bg-orange-500':'bg-orange-100'}`)};
+    [...dots.children].forEach(d=>d.onclick=()=>{current=Number(d.dataset.index||0);apply();restart()});
+    function restart(){if(nikornAutoTimer)clearInterval(nikornAutoTimer);nikornAutoTimer=setInterval(()=>{current=(current+1)%items.length;apply()},3200)}
+    apply();restart();
+  }
+
   try { C.applyBranding(await C.loadBranding()); } catch (_) {}
   if (!db) {
     document.getElementById('latest-list').innerHTML = '<div class="p-5 rounded-2xl bg-rose-50 text-rose-700">ยังไม่ได้เชื่อมต่อ Supabase</div>';
@@ -29,12 +46,14 @@
   }
 
   try {
-    const [settings, dashboardRes] = await Promise.all([
+    const [settings, dashboardRes, nikornRes] = await Promise.all([
       C.loadDonationSettings(),
-      db.rpc('get_donation_dashboard_v2')
+      db.rpc('get_donation_dashboard_v2'),
+      db.rpc('get_donation_nikorn_gallery',{p_limit:8})
     ]);
     if (dashboardRes.error) throw dashboardRes.error;
     dashboard = dashboardRes.data || {periods:{},latest:[]};
+    if(!nikornRes.error) renderNikornGallery(Array.isArray(nikornRes.data)?nikornRes.data:[]);
 
     if (settings) {
       document.getElementById('campaign-title').textContent = settings.campaign_title || 'ร่วมทำบุญเพื่อการศึกษา';

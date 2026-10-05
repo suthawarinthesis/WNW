@@ -1,5 +1,5 @@
 /**
- * WNW Donation Certificate Generator — V21.2
+ * WNW Donation Certificate Generator — V22 Auto After Submit
  * Google Slides tags:
  *   {{donor_name}}
  *   {{donation_amount}}
@@ -32,12 +32,18 @@ function doPost(e) {
   const p = (e && e.parameter) || {};
   const requestId = String(p.request_id || '');
   const targetOrigin = /^https?:\/\/[^\s]+$/i.test(String(p.callback_origin || '')) ? String(p.callback_origin) : '*';
+  const action = String(p.action || '');
+  const isPublicAutoAction = action === 'auto_process_submission';
   try {
+    let data;
+    if (isPublicAutoAction) {
+      data = autoProcessSubmission_(p);
+      return simpleHtmlResponse_(true, data, 'ระบบกำลังดำเนินการอัตโนมัติเรียบร้อยแล้ว');
+    }
+
     verifySupabaseManager_(String(p.access_token || ''));
-    const action = String(p.action || '');
     const templateId = safeId_(p.template_id) || DEFAULT_TEMPLATE_ID;
     const folderId = safeId_(p.folder_id) || DEFAULT_FOLDER_ID;
-    let data;
     if (action === 'validate') data = validateTemplate_(templateId, folderId);
     else if (action === 'generate') data = generateCertificate_(templateId, folderId, p);
     else if (action === 'validate_promo') data = validatePromoTemplate_(safeId_(p.template_id) || DEFAULT_PROMO_TEMPLATE_ID, safeId_(p.folder_id) || DEFAULT_PROMO_FOLDER_ID);
@@ -46,6 +52,7 @@ function doPost(e) {
     else throw new Error('action ไม่ถูกต้อง');
     return callbackHtml_(targetOrigin, requestId, true, data, '');
   } catch (err) {
+    if (isPublicAutoAction) return simpleHtmlResponse_(false, null, err && err.message ? err.message : String(err));
     return callbackHtml_(targetOrigin, requestId, false, null, err && err.message ? err.message : String(err));
   }
 }
@@ -65,6 +72,133 @@ function verifySupabaseManager_(token) {
 function safeId_(value) {
   const v = String(value || '').trim();
   return /^[A-Za-z0-9_-]{15,}$/.test(v) ? v : '';
+}
+
+
+function safeUuid_(value) {
+  const v = String(value || '').trim();
+  return /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(v) ? v : '';
+}
+
+function callSupabaseRpc_(fnName, payload) {
+  const res = UrlFetchApp.fetch(SUPABASE_URL + '/rest/v1/rpc/' + encodeURIComponent(fnName), {
+    method: 'post',
+    muteHttpExceptions: true,
+    contentType: 'application/json',
+    headers: {
+      apikey: SUPABASE_ANON_KEY,
+      Authorization: 'Bearer ' + SUPABASE_ANON_KEY,
+      Prefer: 'return=representation'
+    },
+    payload: JSON.stringify(payload || {})
+  });
+  const code = res.getResponseCode();
+  const body = res.getContentText() || '';
+  if (code < 200 || code >= 300) throw new Error('Supabase RPC ' + fnName + ' ไม่สำเร็จ: HTTP ' + code + ' ' + body.slice(0, 400));
+  return body ? JSON.parse(body) : null;
+}
+
+function firstRow_(data) {
+  return Array.isArray(data) ? (data[0] || null) : data;
+}
+
+function formatAmountTag_(value) {
+  const n = Number(value || 0);
+  if (!isFinite(n)) return '0.00';
+  const parts = n.toFixed(2).split('.');
+  parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+  return parts.join('.');
+}
+
+function autoProcessSubmission_(p) {
+  const donationId = safeUuid_(p.donation_id);
+  const autoToken = safeUuid_(p.auto_process_token);
+  if (!donationId || !autoToken) throw new Error('ข้อมูล auto process token ไม่ถูกต้อง');
+
+  const prepared = firstRow_(callSupabaseRpc_('auto_prepare_donation_processing', {
+    p_id: donationId,
+    p_auto_process_token: autoToken
+  }));
+  if (!prepared || !prepared.certificate_no) throw new Error('ไม่พบข้อมูลรายการบริจาคสำหรับสร้างอัตโนมัติ');
+
+  const donorName = String(prepared.certificate_name || prepared.display_name || '').trim();
+  const amountText = formatAmountTag_(prepared.amount);
+  const verifyBase = String(prepared.verify_base_url || p.verify_base_url || 'https://wnw-vit.site/donation/verify/?no=').trim();
+  const verifyUrl = verifyBase + encodeURIComponent(prepared.certificate_no);
+  const certificateTemplateId = safeId_(prepared.google_slides_template_id) || safeId_(p.template_id) || DEFAULT_TEMPLATE_ID;
+  const certificateFolderId = safeId_(prepared.google_drive_folder_id) || safeId_(p.folder_id) || DEFAULT_FOLDER_ID;
+  const promoTemplateId = safeId_(prepared.nikorn_google_slides_template_id) || safeId_(p.promo_template_id) || DEFAULT_PROMO_TEMPLATE_ID;
+  const promoFolderId = safeId_(prepared.nikorn_google_drive_folder_id) || safeId_(p.promo_folder_id) || DEFAULT_PROMO_FOLDER_ID;
+  const fallbackPhotoUrl = String(prepared.nikorn_fallback_photo_url || p.fallback_photo_url || DEFAULT_PROMO_FALLBACK_PHOTO_URL).trim();
+
+  let certResult = null, certStatus = 'not_generated', certError = '';
+  try {
+    certResult = generateCertificate_(certificateTemplateId, certificateFolderId, {
+      donor_name: donorName,
+      donation_amount: amountText,
+      certificate_no: prepared.certificate_no,
+      verify_url: verifyUrl
+    });
+    certStatus = certResult && certResult.pdf_url ? 'ready' : 'error';
+    if (certStatus === 'error') certError = 'Google Apps Script ไม่ได้ส่งลิงก์ PDF กลับมา';
+  } catch (err) {
+    certStatus = 'error';
+    certError = err && err.message ? err.message : String(err);
+  }
+
+  let promoResult = null, promoStatus = 'not_generated', promoError = '';
+  try {
+    promoResult = generatePromoImage_(promoTemplateId, promoFolderId, {
+      donor_name: donorName,
+      donation_amount: amountText,
+      certificate_no: prepared.certificate_no,
+      request_no: prepared.request_no,
+      photo_url: prepared.photo_url || '',
+      fallback_photo_url: fallbackPhotoUrl
+    });
+    promoStatus = promoResult && promoResult.image_url ? 'ready' : 'error';
+    if (promoStatus === 'error') promoError = 'Google Apps Script ไม่ได้ส่งลิงก์ภาพผู้บริจาคกลับมา';
+  } catch (err) {
+    promoStatus = 'error';
+    promoError = err && err.message ? err.message : String(err);
+  }
+
+  const saved = firstRow_(callSupabaseRpc_('auto_complete_donation_processing', {
+    p_id: donationId,
+    p_auto_process_token: autoToken,
+    p_certificate_pdf_url: certResult ? certResult.pdf_url || '' : '',
+    p_certificate_drive_file_id: certResult ? certResult.file_id || '' : '',
+    p_certificate_image_url: certResult ? certResult.image_url || '' : '',
+    p_certificate_image_drive_file_id: certResult ? certResult.image_file_id || '' : '',
+    p_certificate_generation_status: certStatus,
+    p_certificate_generation_error: certError,
+    p_nikorn_image_url: promoResult ? promoResult.image_url || '' : '',
+    p_nikorn_image_drive_file_id: promoResult ? promoResult.image_file_id || '' : '',
+    p_nikorn_generation_status: promoStatus,
+    p_nikorn_generation_error: promoError
+  })) || {};
+
+  return {
+    donation_id: donationId,
+    certificate_no: prepared.certificate_no,
+    certificate_generation_status: certStatus,
+    nikorn_generation_status: promoStatus,
+    certificate_pdf_url: saved.certificate_pdf_url || (certResult ? certResult.pdf_url || '' : ''),
+    certificate_image_url: saved.certificate_image_url || (certResult ? certResult.image_url || '' : ''),
+    nikorn_image_url: saved.nikorn_image_url || (promoResult ? promoResult.image_url || '' : ''),
+    certificate_error: certError,
+    nikorn_error: promoError
+  };
+}
+
+function simpleHtmlResponse_(ok, data, message) {
+  const payload = JSON.stringify({ ok: ok, data: data || null, message: message || '' }).replace(/</g, '\u003c');
+  const html = '<!doctype html><meta charset="utf-8">' +
+    '<script>window.__wnwAutoResult=' + payload + ';<\/script>' +
+    '<div style="font-family:Arial,sans-serif;font-size:14px;padding:16px;color:' + (ok ? '#166534' : '#b91c1c') + '">' +
+    (ok ? 'ระบบดำเนินการอัตโนมัติเรียบร้อยแล้ว' : ('ดำเนินการอัตโนมัติไม่สำเร็จ: ' + String(message || 'ไม่ทราบสาเหตุ').replace(/</g, '&lt;'))) +
+    '</div>';
+  return HtmlService.createHtmlOutput(html).setXFrameOptionsMode(HtmlService.XFrameOptionsMode.ALLOWALL);
 }
 
 function validateTemplate_(templateId, folderId) {

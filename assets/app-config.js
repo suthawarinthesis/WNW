@@ -105,3 +105,49 @@ window.SCHOOL_APP_CONFIG = {
   // Run without blocking page rendering.
   Promise.resolve().then(refreshSchoolFavicon);
 })();
+
+
+/* ============================================================
+   WNW Privacy & Cookie Consent
+   Loads on every page that already uses app-config.js
+   ============================================================ */
+(() => {
+  try {
+    const current = document.currentScript?.src || '';
+    const privacyScriptUrl = current
+      ? new URL('./privacy-consent.js?v=20261007-v31', current).href
+      : './assets/privacy-consent.js?v=20261007-v31';
+    if (document.querySelector('script[data-wnw-privacy-loader]')) return;
+    const script = document.createElement('script');
+    script.src = privacyScriptUrl;
+    script.defer = true;
+    script.dataset.wnwPrivacyLoader = '1';
+    document.head.appendChild(script);
+  } catch (err) {
+    console.warn('Unable to load privacy consent module:', err);
+  }
+})();
+
+
+/* ============================================================
+   WNW Site Runtime V31
+   - Maintenance mode
+   - Error monitoring
+   - Shared runtime services
+   ============================================================ */
+(() => {
+  try {
+    const current = document.currentScript?.src || '';
+    const runtimeUrl = current
+      ? new URL('./site-runtime.js?v=20261007-v31', current).href
+      : './assets/site-runtime.js?v=20261007-v31';
+    if (document.querySelector('script[data-wnw-runtime-loader]')) return;
+    const script = document.createElement('script');
+    script.src = runtimeUrl;
+    script.defer = true;
+    script.dataset.wnwRuntimeLoader = '1';
+    document.head.appendChild(script);
+  } catch (err) {
+    console.warn('Unable to load WNW runtime:', err);
+  }
+})();

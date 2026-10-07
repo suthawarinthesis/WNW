@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="th"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>ติดต่อฝ่ายงาน | โรงเรียนวัดหนองแวงวิทยา</title>
+<meta name="description" content="หน้าที่รับผิดชอบของฝ่ายงานโรงเรียนวัดหนองแวงวิทยา พร้อมข้อมูลว่าควรติดต่อใคร">
+<script src="https://cdn.tailwindcss.com"></script><link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Thai:wght@300;400;500;600;700;800&display=swap" rel="stylesheet"><script src="https://unpkg.com/lucide@latest"></script><script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script src="../assets/app-config.js?v=20261007-v31"></script><script src="../assets/page-data.js?v=20261007-v31"></script>
+<style>body{font-family:'Noto Sans Thai',sans-serif}</style></head>
+<body class="bg-slate-50 text-slate-800 min-h-screen">
+<header class="bg-slate-950 text-white"><div class="max-w-6xl mx-auto px-4 py-8"><a href="../" class="text-sm text-slate-300 hover:text-orange-300 inline-flex gap-2 items-center"><i data-lucide="arrow-left" class="w-4 h-4"></i>กลับหน้าแรก</a><h1 class="text-3xl sm:text-4xl font-black mt-5">ติดต่อฝ่ายงาน / ติดต่อใคร</h1><p class="text-slate-400 mt-2">ค้นหาฝ่ายที่รับผิดชอบ ก่อนโทรหรือมาติดต่อโรงเรียน</p></div></header>
+<main class="max-w-6xl mx-auto px-4 py-8">
+<div class="bg-white rounded-2xl border border-slate-200 p-3 flex items-center gap-3"><i data-lucide="search" class="w-5 h-5 text-slate-400"></i><input id="resp-search" class="w-full outline-none py-2" placeholder="ค้นหา เช่น ทะเบียน ผลการเรียน ทุน ประชาสัมพันธ์"></div>
+<div id="resp-list" class="grid md:grid-cols-2 gap-4 mt-6"></div>
+</main>
+<script>
+let RESP=[];
+function esc(v=''){return String(v).replace(/[&<>'"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]))}
+function render(){
+ const q=(document.getElementById('resp-search').value||'').trim().toLowerCase();
+ const arr=RESP.filter(x=>x.published!==false).filter(x=>!q||`${x.title} ${x.description} ${x.contactName} ${x.phone} ${x.email}`.toLowerCase().includes(q));
+ document.getElementById('resp-list').innerHTML=arr.map(x=>`<article class="bg-white border border-slate-200 rounded-[1.75rem] p-6 hover:border-orange-200 hover:shadow-lg transition"><div class="w-11 h-11 rounded-xl bg-orange-50 text-orange-600 flex items-center justify-center"><i data-lucide="briefcase-business"></i></div><h2 class="font-black text-xl mt-4">${esc(x.title||'-')}</h2><p class="text-sm text-slate-600 leading-7 mt-2">${esc(x.description||'')}</p><div class="mt-5 pt-4 border-t border-slate-100"><p class="text-[10px] font-black uppercase tracking-widest text-slate-400">ติดต่อใคร</p><p class="font-bold mt-1">${esc(x.contactName||'สำนักงานโรงเรียน')}</p><div class="flex flex-wrap gap-2 mt-3">${x.phone?`<a href="tel:${esc(String(x.phone).replace(/\D/g,''))}" class="px-3 py-2 rounded-xl bg-orange-500 text-white text-sm font-bold">☎ ${esc(x.phone)}</a>`:''}${x.email?`<a href="mailto:${esc(x.email)}" class="px-3 py-2 rounded-xl bg-slate-100 text-slate-700 text-sm font-bold">✉ ${esc(x.email)}</a>`:''}</div></div></article>`).join('')||'<div class="md:col-span-2 p-10 text-center text-slate-400">ไม่พบฝ่ายงานที่ตรงกับคำค้น</div>';
+ lucide.createIcons();
+}
+(async()=>{const d=await WNWPageData.load();RESP=d.responsibilities||[];render();document.getElementById('resp-search').addEventListener('input',render)})();
+</script></body></html>

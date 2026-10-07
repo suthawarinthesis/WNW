@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>รู้จักโรงเรียนใน 60 วินาที | โรงเรียนวัดหนองแวงวิทยา</title>
+<meta name="description" content="สรุปหลักสูตร ธรรม บาลี สามัญ บวชเรียนฟรี จุดเด่น สถานที่ และขั้นตอนสมัครเรียน โรงเรียนวัดหนองแวงวิทยา">
+<script src="https://cdn.tailwindcss.com"></script>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Thai:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+<script src="https://unpkg.com/lucide@latest"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="../assets/app-config.js?v=20261007-v31"></script>
+<script src="../assets/page-data.js?v=20261007-v31"></script>
+<style>body{font-family:'Noto Sans Thai',sans-serif}.glass{background:rgba(255,255,255,.82);backdrop-filter:blur(18px);border:1px solid rgba(255,255,255,.9)}</style>
+</head>
+<body class="bg-gradient-to-br from-orange-50 via-white to-amber-50 text-slate-800 min-h-screen">
+<header class="max-w-6xl mx-auto px-4 pt-6"><a href="../" class="inline-flex items-center gap-2 text-sm font-bold text-slate-600 hover:text-orange-600"><i data-lucide="arrow-left" class="w-4 h-4"></i> กลับหน้าแรก</a></header>
+<main class="max-w-6xl mx-auto px-4 py-8 sm:py-12">
+  <section class="rounded-[2.5rem] bg-slate-950 text-white p-7 sm:p-12 overflow-hidden relative">
+    <div class="absolute -right-24 -top-24 w-72 h-72 bg-orange-500/30 blur-[80px] rounded-full"></div>
+    <div class="relative z-10 max-w-3xl"><span class="inline-flex items-center gap-2 text-xs font-black bg-orange-500/15 text-orange-300 border border-orange-500/30 px-3 py-1.5 rounded-full"><i data-lucide="timer" class="w-4 h-4"></i> 60 SECOND GUIDE</span><h1 id="s60-headline" class="text-3xl sm:text-5xl font-black mt-5 leading-tight">รู้จักโรงเรียนใน 60 วินาที</h1><p id="s60-summary" class="text-slate-300 mt-4 leading-8"></p></div>
+  </section>
+
+  <section class="grid md:grid-cols-3 gap-4 mt-6">
+    <article class="glass rounded-[2rem] p-6"><div class="w-12 h-12 rounded-2xl bg-amber-100 text-amber-700 flex items-center justify-center"><i data-lucide="book-open-check"></i></div><h2 class="font-black text-xl mt-4">แผนกธรรม</h2><p id="s60-dhamma" class="text-sm text-slate-600 leading-7 mt-2"></p></article>
+    <article class="glass rounded-[2rem] p-6 border-orange-200"><div class="w-12 h-12 rounded-2xl bg-orange-100 text-orange-700 flex items-center justify-center"><i data-lucide="languages"></i></div><h2 class="font-black text-xl mt-4">แผนกบาลี</h2><p id="s60-pali" class="text-sm text-slate-600 leading-7 mt-2"></p></article>
+    <article class="glass rounded-[2rem] p-6"><div class="w-12 h-12 rounded-2xl bg-blue-100 text-blue-700 flex items-center justify-center"><i data-lucide="graduation-cap"></i></div><h2 class="font-black text-xl mt-4">แผนกสามัญ</h2><p id="s60-general" class="text-sm text-slate-600 leading-7 mt-2"></p></article>
+  </section>
+
+  <section class="grid lg:grid-cols-2 gap-5 mt-5">
+    <article class="rounded-[2rem] bg-gradient-to-br from-emerald-500 to-green-600 text-white p-7"><p class="text-xs font-black uppercase tracking-widest text-emerald-100">ค่าใช้จ่าย</p><h2 id="s60-cost" class="text-3xl font-black mt-3">บวชเรียนฟรี ไม่มีค่าใช้จ่าย</h2><p class="text-emerald-50 mt-3 text-sm leading-7">เปิดโอกาสให้เยาวชนได้ศึกษาทั้งพระปริยัติธรรมและวิชาสามัญ ภายใต้สภาพแวดล้อมของวัดและการดูแลของโรงเรียน</p></article>
+    <article class="glass rounded-[2rem] p-7"><p class="text-xs font-black uppercase tracking-widest text-orange-500">จุดเด่น</p><p id="s60-highlight" class="text-lg font-bold mt-3 leading-8"></p><div class="mt-4 flex items-center gap-2 text-sm text-slate-500"><i data-lucide="map-pin" class="w-4 h-4 text-orange-500"></i><span id="s60-venue"></span></div></article>
+  </section>
+
+  <section class="glass rounded-[2rem] p-6 sm:p-8 mt-5">
+    <div class="flex items-center gap-3"><div class="w-12 h-12 rounded-2xl bg-fuchsia-100 text-fuchsia-700 flex items-center justify-center"><i data-lucide="clipboard-check"></i></div><div><p class="text-xs font-black text-fuchsia-600 uppercase tracking-widest">Admission</p><h2 class="text-2xl font-black">สมัครเรียนได้ 2 วิธี</h2></div></div>
+    <div class="grid md:grid-cols-2 gap-4 mt-6">
+      <a id="s60-online" href="../admission/" class="rounded-2xl bg-orange-500 hover:bg-orange-600 text-white p-5 transition"><p class="font-black">1. สมัครออนไลน์ผ่านเว็บไซต์</p><p class="text-sm text-orange-100 mt-2">กรอกข้อมูลและส่งเอกสารผ่านระบบรับสมัครของโรงเรียน</p></a>
+      <div class="rounded-2xl bg-slate-100 p-5"><p class="font-black">2. สมัครออนไซต์ที่โรงเรียน</p><p id="s60-onsite" class="text-sm text-slate-600 mt-2 leading-7"></p></div>
+    </div>
+  </section>
+</main>
+<script>
+(async()=>{
+ const d=await WNWPageData.load(),s=d.school60||{};
+ const map={headline:'s60-headline',summary:'s60-summary',dhamma:'s60-dhamma',pali:'s60-pali',general:'s60-general',cost:'s60-cost',highlight:'s60-highlight',venue:'s60-venue',applyOnsite:'s60-onsite'};
+ Object.entries(map).forEach(([k,id])=>{const el=document.getElementById(id);if(el&&s[k])el.textContent=s[k]});
+ const online=document.getElementById('s60-online');if(s.applyOnlineUrl)online.href=s.applyOnlineUrl;
+ lucide.createIcons();
+})();
+</script>
+</body></html>

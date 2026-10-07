@@ -23,7 +23,7 @@
 
     <!-- Supabase (GitHub Pages compatible) -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="./assets/app-config.js?v=20260926-favicon"></script>
+    <script src="./assets/app-config.js?v=20261007-v31-school-system"></script>
 
     <style>
         body { font-family: 'Noto Sans Thai', sans-serif; background-color: #f8fafc; }
@@ -161,6 +161,14 @@
                                     <i data-lucide="landmark" class="w-5 h-5 text-orange-500 mt-0.5"></i>
                                     <div><p class="font-semibold text-slate-800">ประวัติโรงเรียน</p><p class="text-xs text-slate-500">ข้อมูลและความเป็นมาของโรงเรียน</p></div>
                                 </a>
+                                <a href="./about-60/" class="flex items-start gap-3 px-3 py-3 rounded-xl hover:bg-orange-50 transition-colors">
+                                    <i data-lucide="timer" class="w-5 h-5 text-orange-500 mt-0.5"></i>
+                                    <div><p class="font-semibold text-slate-800">รู้จักโรงเรียนใน 60 วินาที</p><p class="text-xs text-slate-500">หลักสูตร ค่าใช้จ่าย จุดเด่น และวิธีสมัคร</p></div>
+                                </a>
+                                <a href="./responsibilities/" class="flex items-start gap-3 px-3 py-3 rounded-xl hover:bg-orange-50 transition-colors">
+                                    <i data-lucide="contact-round" class="w-5 h-5 text-orange-500 mt-0.5"></i>
+                                    <div><p class="font-semibold text-slate-800">ติดต่อฝ่ายงาน</p><p class="text-xs text-slate-500">งานทะเบียน วัดผล ประชาสัมพันธ์ และงานทุน</p></div>
+                                </a>
                                 <a href="#staff-section" class="flex items-start gap-3 px-3 py-3 rounded-xl hover:bg-orange-50 transition-colors">
                                     <i data-lucide="users" class="w-5 h-5 text-orange-500 mt-0.5"></i>
                                     <div><p class="font-semibold text-slate-800">ทำเนียบบุคลากร</p><p class="text-xs text-slate-500">คณะผู้บริหาร ครู และบุคลากร</p></div>
@@ -252,6 +260,9 @@
                     </summary>
                     <div class="px-3 pb-3 space-y-1">
                         <a href="#history-section" class="block px-3 py-2.5 rounded-xl text-slate-700 hover:bg-orange-50">ประวัติโรงเรียน</a>
+                        <a href="./about-60/" class="block px-3 py-2.5 rounded-xl text-slate-700 hover:bg-orange-50">รู้จักโรงเรียนใน 60 วินาที</a>
+                        <a href="./responsibilities/" class="block px-3 py-2.5 rounded-xl text-slate-700 hover:bg-orange-50">ติดต่อฝ่ายงาน / ติดต่อใคร</a>
+                        <a href="./emergency/" class="block px-3 py-2.5 rounded-xl text-rose-700 hover:bg-rose-50 font-semibold">ข้อมูลฉุกเฉิน</a>
                         <a href="#staff-section" class="block px-3 py-2.5 rounded-xl text-slate-700 hover:bg-orange-50">ทำเนียบบุคลากร</a>
                         <a href="#stats-section" class="block px-3 py-2.5 rounded-xl text-slate-700 hover:bg-orange-50">สถิติผลการสอบ</a>
                         <a href="#news-section" class="block px-3 py-2.5 rounded-xl text-slate-700 hover:bg-orange-50">ข่าวสาร</a>
@@ -344,6 +355,9 @@
                         <button id="video-promo-btn" class="bg-gradient-to-r from-orange-500 to-orange-600 text-white px-6 py-2.5 rounded-full font-semibold hover:from-orange-600 hover:to-orange-700 transition-all shadow-lg hover:shadow-orange-500/30 flex items-center gap-2 cursor-pointer">
                             <i data-lucide="play-circle" class="w-5 h-5"></i> วิดีโอแนะนำโรงเรียน
                         </button>
+                        <a href="./about-60/" class="bg-white/15 hover:bg-white/25 border border-white/25 text-white px-5 py-2.5 rounded-full font-semibold transition-all flex items-center gap-2">
+                            <i data-lucide="timer" class="w-5 h-5"></i> รู้จักโรงเรียนใน 60 วินาที
+                        </a>
                     </div>
                 </div>
             </div>
@@ -402,38 +416,29 @@
                 </div>
             </div>
 
-            <!-- Box: ค้นหาพระไตรปิฎก (Tripitaka Search Widget) -->
-            <div class="col-span-1 md:col-span-1 lg:col-span-1 row-span-1 glass-panel rounded-[2rem] p-5 flex flex-col justify-center group border-amber-200">
-                <div class="flex justify-between items-start mb-2">
-                    <h3 class="text-sm font-bold text-slate-800 flex items-center gap-2">
-                        <i data-lucide="book-marked" class="w-4 h-4 text-amber-600"></i> ค้นหาพระไตรปิฎก
-                    </h3>
+            <!-- Box: บาลีวันละคำ — อัปเดตตามวันอัตโนมัติ -->
+            <div class="col-span-1 md:col-span-1 lg:col-span-1 row-span-1 glass-panel rounded-[2rem] p-5 flex flex-col justify-center items-center text-center group hover:border-indigo-300 transition-colors bg-gradient-to-br from-indigo-50/70 to-white/70">
+                <div class="flex items-center justify-between w-full mb-2">
+                    <span class="text-[10px] font-black text-indigo-700 bg-indigo-50 border border-indigo-100 px-2.5 py-1 rounded-full">อัปเดตทุกวัน</span>
+                    <i data-lucide="languages" class="w-5 h-5 text-indigo-500"></i>
                 </div>
-                <div class="relative mt-2">
-                    <input type="text" id="tripitaka-search" placeholder="พิมพ์คำค้นหา..." class="w-full bg-white/70 border border-slate-200 rounded-full py-2 pl-4 pr-10 text-sm focus:outline-none focus:ring-2 focus:ring-amber-400 transition-shadow">
-                    <button onclick="searchTripitaka()" class="absolute right-1 top-1 w-8 h-8 bg-amber-500 text-white rounded-full flex items-center justify-center hover:bg-amber-600 transition-colors">
-                        <i data-lucide="search" class="w-4 h-4"></i>
-                    </button>
-                </div>
-            </div>
-
-            <!-- Box: บาลีวันละคำ -->
-            <div class="col-span-1 md:col-span-1 lg:col-span-1 row-span-1 glass-panel rounded-[2rem] p-5 flex flex-col justify-center items-center text-center group cursor-pointer hover:border-indigo-300 transition-colors bg-gradient-to-br from-indigo-50/50 to-white/50">
-                <div class="w-10 h-10 bg-indigo-100/80 border border-indigo-200 rounded-full flex items-center justify-center text-indigo-600 mb-2 shadow-sm group-hover:scale-110 transition-transform"><i data-lucide="languages" class="w-5 h-5"></i></div>
                 <p class="text-[10px] text-slate-500 font-bold mb-1 uppercase tracking-wider">บาลีวันละคำ</p>
                 <h4 class="text-xl font-black text-indigo-700 drop-shadow-sm mb-0.5" id="pali-word">...</h4>
-                <p class="text-[11px] text-indigo-400 font-medium mb-1" id="pali-reading">...</p>
-                <p class="text-xs font-medium text-slate-700 bg-white/60 px-3 py-1 rounded-full border border-white" id="pali-meaning">...</p>
+                <p class="text-[11px] text-indigo-500 font-medium mb-1" id="pali-reading">...</p>
+                <p class="text-xs font-medium text-slate-700 bg-white/70 px-3 py-1 rounded-full border border-white" id="pali-meaning">...</p>
+                <p class="text-[9px] text-slate-400 mt-2" id="pali-source">หมุนเวียนอัตโนมัติตามวันที่</p>
             </div>
 
-            <!-- Box: พุทธสุภาษิต -->
-            <div class="col-span-1 md:col-span-1 lg:col-span-1 row-span-1 glass-panel rounded-[2rem] p-5 flex flex-col justify-between group hover:border-orange-300 transition-colors cursor-pointer">
+            <!-- Box: พุทธสุภาษิต — อัปเดตตามวันอัตโนมัติ -->
+            <div class="col-span-1 md:col-span-1 lg:col-span-1 row-span-1 glass-panel rounded-[2rem] p-5 flex flex-col justify-between group hover:border-orange-300 transition-colors bg-gradient-to-br from-orange-50/60 to-white/70">
                 <div class="flex justify-between items-start mb-2">
                     <h3 class="text-sm font-bold text-slate-800 flex items-center gap-2"><i data-lucide="quote" class="w-4 h-4 text-orange-500"></i> พุทธสุภาษิตวันนี้</h3>
+                    <span class="text-[9px] font-black text-orange-700 bg-orange-50 border border-orange-100 px-2 py-1 rounded-full">DAILY</span>
                 </div>
                 <div class="text-center mt-2 group-hover:-translate-y-1 transition-transform flex-1 flex flex-col justify-center">
                     <p class="font-bold text-orange-700 text-sm mb-1 leading-snug" id="dhamma-pali">...</p>
                     <p class="text-[11px] text-slate-600 mt-1" id="dhamma-thai">...</p>
+                    <p class="text-[9px] text-slate-400 mt-2" id="dhamma-source">หมุนเวียนอัตโนมัติตามวันที่</p>
                 </div>
             </div>
 
@@ -461,41 +466,47 @@
                 <div class="flex-1 flex flex-col gap-4 justify-between" id="news-container"></div>
             </div>
 
-            <!-- Box: Smart Environment (PM 2.5) -->
-            <div class="col-span-1 md:col-span-2 lg:col-span-2 row-span-1 glass-panel rounded-[2rem] p-5 flex flex-col justify-between group">
-                <div class="flex justify-between items-start mb-2">
-                    <div>
+            <!-- Box: Smart Environment — ข้อมูลจริงจากพิกัดโรงเรียน -->
+            <div class="col-span-1 md:col-span-2 lg:col-span-2 row-span-1 glass-panel rounded-[2rem] p-5 flex flex-col justify-between group border-emerald-100">
+                <div class="flex justify-between items-start gap-3 mb-3">
+                    <div class="min-w-0">
                         <h3 class="text-sm font-bold text-slate-800 flex items-center gap-2"><i data-lucide="leaf" class="w-4 h-4 text-green-500"></i> Smart Environment</h3>
-                        <div class="flex items-center gap-1 text-[10px] text-slate-500 mt-1"><i data-lucide="map-pin" class="w-3 h-3 text-orange-500"></i> พิกัด: รร.วัดหนองแวงวิทยา</div>
+                        <div class="flex items-center gap-1 text-[10px] text-slate-500 mt-1 min-w-0"><i data-lucide="map-pin" class="w-3 h-3 text-orange-500 shrink-0"></i><span id="env-location-label" class="truncate">โรงเรียนวัดหนองแวงวิทยา • CR5M+HG Khon Kaen</span></div>
                     </div>
-                    <div class="bg-white/60 px-2 py-0.5 rounded-full text-[10px] font-bold text-slate-500 border border-white/50 backdrop-blur-sm shadow-sm">Real-time</div>
+                    <div class="bg-emerald-50 px-2.5 py-1 rounded-full text-[10px] font-bold text-emerald-700 border border-emerald-100">Live data</div>
                 </div>
-                <div class="flex gap-4 items-center mt-2">
-                    <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-green-400 to-green-500 text-white flex flex-col items-center justify-center shadow-lg shadow-green-500/20 group-hover:-translate-y-1 transition-transform">
-                        <span class="text-2xl font-black leading-none" id="aqi-value">24</span><span class="text-[10px] font-medium opacity-90">AQI</span>
+                <div class="grid grid-cols-[72px_1fr] gap-4 items-center">
+                    <div id="aqi-box" class="w-[72px] h-[72px] rounded-2xl bg-gradient-to-br from-slate-400 to-slate-500 text-white flex flex-col items-center justify-center shadow-lg transition-all">
+                        <span class="text-2xl font-black leading-none" id="aqi-value">--</span><span class="text-[10px] font-medium opacity-90">US AQI</span>
                     </div>
-                    <div>
-                        <p class="text-[11px] text-slate-500 mb-0.5">คุณภาพอากาศ (PM 2.5)</p>
-                        <p class="text-sm font-bold text-green-600 mb-1" id="aqi-status">อากาศดีมาก</p>
-                        <div class="flex items-center gap-1 text-xs text-slate-600 font-medium"><i data-lucide="thermometer" class="w-3.5 h-3.5 text-orange-500"></i> <span id="env-temp">32°C</span></div>
+                    <div class="min-w-0">
+                        <p class="text-sm font-bold text-slate-700" id="aqi-status">กำลังโหลดข้อมูลอากาศ...</p>
+                        <div class="grid grid-cols-3 gap-2 mt-2 text-[10px]">
+                            <div class="rounded-xl bg-white/70 border border-white p-2"><span class="text-slate-400 block">PM2.5</span><b id="pm25-value" class="text-slate-700">--</b></div>
+                            <div class="rounded-xl bg-white/70 border border-white p-2"><span class="text-slate-400 block">อุณหภูมิ</span><b id="env-temp" class="text-slate-700">--</b></div>
+                            <div class="rounded-xl bg-white/70 border border-white p-2"><span class="text-slate-400 block">ความชื้น</span><b id="env-humidity" class="text-slate-700">--</b></div>
+                        </div>
                     </div>
+                </div>
+                <div class="flex items-center justify-between gap-3 mt-3 text-[9px] text-slate-400">
+                    <span id="env-updated">รอการอัปเดต</span>
+                    <a href="https://open-meteo.com/" target="_blank" rel="noopener" class="hover:text-emerald-600">ข้อมูล: Open-Meteo ↗</a>
                 </div>
             </div>
 
-            <!-- Box: ติดต่อเราแบบยาว (Contact Bottom Bar) -->
-            <div class="col-span-1 md:col-span-3 lg:col-span-4 row-span-1 glass-panel rounded-[2rem] p-6 flex flex-col justify-between group hover:border-orange-200 transition-colors">
-                <div class="flex flex-col md:flex-row md:items-center justify-between gap-6 h-full">
-                    <div class="flex-1 flex flex-col md:flex-row md:items-center gap-6">
-                        <h3 class="text-base font-bold text-slate-800 flex items-center gap-2 whitespace-nowrap"><i data-lucide="map-pin" class="w-5 h-5 text-orange-500"></i> ติดต่อเรา / Contact Us</h3>
-                        <div class="flex flex-wrap gap-4">
-                            <div class="flex items-center gap-2 text-sm text-slate-600 bg-white/40 px-4 py-2 rounded-xl border border-white/50"><i data-lucide="phone" class="w-4 h-4 text-orange-600"></i><span class="font-medium" id="contact-phone">...</span></div>
-                            <div class="flex items-center gap-2 text-sm text-slate-600 bg-white/40 px-4 py-2 rounded-xl border border-white/50"><i data-lucide="mail" class="w-4 h-4 text-orange-600"></i><span class="font-medium" id="contact-email">...</span></div>
-                        </div>
+            <!-- Box: ค้นหาพระไตรปิฎก — ย้ายลงมาเป็นเครื่องมือเสริม -->
+            <div class="col-span-1 md:col-span-3 lg:col-span-4 row-span-1 glass-panel rounded-[2rem] p-5 sm:p-6 border-amber-100">
+                <div class="flex flex-col md:flex-row md:items-center gap-4">
+                    <div class="md:w-72 shrink-0">
+                        <p class="text-[10px] font-black tracking-wider text-amber-600 uppercase">Dhamma Research Tool</p>
+                        <h3 class="text-base font-bold text-slate-800 flex items-center gap-2 mt-1"><i data-lucide="book-marked" class="w-5 h-5 text-amber-600"></i> ค้นหาพระไตรปิฎก</h3>
+                        <p class="text-[11px] text-slate-500 mt-1">เครื่องมือเสริมสำหรับค้นคำในพระไตรปิฎกจาก 84000.org</p>
                     </div>
-                    <div class="md:w-auto">
-                        <a href="#" target="_blank" class="map-link w-full bg-white/80 hover:bg-orange-500 text-slate-700 hover:text-white text-sm font-bold px-8 py-3 rounded-xl transition-all shadow-sm flex items-center justify-center gap-2 border border-white">
-                            <i data-lucide="map"></i> เปิดแผนที่นำทาง
-                        </a>
+                    <div class="relative flex-1">
+                        <input type="text" id="tripitaka-search" placeholder="พิมพ์คำหรือข้อความที่ต้องการค้นหา..." class="w-full bg-white/80 border border-slate-200 rounded-2xl py-3 pl-4 pr-12 text-sm focus:outline-none focus:ring-2 focus:ring-amber-400 transition-shadow">
+                        <button onclick="searchTripitaka()" class="absolute right-1.5 top-1.5 w-9 h-9 bg-amber-500 text-white rounded-xl flex items-center justify-center hover:bg-amber-600 transition-colors" aria-label="ค้นหาพระไตรปิฎก">
+                            <i data-lucide="search" class="w-4 h-4"></i>
+                        </button>
                     </div>
                 </div>
             </div>
@@ -585,8 +596,8 @@
             </div>
         </section>
 
-        <!-- กิจวัตรประจำวัน -->
-        <section>
+        <!-- กิจวัตรประจำวัน — เปิด/ปิดจาก Manager -->
+        <section id="routine-section" class="hidden">
             <div class="flex items-center gap-3 mb-8">
                 <div class="w-2 h-8 bg-gradient-to-b from-orange-400 to-orange-600 rounded-full shadow-md"></div>
                 <h2 class="text-2xl font-bold text-slate-800 drop-shadow-sm">กิจวัตรประจำวันสามเณร</h2>
@@ -734,7 +745,12 @@
                     </div>
                     <div><h2 class="text-lg font-bold text-white leading-tight" id="footer-school-name-th">...</h2><p class="text-xs text-orange-400" id="footer-school-name-en">...</p></div>
                 </div>
-                <p class="text-sm text-slate-400 mb-4 max-w-xs" id="footer-address">...</p>
+                <p class="text-sm text-slate-400 mb-3 max-w-sm" id="footer-address">...</p>
+                <div class="space-y-1.5 text-xs text-slate-400">
+                    <p class="flex items-center gap-2"><i data-lucide="phone" class="w-3.5 h-3.5 text-orange-400"></i><span>สำนักงาน: <a id="footer-phone" href="tel:043320171" class="hover:text-orange-300">043-320-171</a></span></p>
+                    <p class="flex items-center gap-2"><i data-lucide="phone-call" class="w-3.5 h-3.5 text-rose-400"></i><span>สายด่วนผู้อำนวยการ: <a id="footer-hotline" href="tel:0840286034" class="hover:text-orange-300">084-028-6034</a></span></p>
+                    <p class="flex items-center gap-2"><i data-lucide="mail" class="w-3.5 h-3.5 text-orange-400"></i><a id="footer-email" href="#" class="hover:text-orange-300">...</a></p>
+                </div>
             </div>
             <div>
                 <h3 class="text-white font-bold mb-4">ลิงก์ที่เกี่ยวข้อง</h3>
@@ -745,6 +761,9 @@
                     <li><a href="./student-portal/" class="hover:text-orange-400 transition-colors">Student Portal</a></li>
                     <li><a href="./university-admission/" class="hover:text-orange-400 transition-colors">ประชาสัมพันธ์รับสมัครมหาวิทยาลัย</a></li>
                     <li><a href="./donation/" class="hover:text-orange-400 transition-colors text-orange-400">ร่วมทำบุญและใบอนุโมทนาบัตร</a></li>
+                    <li><a href="./about-60/" class="hover:text-orange-400 transition-colors">รู้จักโรงเรียนใน 60 วินาที</a></li>
+                    <li><a href="./responsibilities/" class="hover:text-orange-400 transition-colors">ติดต่อฝ่ายงาน</a></li>
+                    <li><a href="./emergency/" class="hover:text-rose-300 transition-colors text-rose-400">ข้อมูลฉุกเฉิน</a></li>
                 </ul>
             </div>
             <div>
@@ -759,6 +778,10 @@
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-8 pt-8 border-t border-slate-800 text-xs text-center text-slate-500">
             <div class="flex flex-col sm:flex-row gap-3 items-center justify-center">
                 <span>© <span id="current-year"></span> <span id="copyright-name"></span> All rights reserved.</span>
+                <span class="hidden sm:inline text-slate-700">•</span>
+                <a href="./privacy/" class="inline-flex items-center gap-1.5 text-slate-500 hover:text-orange-400 transition-colors"><i data-lucide="shield" class="w-3.5 h-3.5"></i> Privacy Policy</a>
+                <span class="hidden sm:inline text-slate-700">•</span>
+                <button type="button" onclick="window.WNWPrivacy?.openSettings()" class="inline-flex items-center gap-1.5 text-slate-500 hover:text-orange-400 transition-colors"><i data-lucide="cookie" class="w-3.5 h-3.5"></i> ตั้งค่าคุกกี้</button>
                 <span class="hidden sm:inline text-slate-700">•</span>
                 <a href="./manager/" class="inline-flex items-center gap-1.5 text-slate-500 hover:text-orange-400 transition-colors" title="ระบบผู้ดูแลเว็บไซต์">
                     <i data-lucide="shield-check" class="w-3.5 h-3.5"></i> ระบบ Manager
@@ -891,9 +914,10 @@
                 directorName: "พระครูสุธีกิตติวรญาณ",
                 directorImage: "",
                 directorMsg: "เรามุ่งมั่นที่จะสร้างสภาพแวดล้อมแห่งการเรียนรู้ที่ผสมผสานหลักธรรมทางพระพุทธศาสนาเข้ากับวิชาการสมัยใหม่ เปิดโอกาสให้นักเรียนทุกคนได้ค้นพบศักยภาพของตนเองอย่างเต็มที่",
-                phone: "043-123-4567",
+                phone: "043-320-171",
                 email: "info@nongwang.ac.th",
-                address: "123 ถนนประชาสโมสร ตำบลในเมือง อำเภอเมือง จังหวัดขอนแก่น 40000",
+                address: "593 ถ.กลางเมือง อ.เมือง จ.ขอนแก่น 40000",
+                directorHotline: "084-028-6034",
                 stats: [
                     { label: "สามเณรนักเรียน", value: "1,845", icon: "users" },
                     { label: "บุคลากร", value: "112", icon: "award" }
@@ -938,8 +962,8 @@
                 youtube: "#" // ใส่ลิงก์ Youtube
             },
             map: {
-                linkUrl: "https://maps.app.goo.gl/C1YfMnZP2YkvTuoa7", // ลิงก์สำหรับกดเพื่อเปิด Google Maps
-                embedIframe: "https://maps.google.com/maps?q=โรงเรียนวัดหนองแวงวิทยา%20ขอนแก่น&t=&z=16&ie=UTF8&iwloc=&output=embed" // ลิงก์สำหรับโชว์แผนที่บนเว็บ
+                linkUrl: "https://www.google.com/maps/search/?api=1&query=CR5M%2BHG%2C%20Khon%20Kaen%2C%20Thailand", // พิกัดโรงเรียน
+                embedIframe: "https://maps.google.com/maps?q=16.4089375,102.8338125&t=&z=17&ie=UTF8&iwloc=&output=embed" // โหลดเมื่อผู้ใช้ยอมรับคุกกี้ภายนอก
             },
 
             // 📌 7. สื่อวิดีโอ และ 360 VR (เปิดแท็บใหม่เมื่อกดปุ่ม)
@@ -1023,8 +1047,24 @@
                 { title: "ปฏิทินวิชาการ ประจำภาคเรียนที่ 1/2569", size: "0.8 MB", type: "PDF" }
             ],
 
-            // 📌 20. สภาพแวดล้อม PM2.5 (ระบบจำลอง)
-            environment: { aqi: 24, status: "อากาศดีมาก", temp: 32 },
+            // 📌 20. Smart Environment — ข้อมูลจริงตามพิกัดโรงเรียน
+            environment: {
+                auto: true,
+                latitude: 16.4089375,
+                longitude: 102.8338125,
+                locationLabel: "โรงเรียนวัดหนองแวงวิทยา • CR5M+HG Khon Kaen",
+                refreshMinutes: 10,
+                // ค่า fallback ใช้เฉพาะตอน API ภายนอกไม่ตอบ
+                aqi: 24,
+                status: "กำลังอัปเดตข้อมูล",
+                temp: 32
+            },
+
+            // ฟีเจอร์ที่เปิด/ปิดได้จาก Manager
+            features: {
+                routinesEnabled: false,
+                dailyWisdomAuto: true
+            },
 
             // 📌 21. กิจวัตรประจำวันสามเณร
             routines: [
@@ -1055,6 +1095,62 @@
         let HOME_ALUMNI = [];
         let homeAlumniAnimationFrame = null;
         let homeAlumniPaused = false;
+
+        const DAILY_PALI_WORDS = [
+            {word:"เมตฺตา",reading:"เมต-ตา",meaning:"ความปรารถนาดี ความเป็นมิตร"},
+            {word:"กรุณา",reading:"กะ-รุ-นา",meaning:"ความสงสารและคิดช่วยให้พ้นทุกข์"},
+            {word:"มุทิตา",reading:"มุ-ทิ-ตา",meaning:"ความยินดีเมื่อผู้อื่นได้ดี"},
+            {word:"อุเปกฺขา",reading:"อุ-เปก-ขา",meaning:"ความวางใจเป็นกลางอย่างมีปัญญา"},
+            {word:"สติ",reading:"สะ-ติ",meaning:"ความระลึกรู้ ไม่เผลอ"},
+            {word:"สมาธิ",reading:"สะ-มา-ทิ",meaning:"ความตั้งมั่นแห่งจิต"},
+            {word:"ปญฺญา",reading:"ปัน-ยา",meaning:"ปัญญา ความรู้ทั่วถึงตามความเป็นจริง"},
+            {word:"วิริย",reading:"วิ-ริ-ยะ",meaning:"ความเพียร ความพยายาม"},
+            {word:"ขนฺติ",reading:"ขัน-ติ",meaning:"ความอดทน อดกลั้น"},
+            {word:"สจฺจ",reading:"สัด-จะ",meaning:"ความจริง ความซื่อตรง"},
+            {word:"ทาน",reading:"ทา-นะ",meaning:"การให้ การแบ่งปัน"},
+            {word:"สีล",reading:"สี-ละ",meaning:"ความประพฤติดีทางกายและวาจา"},
+            {word:"ภาวนา",reading:"พา-วะ-นา",meaning:"การอบรมและพัฒนาจิตใจ"},
+            {word:"กตญฺญุตา",reading:"กะ-ตัน-ยู-ตา",meaning:"ความรู้คุณผู้อื่น"},
+            {word:"อปฺปมาท",reading:"อับ-ปะ-มา-ทะ",meaning:"ความไม่ประมาท"},
+            {word:"หิริ",reading:"หิ-ริ",meaning:"ความละอายต่อการทำชั่ว"},
+            {word:"โอตฺตปฺป",reading:"โอด-ตับ-ปะ",meaning:"ความเกรงกลัวต่อผลของความชั่ว"},
+            {word:"สนฺตุฏฺฐิ",reading:"สัน-ตุด-ถิ",meaning:"ความสันโดษ ยินดีในสิ่งที่มีโดยชอบ"},
+            {word:"อธิฏฺฐาน",reading:"อะ-ทิด-ถา-นะ",meaning:"ความตั้งใจมั่น ความตั้งมั่น"},
+            {word:"สามคฺคี",reading:"สา-มัก-คี",meaning:"ความพร้อมเพรียง ความร่วมมือ"},
+            {word:"กุสล",reading:"กุ-สะ-ละ",meaning:"สิ่งที่ดีงาม ฉลาด และเกื้อกูล"}
+        ];
+
+        const DAILY_DHAMMA_QUOTES = [
+            {pali:"นตฺถิ ปญฺญาสมา อาภา",thai:"แสงสว่างเสมอด้วยปัญญา ไม่มี"},
+            {pali:"อตฺตา หิ อตฺตโน นาโถ",thai:"ตนแลเป็นที่พึ่งของตน"},
+            {pali:"อปฺปมาโท อมตํ ปทํ",thai:"ความไม่ประมาทเป็นทางแห่งความไม่ตาย"},
+            {pali:"ขนฺตี ปรมํ ตโป ตีติกฺขา",thai:"ขันติ คือความอดทน เป็นตบะอย่างยิ่ง"},
+            {pali:"น หิ เวเรน เวรานิ สมฺมนฺตีธ กุทาจนํ",thai:"เวรย่อมไม่ระงับด้วยเวรในกาลไหน ๆ"},
+            {pali:"จิตฺตํ ทนฺตํ สุขาวหํ",thai:"จิตที่ฝึกดีแล้ว นำสุขมาให้"},
+            {pali:"สุโข ปุญฺญสฺส อุจฺจโย",thai:"การสั่งสมบุญ นำสุขมาให้"},
+            {pali:"อโรคฺยา ปรมา ลาภา",thai:"ความไม่มีโรค เป็นลาภอันประเสริฐ"},
+            {pali:"สนฺตุฏฺฐี ปรมํ ธนํ",thai:"ความสันโดษ เป็นทรัพย์อย่างยิ่ง"},
+            {pali:"วิสฺสาสปรมา ญาติ",thai:"ความคุ้นเคยไว้วางใจกัน เป็นญาติอย่างยิ่ง"},
+            {pali:"นิพฺพานํ ปรมํ สุขํ",thai:"นิพพาน เป็นสุขอย่างยิ่ง"},
+            {pali:"ธมฺโม หเว รกฺขติ ธมฺมจารึ",thai:"ธรรมย่อมรักษาผู้ประพฤติธรรม"},
+            {pali:"สพฺพปาปสฺส อกรณํ",thai:"การไม่ทำบาปทั้งปวง เป็นหลักแห่งความดี"},
+            {pali:"กุสลสฺสูปสมฺปทา",thai:"การทำกุศลให้ถึงพร้อม"},
+            {pali:"สจิตฺตปริโยทปนํ",thai:"การทำจิตของตนให้ผ่องใส"},
+            {pali:"วิริเยน ทุกฺขมจฺเจติ",thai:"คนล่วงทุกข์ได้ด้วยความเพียร"},
+            {pali:"ปญฺญา โลกสฺมิ ปชฺโชโต",thai:"ปัญญาเป็นแสงสว่างในโลก"},
+            {pali:"สุขา สงฺฆสฺส สามคฺคี",thai:"ความพร้อมเพรียงของหมู่คณะ นำมาซึ่งความสุข"},
+            {pali:"ททมาโน ปิโย โหติ",thai:"ผู้ให้ ย่อมเป็นที่รัก"},
+            {pali:"สติ โลกสฺมิ ชาคโร",thai:"สติเป็นธรรมเครื่องตื่นอยู่ในโลก"},
+            {pali:"ยถาวาที ตถาการี",thai:"พูดอย่างไร ควรทำอย่างนั้น"}
+        ];
+
+        function bangkokDaySerial() {
+            const parts = new Intl.DateTimeFormat('en-CA', {
+                timeZone:'Asia/Bangkok', year:'numeric', month:'2-digit', day:'2-digit'
+            }).formatToParts(new Date()).reduce((o,p)=>{o[p.type]=p.value;return o},{});
+            return Math.floor(Date.UTC(Number(parts.year), Number(parts.month)-1, Number(parts.day)) / 86400000);
+        }
+
 
         window.addEventListener('pageshow', () => {
             // Recover from bfcache / interrupted modal states that can leave the page unscrollable.
@@ -1089,6 +1185,7 @@
             safeRun('dhamma quote', renderDhammaQuote);
             safeRun('pali word', renderPaliWord);
             safeRun('routines', renderRoutines);
+            safeRun('smart environment', initSmartEnvironment);
             safeRun('exam stats', renderExamStats);
             safeRun('countdown', initCountdown);
             safeRun('external links', bindExternalLinks);
@@ -1185,6 +1282,10 @@
             try { renderNews(); } catch (_) {}
             try { renderAchievements(); } catch (_) {}
             try { renderHomeAlumni(); } catch (_) {}
+            try { renderPaliWord(); } catch (_) {}
+            try { renderDhammaQuote(); } catch (_) {}
+            try { renderRoutines(); } catch (_) {}
+            try { initSmartEnvironment(); } catch (_) {}
             Promise.resolve().then(() => initPromoSlider()).catch(err => console.warn('Late promo refresh failed.', err));
             try { lucide.createIcons(); } catch (_) {}
         }
@@ -1330,23 +1431,43 @@
             });
         }
 
+        function applyThirdPartyEmbeds() {
+            const allowed = window.WNWPrivacy?.canUseThirdParty?.() === true;
+            const mapIframe = document.getElementById('map-iframe');
+            const fbIframe = document.getElementById('fb-iframe');
+            const blockedHtml = (name) => `<!doctype html><html lang="th"><body style="margin:0;height:100vh;display:flex;align-items:center;justify-content:center;background:#f8fafc;font-family:sans-serif;color:#64748b;text-align:center;padding:24px;box-sizing:border-box"><div><b style="color:#334155">${name} ยังไม่ถูกโหลด</b><p style="font-size:12px;line-height:1.6">เลือก “ยอมรับทั้งหมด” ในการตั้งค่าคุกกี้เพื่อโหลดเนื้อหาจากผู้ให้บริการภายนอก</p></div></body></html>`;
+            if (mapIframe) {
+                if (allowed) { mapIframe.removeAttribute('srcdoc'); mapIframe.src = SCHOOL_DATA.map.embedIframe; }
+                else { mapIframe.removeAttribute('src'); mapIframe.srcdoc = blockedHtml('Google Maps'); }
+            }
+            if (fbIframe) {
+                if (allowed) {
+                    fbIframe.removeAttribute('srcdoc');
+                    fbIframe.src = `https://www.facebook.com/plugins/page.php?href=${encodeURIComponent(SCHOOL_DATA.social.facebook)}&tabs=timeline&width=800&height=300&small_header=false&adapt_container_width=true&hide_cover=false&show_facepile=true&appId`;
+                } else {
+                    fbIframe.removeAttribute('src');
+                    fbIframe.srcdoc = blockedHtml('Facebook');
+                }
+            }
+        }
+
         function bindExternalLinks() {
             document.querySelectorAll('.fb-link').forEach(el => el.href = SCHOOL_DATA.social.facebook);
-            document.getElementById('footer-line-link').href = SCHOOL_DATA.social.line;
-            document.getElementById('footer-yt-link').href = SCHOOL_DATA.social.youtube;
-            document.getElementById('map-iframe').src = SCHOOL_DATA.map.embedIframe;
+            const lineLink = document.getElementById('footer-line-link'), ytLink = document.getElementById('footer-yt-link');
+            if (lineLink) lineLink.href = SCHOOL_DATA.social.line;
+            if (ytLink) ytLink.href = SCHOOL_DATA.social.youtube;
             document.querySelectorAll('.map-link').forEach(el => el.href = SCHOOL_DATA.map.linkUrl);
-            const fbIframe = document.getElementById('fb-iframe');
-            if(fbIframe) { fbIframe.src = `https://www.facebook.com/plugins/page.php?href=${encodeURIComponent(SCHOOL_DATA.social.facebook)}&tabs=timeline&width=800&height=300&small_header=false&adapt_container_width=true&hide_cover=false&show_facepile=true&appId`; }
             const videoBtn = document.getElementById('video-promo-btn');
-            if(videoBtn) videoBtn.onclick = () => window.open(SCHOOL_DATA.media.videoPromo, '_blank');
-            document.getElementById('donation-bank').textContent = SCHOOL_DATA.donation.bankName;
-            document.getElementById('donation-acc').textContent = SCHOOL_DATA.donation.accNumber;
-            document.getElementById('donation-name').textContent = SCHOOL_DATA.donation.accName;
-            document.getElementById('donation-qr').src = SCHOOL_DATA.donation.qrImage;
-            document.getElementById('tripitaka-search').addEventListener('keypress', function(e) {
-                if (e.key === 'Enter') searchTripitaka();
-            });
+            if(videoBtn) videoBtn.onclick = () => window.open(SCHOOL_DATA.media.videoPromo, '_blank', 'noopener');
+            const bank = document.getElementById('donation-bank'), acc = document.getElementById('donation-acc'), name = document.getElementById('donation-name'), qr = document.getElementById('donation-qr');
+            if (bank) bank.textContent = SCHOOL_DATA.donation.bankName;
+            if (acc) acc.textContent = SCHOOL_DATA.donation.accNumber;
+            if (name) name.textContent = SCHOOL_DATA.donation.accName;
+            if (qr) qr.src = SCHOOL_DATA.donation.qrImage;
+            const tripitaka = document.getElementById('tripitaka-search');
+            tripitaka?.addEventListener('keypress', function(e) { if (e.key === 'Enter') searchTripitaka(); });
+            applyThirdPartyEmbeds();
+            window.addEventListener('wnw:consent-change', applyThirdPartyEmbeds);
         }
 
         function initCountdown() {
@@ -1420,22 +1541,39 @@
                     }
                 }
             });
-            document.getElementById('contact-phone').textContent = SCHOOL_DATA.info.phone;
-            document.getElementById('contact-email').textContent = SCHOOL_DATA.info.email;
-            document.getElementById('footer-address').textContent = SCHOOL_DATA.info.address;
+            const footerAddress = document.getElementById('footer-address');
+            const footerPhone = document.getElementById('footer-phone');
+            const footerHotline = document.getElementById('footer-hotline');
+            const footerEmail = document.getElementById('footer-email');
+            if (footerAddress) footerAddress.textContent = SCHOOL_DATA.info.address || '';
+            if (footerPhone) { footerPhone.textContent = SCHOOL_DATA.info.phone || '-'; footerPhone.href = 'tel:' + String(SCHOOL_DATA.info.phone || '').replace(/\D/g,''); }
+            if (footerHotline) { footerHotline.textContent = SCHOOL_DATA.info.directorHotline || '-'; footerHotline.href = 'tel:' + String(SCHOOL_DATA.info.directorHotline || '').replace(/\D/g,''); }
+            if (footerEmail) { footerEmail.textContent = SCHOOL_DATA.info.email || '-'; footerEmail.href = SCHOOL_DATA.info.email ? 'mailto:' + SCHOOL_DATA.info.email : '#'; }
             document.getElementById('holy-day-display').textContent = getNextHolyDay();
             document.getElementById('welcome-bg-image').src = SCHOOL_DATA.welcomeImage;
         }
 
         function renderPaliWord() {
-            document.getElementById('pali-word').textContent = SCHOOL_DATA.paliWord.word;
-            document.getElementById('pali-reading').textContent = `คำอ่าน: ${SCHOOL_DATA.paliWord.reading}`;
-            document.getElementById('pali-meaning').textContent = `แปลว่า: ${SCHOOL_DATA.paliWord.meaning}`;
+            const auto = SCHOOL_DATA.features?.dailyWisdomAuto !== false;
+            const item = auto
+                ? DAILY_PALI_WORDS[bangkokDaySerial() % DAILY_PALI_WORDS.length]
+                : (SCHOOL_DATA.paliWord || {});
+            document.getElementById('pali-word').textContent = item.word || '-';
+            document.getElementById('pali-reading').textContent = `คำอ่าน: ${item.reading || '-'}`;
+            document.getElementById('pali-meaning').textContent = `แปลว่า: ${item.meaning || '-'}`;
+            const source = document.getElementById('pali-source');
+            if (source) source.textContent = auto ? 'อัปเดตอัตโนมัติตามวันที่ประเทศไทย' : 'โหมดกำหนดเองจาก Manager';
         }
 
         function renderRoutines() {
+            const section = document.getElementById('routine-section');
             const container = document.getElementById('routine-container');
-            SCHOOL_DATA.routines.filter(routine => routine.published !== false).forEach((routine) => {
+            const enabled = SCHOOL_DATA.features?.routinesEnabled === true;
+            if (section) section.classList.toggle('hidden', !enabled);
+            if (!container) return;
+            container.innerHTML = '';
+            if (!enabled) return;
+            (SCHOOL_DATA.routines || []).filter(routine => routine.published !== false).forEach((routine) => {
                 container.innerHTML += `
                     <div class="mb-8 md:mb-0 relative pl-6 md:pl-0 md:flex-1 md:text-center group">
                         <div class="absolute -left-[21px] md:left-1/2 md:-top-[42px] md:-translate-x-1/2 w-10 h-10 bg-white/80 backdrop-blur-sm border border-orange-200 rounded-full flex items-center justify-center text-orange-500 shadow-md group-hover:bg-gradient-to-br group-hover:from-orange-400 group-hover:to-orange-500 group-hover:text-white group-hover:border-transparent transition-all z-10 group-hover:scale-110">
@@ -1448,8 +1586,14 @@
         }
 
         function renderDhammaQuote() {
-            document.getElementById('dhamma-pali').textContent = SCHOOL_DATA.dhammaQuote.pali;
-            document.getElementById('dhamma-thai').textContent = SCHOOL_DATA.dhammaQuote.thai;
+            const auto = SCHOOL_DATA.features?.dailyWisdomAuto !== false;
+            const item = auto
+                ? DAILY_DHAMMA_QUOTES[bangkokDaySerial() % DAILY_DHAMMA_QUOTES.length]
+                : (SCHOOL_DATA.dhammaQuote || {});
+            document.getElementById('dhamma-pali').textContent = item.pali || '-';
+            document.getElementById('dhamma-thai').textContent = item.thai || '-';
+            const source = document.getElementById('dhamma-source');
+            if (source) source.textContent = auto ? 'อัปเดตอัตโนมัติตามวันที่ประเทศไทย' : 'โหมดกำหนดเองจาก Manager';
         }
 
         let currentPromoIdx = 0;
@@ -1993,6 +2137,105 @@
             try { lucide.createIcons(); } catch (_) {}
         }
 
+
+        let smartEnvironmentTimer = null;
+
+        function environmentAqiMeta(aqi) {
+            const n = Number(aqi);
+            if (!Number.isFinite(n)) return {label:'ไม่ทราบสถานะ', box:'from-slate-400 to-slate-500', text:'text-slate-600'};
+            if (n <= 50) return {label:'อากาศดี', box:'from-emerald-400 to-green-500', text:'text-emerald-600'};
+            if (n <= 100) return {label:'ปานกลาง', box:'from-yellow-400 to-amber-500', text:'text-amber-600'};
+            if (n <= 150) return {label:'มีผลต่อกลุ่มเสี่ยง', box:'from-orange-400 to-orange-600', text:'text-orange-600'};
+            if (n <= 200) return {label:'ไม่ดีต่อสุขภาพ', box:'from-rose-500 to-red-600', text:'text-rose-600'};
+            if (n <= 300) return {label:'ไม่ดีต่อสุขภาพมาก', box:'from-purple-500 to-violet-700', text:'text-purple-700'};
+            return {label:'อันตราย', box:'from-fuchsia-700 to-rose-950', text:'text-rose-800'};
+        }
+
+        function renderEnvironmentSnapshot(data, cached=false) {
+            const aqi = Number(data?.aqi);
+            const pm25 = Number(data?.pm25);
+            const temp = Number(data?.temp);
+            const humidity = Number(data?.humidity);
+            const meta = environmentAqiMeta(aqi);
+            const aqiValue = document.getElementById('aqi-value');
+            const aqiStatus = document.getElementById('aqi-status');
+            const box = document.getElementById('aqi-box');
+            if (aqiValue) aqiValue.textContent = Number.isFinite(aqi) ? Math.round(aqi) : '--';
+            if (aqiStatus) { aqiStatus.textContent = data?.status || meta.label; aqiStatus.className = `text-sm font-bold ${meta.text}`; }
+            if (box) box.className = `w-[72px] h-[72px] rounded-2xl bg-gradient-to-br ${meta.box} text-white flex flex-col items-center justify-center shadow-lg transition-all`;
+            const pmEl = document.getElementById('pm25-value'), tEl = document.getElementById('env-temp'), hEl = document.getElementById('env-humidity');
+            if (pmEl) pmEl.textContent = Number.isFinite(pm25) ? `${pm25.toFixed(1)} µg/m³` : '--';
+            if (tEl) tEl.textContent = Number.isFinite(temp) ? `${temp.toFixed(1)}°C` : '--';
+            if (hEl) hEl.textContent = Number.isFinite(humidity) ? `${Math.round(humidity)}%` : '--';
+            const updated = document.getElementById('env-updated');
+            if (updated) {
+                const ts = data?.updatedAt ? new Date(data.updatedAt) : new Date();
+                updated.textContent = `${cached ? 'ข้อมูลล่าสุดที่บันทึกไว้ • ' : 'อัปเดต • '}${ts.toLocaleTimeString('th-TH',{hour:'2-digit',minute:'2-digit'})} น.`;
+            }
+        }
+
+        async function fetchJsonWithTimeout(url, timeoutMs=8000) {
+            const controller = new AbortController();
+            const timer = setTimeout(() => controller.abort(), timeoutMs);
+            try {
+                const response = await fetch(url, {signal:controller.signal, cache:'no-store'});
+                if (!response.ok) throw new Error(`HTTP ${response.status}`);
+                return await response.json();
+            } finally { clearTimeout(timer); }
+        }
+
+        async function initSmartEnvironment() {
+            const cfg = SCHOOL_DATA.environment || {};
+            const label = document.getElementById('env-location-label');
+            if (label) label.textContent = cfg.locationLabel || 'โรงเรียนวัดหนองแวงวิทยา';
+            const lat = Number(cfg.latitude ?? 16.4089375);
+            const lon = Number(cfg.longitude ?? 102.8338125);
+            const refreshMinutes = Math.max(5, Number(cfg.refreshMinutes || 10));
+
+            if (cfg.auto === false) {
+                renderEnvironmentSnapshot({
+                    aqi: cfg.aqi,
+                    pm25: null,
+                    temp: cfg.temp,
+                    humidity: null,
+                    status: cfg.status || 'โหมดกำหนดเองจาก Manager',
+                    updatedAt: new Date().toISOString()
+                }, true);
+                clearTimeout(smartEnvironmentTimer);
+                return;
+            }
+
+            try {
+                const weatherUrl = `https://api.open-meteo.com/v1/forecast?latitude=${encodeURIComponent(lat)}&longitude=${encodeURIComponent(lon)}&current=temperature_2m,relative_humidity_2m&timezone=Asia%2FBangkok`;
+                const airUrl = `https://air-quality-api.open-meteo.com/v1/air-quality?latitude=${encodeURIComponent(lat)}&longitude=${encodeURIComponent(lon)}&current=pm2_5,us_aqi&timezone=Asia%2FBangkok`;
+                const [weather, air] = await Promise.all([
+                    fetchJsonWithTimeout(weatherUrl),
+                    fetchJsonWithTimeout(airUrl)
+                ]);
+                const snapshot = {
+                    aqi: air?.current?.us_aqi,
+                    pm25: air?.current?.pm2_5,
+                    temp: weather?.current?.temperature_2m,
+                    humidity: weather?.current?.relative_humidity_2m,
+                    updatedAt: new Date().toISOString()
+                };
+                renderEnvironmentSnapshot(snapshot, false);
+                try { localStorage.setItem('wnw-smart-environment-v1', JSON.stringify(snapshot)); } catch (_) {}
+            } catch (err) {
+                console.warn('Smart Environment API failed:', err);
+                let cached = null;
+                try { cached = JSON.parse(localStorage.getItem('wnw-smart-environment-v1') || 'null'); } catch (_) {}
+                if (cached) renderEnvironmentSnapshot(cached, true);
+                else renderEnvironmentSnapshot({
+                    aqi: cfg.aqi, pm25: null, temp: cfg.temp, humidity: null,
+                    status: cfg.status || 'ไม่สามารถโหลดข้อมูลสดได้', updatedAt:new Date().toISOString()
+                }, true);
+            }
+
+            clearTimeout(smartEnvironmentTimer);
+            smartEnvironmentTimer = setTimeout(initSmartEnvironment, refreshMinutes * 60 * 1000);
+        }
+
         function renderDocuments() {
             const container = document.getElementById('documents-container');
             if (!container) return;
@@ -2000,11 +2243,6 @@
             (SCHOOL_DATA.documents || []).filter(doc => doc.published !== false).forEach(doc => {
                 container.innerHTML += `<${doc.url ? 'a' : 'div'} ${doc.url ? `href="${doc.url}" target="_blank" rel="noopener"` : ''} class="flex items-center justify-between p-3 border border-white/60 bg-white/40 backdrop-blur-sm rounded-xl hover:bg-white/80 hover:shadow-md transition-all cursor-pointer group"><div class="flex items-center gap-3"><div class="w-10 h-10 bg-red-100/80 text-red-500 rounded-lg flex items-center justify-center group-hover:bg-red-500 group-hover:text-white transition-colors border border-white/50"><i data-lucide="file-text" class="w-5 h-5"></i></div><div><h4 class="text-sm font-bold text-slate-800">${doc.title}</h4><p class="text-xs text-slate-500">${doc.type || 'FILE'}${doc.size ? ` • ${doc.size}` : ''}</p></div></div><span class="w-8 h-8 rounded-full bg-white/80 text-slate-600 flex items-center justify-center border border-white/50 group-hover:bg-orange-500 group-hover:text-white group-hover:border-orange-500 transition-colors shadow-sm"><i data-lucide="download" class="w-4 h-4"></i></span></${doc.url ? 'a' : 'div'}>`;
             });
-            const env = SCHOOL_DATA.environment || {};
-            const aqiValue = document.getElementById('aqi-value'), aqiStatus = document.getElementById('aqi-status'), envTemp = document.getElementById('env-temp');
-            if (aqiValue) aqiValue.textContent = env.aqi ?? '-';
-            if (aqiStatus) aqiStatus.textContent = env.status || '-';
-            if (envTemp) envTemp.textContent = env.temp != null ? env.temp + "°C" : '-';
         }
 
         function renderCurriculums() {

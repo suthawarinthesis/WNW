@@ -1,0 +1,13 @@
+User-agent: *
+Allow: /
+Disallow: /manager/
+Disallow: /admission/manager/
+Disallow: /alumni/manager/
+Disallow: /student-portal/
+Disallow: /student-portal/manager/
+Disallow: /university-admission/manager/
+Disallow: /donation/manager/
+Disallow: /donation/history/
+
+# หมายเหตุ: ใช้ Website Manager > ระบบเว็บไซต์ > SEO
+# เพื่อดาวน์โหลด robots.txt และ sitemap.xml ที่ใส่ URL จริงของเว็บไซต์

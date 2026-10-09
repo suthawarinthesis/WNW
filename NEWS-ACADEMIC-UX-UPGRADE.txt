@@ -1,0 +1,33 @@
+NEWS + ACADEMIC SUBWEB UX REDESIGN
+Updated: 2026-10-09
+
+1) New /news/ subweb
+- Featured latest story
+- Latest-news sidebar
+- Search by title/summary/category
+- Dynamic category filters
+- News archive cards
+- Load-more pagination
+- Detail reader modal
+- Shareable ?id=<news-id> links
+- Google Drive image-link normalization
+- Dynamic school branding/logo
+
+2) Redesigned /academic/
+- Academic Center hero and global search
+- Counts for announcements/documents
+- Quick document-category cards
+- Pinned announcement spotlight
+- Searchable announcement cards
+- Document library with category filters
+- File-type badges (PDF/Excel/Word/PowerPoint/CSV)
+- Shareable ?post=<id> announcement links
+- Responsive mobile layout
+
+3) Main homepage
+- News navigation now opens /news/
+- News section has "ดูข่าวทั้งหมด"
+- News without an external URL opens the internal /news/ reader
+
+No new database migration is required for this UX update.
+It reuses the existing public.news, public.academic_posts and public.academic_files tables.

@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#fff7ed">
+  <title>ข่าวสาร | โรงเรียนวัดหนองแวงวิทยา</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Thai:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="../assets/app-config.js?v=20261009-news-redesign"></script>
+  <style>
+    *{box-sizing:border-box}html{scroll-behavior:smooth}body{font-family:'Noto Sans Thai',sans-serif;background:#fffaf5;color:#172033}
+    .glass{background:rgba(255,255,255,.84);backdrop-filter:blur(22px);border:1px solid rgba(255,255,255,.94);box-shadow:0 16px 50px rgba(75,52,30,.08)}
+    .soft-card{background:rgba(255,255,255,.95);border:1px solid #ffedd5;box-shadow:0 12px 35px rgba(124,67,20,.06)}
+    .hero-grid{background-image:linear-gradient(rgba(249,115,22,.035) 1px,transparent 1px),linear-gradient(90deg,rgba(249,115,22,.035) 1px,transparent 1px);background-size:28px 28px}
+    .chip.active{background:#f97316;color:white;border-color:#f97316;box-shadow:0 8px 20px rgba(249,115,22,.22)}
+    .news-card img{transition:transform .45s ease}.news-card:hover img{transform:scale(1.045)}
+    .line-clamp-2{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}.line-clamp-3{display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+    .skeleton{background:linear-gradient(90deg,#fff7ed 25%,#ffedd5 37%,#fff7ed 63%);background-size:400% 100%;animation:shimmer 1.35s infinite}@keyframes shimmer{0%{background-position:100% 0}100%{background-position:-100% 0}}
+    .reader-body{white-space:pre-line;overflow-wrap:anywhere}
+  </style>
+</head>
+<body class="min-h-screen selection:bg-orange-200">
+  <div class="fixed inset-x-0 top-0 h-[430px] bg-gradient-to-b from-orange-100/70 via-amber-50/45 to-transparent -z-20"></div>
+  <div class="fixed -top-20 -left-24 w-96 h-96 rounded-full bg-orange-300/25 blur-3xl -z-10"></div>
+  <div class="fixed top-24 -right-24 w-80 h-80 rounded-full bg-amber-200/25 blur-3xl -z-10"></div>
+
+  <nav class="sticky top-0 z-50 border-b border-orange-100/70 bg-white/86 backdrop-blur-xl">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-[74px] flex items-center justify-between gap-4">
+      <a href="../" class="flex items-center gap-3 min-w-0 group">
+        <div class="w-11 h-11 rounded-2xl bg-white border border-orange-100 shadow-sm p-1.5 flex items-center justify-center overflow-hidden">
+          <img id="site-logo" class="w-full h-full object-contain hidden" alt="โลโก้โรงเรียน"><i id="site-logo-icon" data-lucide="school" class="w-5 h-5 text-orange-500"></i>
+        </div>
+        <div class="min-w-0"><p id="school-name" class="font-extrabold text-slate-900 truncate">โรงเรียนวัดหนองแวงวิทยา</p><p class="text-[11px] font-bold text-orange-600">ศูนย์ข่าวสารและประชาสัมพันธ์</p></div>
+      </a>
+      <div class="flex items-center gap-2">
+        <a href="../manager/" class="hidden md:inline-flex items-center gap-2 rounded-full bg-slate-900 text-white px-4 py-2 text-xs font-bold hover:bg-slate-800"><i data-lucide="settings-2" class="w-4 h-4"></i> Website Manager</a>
+        <a href="../" class="inline-flex items-center gap-2 rounded-full bg-white border border-orange-100 px-4 py-2 text-xs font-bold text-slate-600 hover:bg-orange-50"><i data-lucide="home" class="w-4 h-4"></i><span class="hidden sm:inline">หน้าเว็บหลัก</span></a>
+      </div>
+    </div>
+  </nav>
+
+  <header class="hero-grid border-b border-orange-100/60">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-10 sm:pt-14 pb-9">
+      <div class="grid lg:grid-cols-[1.08fr_.92fr] gap-7 items-end">
+        <div>
+          <div class="inline-flex items-center gap-2 rounded-full border border-orange-200 bg-white/80 px-3.5 py-2 text-[11px] font-extrabold text-orange-700 shadow-sm"><i data-lucide="radio" class="w-3.5 h-3.5"></i> WNW NEWSROOM</div>
+          <h1 class="mt-5 text-4xl sm:text-5xl lg:text-6xl font-black tracking-tight text-slate-950">ข่าวสาร<span class="text-orange-500">.</span></h1>
+          <p class="mt-4 max-w-2xl text-sm sm:text-base leading-7 text-slate-600">รวมข่าวประชาสัมพันธ์ ประกาศ และความเคลื่อนไหวของโรงเรียนไว้ในหน้าเดียว ค้นหาและกรองข่าวได้ง่ายทั้งบนมือถือและคอมพิวเตอร์</p>
+        </div>
+        <div class="glass rounded-[1.8rem] p-4 sm:p-5">
+          <label for="news-search" class="text-xs font-extrabold text-slate-700">ค้นหาข่าวสาร</label>
+          <div class="mt-2 flex items-center gap-3 rounded-2xl border border-orange-100 bg-white px-4 py-3.5 focus-within:ring-2 focus-within:ring-orange-200">
+            <i data-lucide="search" class="w-4 h-4 text-orange-500 shrink-0"></i><input id="news-search" type="search" placeholder="ค้นหาจากชื่อข่าวหรือคำโปรย..." class="w-full outline-none bg-transparent text-sm placeholder:text-slate-400">
+            <button id="clear-search" type="button" class="hidden text-slate-400 hover:text-orange-600" aria-label="ล้างการค้นหา"><i data-lucide="x" class="w-4 h-4"></i></button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-16">
+    <section id="featured-wrap" class="pt-8 hidden">
+      <div class="flex items-center justify-between gap-3 mb-4"><div><p class="text-[11px] font-black tracking-[.18em] text-orange-500 uppercase">Featured story</p><h2 class="text-xl sm:text-2xl font-black text-slate-900 mt-1">ข่าวเด่นล่าสุด</h2></div><span id="news-count-top" class="rounded-full bg-orange-50 border border-orange-100 px-3 py-1.5 text-[11px] font-bold text-orange-700"></span></div>
+      <div class="grid lg:grid-cols-[1.35fr_.65fr] gap-5">
+        <article id="featured-main" class="soft-card rounded-[2rem] overflow-hidden min-h-[360px]"></article>
+        <div id="featured-side" class="space-y-3"></div>
+      </div>
+    </section>
+
+    <section class="pt-10">
+      <div class="flex flex-col xl:flex-row xl:items-end justify-between gap-5 mb-6">
+        <div><p class="text-[11px] font-black tracking-[.18em] text-orange-500 uppercase">News archive</p><h2 class="text-2xl sm:text-3xl font-black text-slate-900 mt-1">ข่าวทั้งหมด</h2><p id="result-summary" class="text-xs text-slate-500 mt-1">กำลังโหลดข้อมูล...</p></div>
+        <div id="category-chips" class="flex gap-2 overflow-x-auto pb-1 xl:justify-end"></div>
+      </div>
+      <div id="loading-grid" class="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
+        <div class="rounded-[1.8rem] overflow-hidden bg-white border border-orange-100"><div class="h-48 skeleton"></div><div class="p-5"><div class="h-3 w-24 rounded-full skeleton"></div><div class="h-5 w-4/5 rounded-full skeleton mt-4"></div><div class="h-3 w-full rounded-full skeleton mt-4"></div></div></div>
+        <div class="rounded-[1.8rem] overflow-hidden bg-white border border-orange-100"><div class="h-48 skeleton"></div><div class="p-5"><div class="h-3 w-24 rounded-full skeleton"></div><div class="h-5 w-4/5 rounded-full skeleton mt-4"></div><div class="h-3 w-full rounded-full skeleton mt-4"></div></div></div>
+        <div class="rounded-[1.8rem] overflow-hidden bg-white border border-orange-100"><div class="h-48 skeleton"></div><div class="p-5"><div class="h-3 w-24 rounded-full skeleton"></div><div class="h-5 w-4/5 rounded-full skeleton mt-4"></div><div class="h-3 w-full rounded-full skeleton mt-4"></div></div></div>
+      </div>
+      <div id="news-grid" class="hidden grid sm:grid-cols-2 lg:grid-cols-3 gap-5"></div>
+      <div id="empty-state" class="hidden soft-card rounded-[2rem] p-10 sm:p-14 text-center"><div class="w-16 h-16 rounded-3xl bg-orange-50 text-orange-500 mx-auto flex items-center justify-center"><i data-lucide="search-x" class="w-7 h-7"></i></div><h3 class="font-black text-slate-900 mt-4">ไม่พบข่าวที่ตรงกับการค้นหา</h3><p class="text-sm text-slate-500 mt-2">ลองเปลี่ยนคำค้นหรือเลือกหมวด “ทั้งหมด”</p></div>
+      <div class="mt-8 text-center"><button id="load-more" type="button" class="hidden rounded-full bg-slate-900 hover:bg-orange-600 text-white px-6 py-3 text-sm font-bold shadow-lg transition-colors">แสดงข่าวเพิ่มเติม</button></div>
+    </section>
+  </main>
+
+  <div id="reader-modal" class="fixed inset-0 z-[100] hidden items-center justify-center p-3 sm:p-5">
+    <button class="absolute inset-0 bg-slate-950/60 backdrop-blur-sm" data-close-reader aria-label="ปิด"></button>
+    <article class="relative z-10 w-full max-w-4xl max-h-[92vh] overflow-y-auto rounded-[2rem] bg-white shadow-2xl">
+      <div id="reader-image-wrap" class="hidden relative h-56 sm:h-80 overflow-hidden bg-orange-50"><img id="reader-image" class="w-full h-full object-cover" alt=""><div class="absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-black/35 to-transparent"></div></div>
+      <div class="p-6 sm:p-9">
+        <div class="flex items-start justify-between gap-5">
+          <div class="min-w-0"><div class="flex flex-wrap items-center gap-2"><span id="reader-category" class="rounded-full bg-orange-100 text-orange-700 px-3 py-1 text-[10px] font-black"></span><span id="reader-date" class="text-[11px] font-bold text-slate-400"></span></div><h2 id="reader-title" class="mt-3 text-2xl sm:text-3xl font-black text-slate-950 leading-tight"></h2></div>
+          <button data-close-reader class="w-10 h-10 rounded-full bg-slate-100 hover:bg-orange-100 hover:text-orange-700 flex items-center justify-center shrink-0"><i data-lucide="x" class="w-5 h-5"></i></button>
+        </div>
+        <div id="reader-body" class="reader-body mt-6 text-[15px] leading-8 text-slate-600"></div>
+        <div id="reader-actions" class="mt-7 pt-5 border-t border-slate-100 flex flex-wrap gap-2"></div>
+      </div>
+    </article>
+  </div>
+
+  <footer class="mt-8 border-t border-orange-100 bg-white/75 py-8"><div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-slate-500"><p>ศูนย์ข่าวสาร • <span id="footer-school">โรงเรียนวัดหนองแวงวิทยา</span></p><div class="flex gap-3"><a href="../academic/" class="hover:text-orange-600 font-bold">ฝ่ายวิชาการ</a><a href="../activities/" class="hover:text-orange-600 font-bold">กิจกรรมนักเรียน</a></div></div></footer>
+  <script src="./news.js?v=20261009-news-redesign"></script>
+</body>
+</html>

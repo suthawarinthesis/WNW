@@ -10,7 +10,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Thai:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <script src="https://unpkg.com/lucide@latest"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="../assets/app-config.js?v=20261007-v31-school-system?v=20260926-favicon"></script>
+  <script src="../assets/app-config.js?v=20260926-favicon"></script>
   <style>
     body{font-family:'Noto Sans Thai',sans-serif;background:#f8fafc}.glass{background:rgba(255,255,255,.78);backdrop-filter:blur(22px);border:1px solid rgba(255,255,255,.9);box-shadow:0 10px 40px rgba(15,23,42,.06)}
     .field{width:100%;background:rgba(255,255,255,.94);border:1px solid #e2e8f0;border-radius:1rem;padding:.75rem 1rem;font-size:.875rem;outline:none}.field:focus{border-color:#fb923c;box-shadow:0 0 0 3px rgba(251,146,60,.15)}
@@ -62,9 +62,6 @@
         <button class="sidebar-btn flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold text-left hover:bg-white/5" data-view="academic"><i data-lucide="book-open-check" class="w-4 h-4"></i> วิชาการ</button>
         <button class="sidebar-btn flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold text-left hover:bg-white/5" data-view="services"><i data-lucide="panels-top-left" class="w-4 h-4"></i> บริการ/ลิงก์</button>
         <button class="sidebar-btn flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold text-left hover:bg-white/5" data-view="achievements"><i data-lucide="award" class="w-4 h-4"></i> ผลงาน</button>
-        <button class="sidebar-btn flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold text-left hover:bg-white/5" data-view="responsibilities"><i data-lucide="contact-round" class="w-4 h-4"></i> ฝ่ายงาน / ติดต่อใคร</button>
-        <button class="sidebar-btn flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold text-left hover:bg-white/5" data-view="emergency"><i data-lucide="siren" class="w-4 h-4"></i> ข้อมูลฉุกเฉิน</button>
-        <button class="sidebar-btn flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold text-left hover:bg-white/5" data-view="system"><i data-lucide="server-cog" class="w-4 h-4"></i> ระบบเว็บไซต์ <span id="system-error-badge" class="hidden ml-auto min-w-5 h-5 px-1 rounded-full bg-red-500 text-white text-[10px] items-center justify-center"></span></button>
         <button class="sidebar-btn flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold text-left hover:bg-white/5" data-view="admins"><i data-lucide="shield-check" class="w-4 h-4"></i> บัญชี Admin</button>
         <a href="../alumni/manager/" class="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold text-left hover:bg-white/5"><i data-lucide="book-user" class="w-4 h-4"></i> Alumni Manager</a>
         <a href="../student-portal/manager/" class="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold text-left hover:bg-white/5"><i data-lucide="school" class="w-4 h-4"></i> Student Manager</a>
@@ -108,28 +105,25 @@
             <div class="grid md:grid-cols-2 gap-5">
               <div class="md:col-span-2"><label class="label">โลโก้โรงเรียน</label><div class="flex flex-col sm:flex-row gap-2"><input data-path="branding.logoUrl" class="field" placeholder="URL รูปโลโก้"><label class="cursor-pointer px-4 py-3 rounded-2xl bg-slate-900 text-white text-xs font-bold text-center"><input type="file" accept="image/*" class="hidden" data-upload-target="branding.logoUrl">อัปโหลดโลโก้</label></div></div>
               <div><label class="label">ชื่อโรงเรียน (ไทย)</label><input data-path="info.nameTh" class="field"></div><div><label class="label">ชื่อโรงเรียน (อังกฤษ)</label><input data-path="info.nameEn" class="field"></div>
-              <div><label class="label">โทรศัพท์สำนักงาน</label><input data-path="info.phone" class="field"></div><div><label class="label">สายด่วนผู้อำนวยการ</label><input data-path="info.directorHotline" class="field"></div><div><label class="label">อีเมล</label><input data-path="info.email" type="email" class="field"></div><div></div>
+              <div><label class="label">โทรศัพท์</label><input data-path="info.phone" class="field"></div><div><label class="label">อีเมล</label><input data-path="info.email" type="email" class="field"></div>
               <div class="md:col-span-2"><label class="label">ที่อยู่</label><textarea data-path="info.address" class="field min-h-24"></textarea></div>
               <div class="md:col-span-2"><div class="grid md:grid-cols-2 gap-4 p-4 rounded-2xl bg-slate-50"><div><label class="label">ชื่อสถิติช่องที่ 1</label><input data-path="info.stats.0.label" class="field"></div><div><label class="label">จำนวน / ค่า</label><input data-path="info.stats.0.value" class="field"></div><div><label class="label">ไอคอน</label><select data-path="info.stats.0.icon" class="field"><option value="users">ผู้เรียน / คน</option><option value="graduation-cap">การศึกษา</option><option value="book-open">หนังสือ</option><option value="award">รางวัล</option></select></div></div></div><div class="md:col-span-2"><div class="grid md:grid-cols-2 gap-4 p-4 rounded-2xl bg-slate-50"><div><label class="label">ชื่อสถิติช่องที่ 2</label><input data-path="info.stats.1.label" class="field"></div><div><label class="label">จำนวน / ค่า</label><input data-path="info.stats.1.value" class="field"></div><div><label class="label">ไอคอน</label><select data-path="info.stats.1.icon" class="field"><option value="award">บุคลากร / รางวัล</option><option value="users">คน</option><option value="school">โรงเรียน</option><option value="book-open">หนังสือ</option></select></div></div></div>
             </div>
           </div>
+          <div class="glass rounded-[2rem] p-6 sm:p-8"><h3 class="text-lg font-bold mb-5">สารจากผู้อำนวยการ</h3><div class="grid md:grid-cols-2 gap-5"><div><label class="label">ชื่อผู้อำนวยการ</label><input data-path="info.directorName" class="field"></div><div><label class="label">ภาพผู้อำนวยการ</label><div class="flex gap-2"><input data-path="info.directorImage" class="field"><label class="cursor-pointer px-4 py-3 rounded-2xl bg-slate-100 text-xs font-bold"><input type="file" accept="image/*" class="hidden" data-upload-target="info.directorImage">อัปโหลด</label></div></div><div class="md:col-span-2"><label class="label">ข้อความจากผู้อำนวยการ</label><textarea data-path="info.directorMsg" class="field min-h-32"></textarea></div></div></div>
           <div class="glass rounded-[2rem] p-6 sm:p-8">
-  <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-5"><div><h3 class="text-lg font-bold">รู้จักโรงเรียนใน 60 วินาที</h3><p class="section-help">ข้อมูลสรุปสำหรับผู้ปกครองใหม่</p></div><a href="../about-60/" target="_blank" class="btn-secondary">เปิดหน้าจริง ↗</a></div>
-  <div class="grid md:grid-cols-2 gap-4">
-    <div class="md:col-span-2"><label class="label">หัวข้อ</label><input data-path="school60.headline" class="field"></div>
-    <div class="md:col-span-2"><label class="label">คำสรุป</label><textarea data-path="school60.summary" class="field min-h-20"></textarea></div>
-    <div><label class="label">แผนกธรรม</label><textarea data-path="school60.dhamma" class="field min-h-24"></textarea></div>
-    <div><label class="label">แผนกบาลี</label><textarea data-path="school60.pali" class="field min-h-24"></textarea></div>
-    <div><label class="label">แผนกสามัญ</label><textarea data-path="school60.general" class="field min-h-24"></textarea></div>
-    <div><label class="label">ค่าใช้จ่าย</label><textarea data-path="school60.cost" class="field min-h-24"></textarea></div>
-    <div class="md:col-span-2"><label class="label">จุดเด่น</label><textarea data-path="school60.highlight" class="field min-h-24"></textarea></div>
-    <div class="md:col-span-2"><label class="label">สถานที่</label><input data-path="school60.venue" class="field"></div>
-    <div><label class="label">ลิงก์สมัครออนไลน์</label><input data-path="school60.applyOnlineUrl" class="field"></div>
-    <div><label class="label">ข้อความสมัครออนไซต์</label><input data-path="school60.applyOnsite" class="field"></div>
-  </div>
-</div>
-<div class="glass rounded-[2rem] p-6 sm:p-8"><h3 class="text-lg font-bold mb-5">สารจากผู้อำนวยการ</h3><div class="grid md:grid-cols-2 gap-5"><div><label class="label">ชื่อผู้อำนวยการ</label><input data-path="info.directorName" class="field"></div><div><label class="label">ภาพผู้อำนวยการ</label><div class="flex gap-2"><input data-path="info.directorImage" class="field"><label class="cursor-pointer px-4 py-3 rounded-2xl bg-slate-100 text-xs font-bold"><input type="file" accept="image/*" class="hidden" data-upload-target="info.directorImage">อัปโหลด</label></div></div><div class="md:col-span-2"><label class="label">ข้อความจากผู้อำนวยการ</label><textarea data-path="info.directorMsg" class="field min-h-32"></textarea></div></div></div>
-          <div class="glass rounded-[2rem] p-6 sm:p-8"><h3 class="text-lg font-bold mb-5">ประวัติโรงเรียน</h3><div class="grid md:grid-cols-2 gap-5"><div class="md:col-span-2"><label class="label">ย่อหน้าที่ 1</label><textarea data-path="history.paragraph1" class="field min-h-28"></textarea></div><div class="md:col-span-2"><label class="label">ย่อหน้าที่ 2</label><textarea data-path="history.paragraph2" class="field min-h-28"></textarea></div><div class="md:col-span-2"><label class="label">ปรัชญา / วิสัยทัศน์</label><textarea data-path="history.vision" class="field min-h-20"></textarea></div><div><label class="label">ภาพอดีต</label><div class="flex gap-2"><input data-path="history.oldImage" class="field"><label class="cursor-pointer px-3 py-3 rounded-2xl bg-slate-100 text-xs font-bold"><input type="file" accept="image/*" class="hidden" data-upload-target="history.oldImage">อัปโหลด</label></div></div><div><label class="label">ภาพปัจจุบัน</label><div class="flex gap-2"><input data-path="history.newImage" class="field"><label class="cursor-pointer px-3 py-3 rounded-2xl bg-slate-100 text-xs font-bold"><input type="file" accept="image/*" class="hidden" data-upload-target="history.newImage">อัปโหลด</label></div></div></div></div>
+            <div class="flex flex-col sm:flex-row sm:items-start justify-between gap-3 mb-5"><div><h3 class="text-lg font-bold">เรื่องราว ๓๓ ปี โรงเรียนวัดหนองแวงวิทยา</h3><p class="section-help">หน้าเว็บจะแสดงบทนำแบบสั้น และซ่อนเรื่องราวฉบับเต็มไว้หลังปุ่ม “อ่านเรื่องราวทั้งหมด” เพื่อไม่ให้หน้าแรกยาวเกินไป</p></div><span class="shrink-0 rounded-full bg-orange-50 px-3 py-1.5 text-[10px] font-bold text-orange-600">33 YEARS STORY</span></div>
+            <div class="grid gap-5">
+              <div><label class="label">หัวข้อ</label><input data-path="history.anniversaryTitle" class="field" placeholder="๓๓ ปี โรงเรียนวัดหนองแวงวิทยา"></div>
+              <div><label class="label">บทนำที่แสดงบนหน้าแรก</label><textarea data-path="history.anniversaryLead" class="field min-h-32"></textarea><p class="section-help">แนะนำ 1 ย่อหน้า เพื่อให้หน้าเว็บกระชับ</p></div>
+              <div><label class="label">เรื่องราวฉบับเต็ม</label><textarea data-path="history.anniversaryStory" class="field min-h-[360px]"></textarea><p class="section-help">ระบบจะรักษาการขึ้นบรรทัดและจัดรายชื่อคณาจารย์เป็น 2 คอลัมน์ให้อัตโนมัติ</p></div>
+            </div>
+          </div>
+          <div class="glass rounded-[2rem] p-6 sm:p-8">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4"><div><h3 class="text-lg font-bold">ภาพความทรงจำ ๓๓ ปี</h3><p class="section-help">วางลิงก์ภาพได้ประมาณ 10 ภาพหรือมากกว่า หน้าแรกจะแสดงเพียง 3 ภาพ และมีปุ่ม “ดูภาพทั้งหมด”</p></div><button class="btn-primary" data-add-collection="history.galleryImages">+ เพิ่มภาพ</button></div>
+            <div class="rounded-2xl border border-orange-100 bg-orange-50/60 px-4 py-3 text-xs leading-6 text-orange-700 mb-4"><b>ใช้ลิงก์ภาพได้:</b> URL รูปโดยตรง หรือ Google Drive โดยตั้งสิทธิ์เป็น “ทุกคนที่มีลิงก์สามารถดูได้” ระบบจะแปลงลิงก์ Drive สำหรับแสดงภาพให้อัตโนมัติ</div>
+            <div id="collection-history-galleryImages" class="space-y-3"></div>
+          </div><div><label class="label">ภาพปัจจุบัน</label><div class="flex gap-2"><input data-path="history.newImage" class="field"><label class="cursor-pointer px-3 py-3 rounded-2xl bg-slate-100 text-xs font-bold"><input type="file" accept="image/*" class="hidden" data-upload-target="history.newImage">อัปโหลด</label></div></div></div></div>
         </section>
 
         <section data-panel="visual" class="panel hidden space-y-6">
@@ -158,6 +152,9 @@
         </section>
 
         <section data-panel="events" class="panel hidden space-y-6">
+          <div class="glass rounded-[2rem] p-6 sm:p-8 bg-gradient-to-br from-white to-rose-50/60">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4"><div><p class="text-xs font-bold text-orange-600">SUBWEB</p><h3 class="text-lg font-bold mt-1">ฝ่ายกิจกรรมนักเรียน</h3><p class="section-help">โพสต์กิจกรรมแบบหลายภาพ เรียงภาพ และเลือกให้รูปอยู่บน/ล่างข้อความ</p></div><div class="flex gap-2"><a href="../activities/" target="_blank" class="btn-secondary">เปิดหน้าเว็บ</a><a href="../activities/manager/" class="btn-primary">จัดการโพสต์กิจกรรม</a></div></div>
+          </div>
           <div class="glass rounded-[2rem] p-6 sm:p-8">
             <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-5">
               <div><h3 class="text-lg font-bold">กิจกรรม / ปฏิทิน</h3><p class="section-help">จัดการวัน เวลา และชื่อกิจกรรมโดยไม่ปะปนกับข่าวสาร</p></div>
@@ -168,21 +165,12 @@
         </section>
 
         <section data-panel="academic" class="panel hidden space-y-6">
-          <div class="glass rounded-[2rem] p-6 sm:p-8">
-            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-5">
-              <div><h3 class="font-bold">บาลีวันละคำ & พุทธสุภาษิต</h3><p class="section-help">เปิดโหมดอัตโนมัติเพื่อให้หน้าเว็บเปลี่ยนเนื้อหาตามวัน โดยไม่ต้องแก้ทุกวัน</p></div>
-              <label class="flex items-center gap-2 text-sm font-bold"><input data-path="features.dailyWisdomAuto" type="checkbox" class="w-5 h-5 accent-orange-500"> อัปเดตอัตโนมัติรายวัน</label>
-            </div>
-            <div class="grid md:grid-cols-2 gap-5"><div><label class="label">วันที่สอบบาลีสนามหลวง</label><input data-path="examDate" type="datetime-local" class="field"></div><div></div><div><label class="label">บาลีวันละคำ (ใช้เมื่อปิด Auto)</label><input data-path="paliWord.word" class="field"></div><div><label class="label">คำอ่าน</label><input data-path="paliWord.reading" class="field"></div><div><label class="label">ความหมาย</label><input data-path="paliWord.meaning" class="field"></div><div></div><div><label class="label">พุทธสุภาษิต (บาลี — ใช้เมื่อปิด Auto)</label><input data-path="dhammaQuote.pali" class="field"></div><div><label class="label">คำแปล</label><input data-path="dhammaQuote.thai" class="field"></div></div>
+          <div class="glass rounded-[2rem] p-6 sm:p-8 bg-gradient-to-br from-white to-orange-50/70">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4"><div><p class="text-xs font-bold text-orange-600">SUBWEB</p><h3 class="text-lg font-bold mt-1">ฝ่ายวิชาการ</h3><p class="section-help">จัดการประกาศ เอกสารวิชาการ ไฟล์การเงิน และไฟล์ประกัน/ประเมินคุณภาพ</p></div><div class="flex gap-2"><a href="../academic/" target="_blank" class="btn-secondary">เปิดหน้าเว็บ</a><a href="../academic/manager/" class="btn-primary">จัดการ Subweb</a></div></div>
           </div>
+          <div class="glass rounded-[2rem] p-6 sm:p-8"><div class="grid md:grid-cols-2 gap-5"><div><label class="label">วันที่สอบบาลีสนามหลวง</label><input data-path="examDate" type="datetime-local" class="field"></div><div><label class="label">บาลีวันละคำ</label><input data-path="paliWord.word" class="field"></div><div><label class="label">คำอ่าน</label><input data-path="paliWord.reading" class="field"></div><div><label class="label">ความหมาย</label><input data-path="paliWord.meaning" class="field"></div><div><label class="label">พุทธสุภาษิต (บาลี)</label><input data-path="dhammaQuote.pali" class="field"></div><div><label class="label">คำแปล</label><input data-path="dhammaQuote.thai" class="field"></div></div></div>
           <div class="grid xl:grid-cols-2 gap-6"><div class="glass rounded-[2rem] p-6"><div class="flex justify-between items-center mb-4"><div><h3 class="font-bold">สถิติแผนกธรรม</h3><p class="section-help">ชื่อระดับและเปอร์เซ็นต์สอบผ่าน</p></div><button class="btn-primary" data-add-collection="examStats.naktham">+ เพิ่ม</button></div><div id="collection-examStats-naktham" class="space-y-3"></div></div><div class="glass rounded-[2rem] p-6"><div class="flex justify-between items-center mb-4"><div><h3 class="font-bold">สถิติแผนกบาลี</h3><p class="section-help">ชื่อระดับและเปอร์เซ็นต์สอบผ่าน</p></div><button class="btn-primary" data-add-collection="examStats.pali">+ เพิ่ม</button></div><div id="collection-examStats-pali" class="space-y-3"></div></div></div>
-          <div class="glass rounded-[2rem] p-6 sm:p-8">
-            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
-              <div><h3 class="font-bold">กิจวัตรประจำวันสามเณร</h3><p class="section-help">ปิดเป็นค่าเริ่มต้น สามารถเปิดเผยแพร่ทั้งส่วนได้เมื่อข้อมูลพร้อม</p></div>
-              <div class="flex items-center gap-3"><label class="flex items-center gap-2 text-sm font-bold"><input data-path="features.routinesEnabled" type="checkbox" class="w-5 h-5 accent-orange-500"> แสดงบนหน้าเว็บ</label><button class="btn-primary" data-add-collection="routines">+ เพิ่มกิจวัตร</button></div>
-            </div>
-            <div id="collection-routines" class="space-y-3"></div>
-          </div>
+          <div class="glass rounded-[2rem] p-6 sm:p-8"><div class="flex justify-between items-center mb-4"><div><h3 class="font-bold">กิจวัตรประจำวันสามเณร</h3><p class="section-help">จัดลำดับได้ด้วยปุ่มขึ้น/ลง</p></div><button class="btn-primary" data-add-collection="routines">+ เพิ่มกิจวัตร</button></div><div id="collection-routines" class="space-y-3"></div></div>
           <div class="glass rounded-[2rem] p-6 sm:p-8"><div class="flex justify-between items-center mb-4"><div><h3 class="font-bold">แผนการเรียนที่เปิดสอน</h3><p class="section-help">เพิ่มหรือแก้ข้อมูลหลักสูตรได้จากฟอร์ม</p></div><button class="btn-primary" data-add-collection="curriculums">+ เพิ่มแผนการเรียน</button></div><div id="collection-curriculums" class="space-y-3"></div></div>
         </section>
 
@@ -191,16 +179,7 @@
             <div class="glass rounded-[2rem] p-6"><h3 class="font-bold mb-4">บัญชีรับบริจาค</h3><div class="space-y-4"><div><label class="label">ธนาคาร</label><input data-path="donation.bankName" class="field"></div><div><label class="label">เลขบัญชี</label><input data-path="donation.accNumber" class="field"></div><div><label class="label">ชื่อบัญชี</label><input data-path="donation.accName" class="field"></div><div><label class="label">QR Code</label><div class="flex gap-2"><input data-path="donation.qrImage" class="field"><label class="cursor-pointer px-3 py-3 rounded-2xl bg-slate-100 text-xs font-bold"><input type="file" accept="image/*" class="hidden" data-upload-target="donation.qrImage">อัปโหลด</label></div></div></div></div>
             <div class="glass rounded-[2rem] p-6"><h3 class="font-bold mb-4">Social / แผนที่ / วิดีโอ</h3><div class="space-y-4"><div><label class="label">Facebook</label><input data-path="social.facebook" class="field"></div><div><label class="label">LINE</label><input data-path="social.line" class="field"></div><div><label class="label">YouTube</label><input data-path="social.youtube" class="field"></div><div><label class="label">Google Maps Link</label><input data-path="map.linkUrl" class="field"></div><div><label class="label">Google Maps Embed URL</label><input data-path="map.embedIframe" class="field"></div><div><label class="label">วิดีโอแนะนำโรงเรียน</label><input data-path="media.videoPromo" class="field"></div><div><label class="label">ลิงก์ 360° / VR</label><input data-path="media.vrTour" class="field"></div></div></div>
           </div>
-          <div class="glass rounded-[2rem] p-6 sm:p-8">
-            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4"><div><h3 class="font-bold">Smart Environment</h3><p class="section-help">หน้าเว็บดึงอุณหภูมิ ความชื้น PM2.5 และ US AQI จาก Open-Meteo ตามพิกัดนี้อัตโนมัติ</p></div><label class="flex items-center gap-2 text-sm font-bold"><input data-path="environment.auto" type="checkbox" class="w-5 h-5 accent-green-500"> ใช้ข้อมูลอัตโนมัติ</label></div>
-            <div class="grid md:grid-cols-2 gap-4">
-              <div><label class="label">Latitude</label><input data-path="environment.latitude" type="number" step="0.000001" class="field"></div>
-              <div><label class="label">Longitude</label><input data-path="environment.longitude" type="number" step="0.000001" class="field"></div>
-              <div class="md:col-span-2"><label class="label">ชื่อพิกัดที่แสดง</label><input data-path="environment.locationLabel" class="field"></div>
-              <div><label class="label">รีเฟรชทุกกี่นาที</label><input data-path="environment.refreshMinutes" type="number" min="5" max="120" class="field"></div>
-              <div><label class="label">AQI fallback (กรณี API ล่ม)</label><input data-path="environment.aqi" type="number" class="field"></div>
-            </div>
-          </div>
+          <div class="glass rounded-[2rem] p-6 sm:p-8"><h3 class="font-bold mb-4">Smart Environment</h3><div class="grid md:grid-cols-3 gap-4"><div><label class="label">AQI</label><input data-path="environment.aqi" type="number" class="field"></div><div><label class="label">สถานะอากาศ</label><input data-path="environment.status" class="field"></div><div><label class="label">อุณหภูมิ (°C)</label><input data-path="environment.temp" type="number" class="field"></div></div></div>
           <div class="glass rounded-[2rem] p-6 sm:p-8"><div class="flex justify-between items-center mb-4"><div><h3 class="font-bold">E-Services / เมนูลัด</h3><p class="section-help">กำหนดชื่อ ปลายทาง และไอคอนโดยไม่ต้องแก้ HTML</p></div><button class="btn-primary" data-add-collection="quickLinks">+ เพิ่มเมนู</button></div><div id="collection-quickLinks" class="space-y-3"></div></div>
           <div class="glass rounded-[2rem] p-6 sm:p-8"><div class="flex justify-between items-center mb-4"><div><h3 class="font-bold">ศูนย์ดาวน์โหลดเอกสาร</h3><p class="section-help">เพิ่มชื่อไฟล์ ประเภท ขนาด และลิงก์ดาวน์โหลด</p></div><button class="btn-primary" data-add-collection="documents">+ เพิ่มเอกสาร</button></div><div id="collection-documents" class="space-y-3"></div></div>
         </section>
@@ -208,51 +187,6 @@
         <section data-panel="achievements" class="panel hidden space-y-6">
           <div class="flex flex-col sm:flex-row sm:items-end justify-between gap-3"><div><h3 class="text-2xl font-bold">ผลงานแห่งความภาคภูมิใจ</h3><p class="text-sm text-slate-500 mt-1">ผลงานล่าสุดที่เผยแพร่จะขึ้นหน้าเว็บไซต์หลัก 3 รายการโดยอัตโนมัติ</p></div><button id="add-achievement" class="btn-primary flex items-center gap-2"><i data-lucide="plus" class="w-4 h-4"></i> เพิ่มผลงาน</button></div>
           <div id="achievement-list" class="grid sm:grid-cols-2 xl:grid-cols-3 gap-5"></div>
-        </section>
-
-
-        <section data-panel="responsibilities" class="panel hidden space-y-6">
-          <div class="glass rounded-[2rem] p-6 sm:p-8">
-            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3"><div><h3 class="text-xl font-bold">หน้าที่รับผิดชอบบุคลากร / ติดต่อใคร</h3><p class="section-help">สร้างรายการฝ่ายงาน พร้อมผู้ติดต่อ เบอร์โทร และอีเมล</p></div><div class="flex gap-2"><a href="../responsibilities/" target="_blank" class="btn-secondary">เปิดหน้าจริง ↗</a><button class="btn-primary" data-add-collection="responsibilities">+ เพิ่มฝ่ายงาน</button></div></div>
-            <div id="collection-responsibilities" class="space-y-3 mt-5"></div>
-          </div>
-        </section>
-
-        <section data-panel="emergency" class="panel hidden space-y-6">
-          <div class="glass rounded-[2rem] p-6 sm:p-8">
-            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3"><div><h3 class="text-xl font-bold">Emergency Info</h3><p class="section-help">เบอร์สำคัญสำหรับนักเรียน ผู้ปกครอง และบุคลากร</p></div><div class="flex gap-2"><a href="../emergency/" target="_blank" class="btn-secondary">เปิดหน้าจริง ↗</a><button class="btn-primary" data-add-collection="emergencyContacts">+ เพิ่มเบอร์ฉุกเฉิน</button></div></div>
-            <div id="collection-emergencyContacts" class="space-y-3 mt-5"></div>
-          </div>
-        </section>
-
-        <section data-panel="system" class="panel hidden space-y-6">
-          <div class="grid xl:grid-cols-2 gap-6">
-            <div class="glass rounded-[2rem] p-6 sm:p-8">
-              <div class="flex items-start gap-4"><div class="w-12 h-12 rounded-2xl bg-amber-100 text-amber-700 flex items-center justify-center"><i data-lucide="construction"></i></div><div class="flex-1"><h3 class="text-lg font-bold">Maintenance Mode</h3><p class="section-help">ปิดหน้าเว็บไซต์สาธารณะชั่วคราว แต่ Manager, Privacy และ Emergency ยังเปิดได้</p></div></div>
-              <label class="mt-5 flex items-center gap-3 p-4 rounded-2xl bg-amber-50 border border-amber-100"><input data-path="siteMaintenance.enabled" type="checkbox" class="w-5 h-5 accent-amber-600"><span class="font-bold text-sm">เปิดโหมดกำลังปรับปรุง</span></label>
-              <div class="mt-4 space-y-3"><div><label class="label">หัวข้อ</label><input data-path="siteMaintenance.title" class="field"></div><div><label class="label">ข้อความ</label><textarea data-path="siteMaintenance.message" class="field min-h-24"></textarea></div></div>
-            </div>
-            <div class="glass rounded-[2rem] p-6 sm:p-8">
-              <div class="flex items-start gap-4"><div class="w-12 h-12 rounded-2xl bg-sky-100 text-sky-700 flex items-center justify-center"><i data-lucide="database-backup"></i></div><div><h3 class="text-lg font-bold">Backup / Restore Settings</h3><p class="section-help">สำรองเฉพาะการตั้งค่าเว็บไซต์ ไม่รวมข้อมูลนักเรียน ผู้บริจาค และไฟล์ใน Storage</p></div></div>
-              <div class="grid sm:grid-cols-2 gap-3 mt-5"><button id="backup-settings" class="btn-primary">ดาวน์โหลด Backup JSON</button><label class="btn-secondary text-center cursor-pointer"><input id="restore-settings-file" type="file" accept=".json,application/json" class="hidden">เลือกไฟล์ Restore</label></div>
-              <p id="backup-status" class="text-xs text-slate-500 mt-3">แนะนำให้ Backup ก่อนแก้ไขครั้งใหญ่</p>
-            </div>
-          </div>
-
-          <div class="glass rounded-[2rem] p-6 sm:p-8">
-            <div class="flex flex-col lg:flex-row lg:items-end justify-between gap-4">
-              <div><h3 class="text-lg font-bold">SEO • Sitemap • robots.txt</h3><p class="section-help">Sitemap ต้องใช้ URL เต็มของเว็บไซต์ ระบบจะช่วยสร้างไฟล์พร้อมอัปโหลดขึ้น root</p></div>
-              <button id="seo-detect-url" class="btn-secondary">ใช้ URL ของเว็บที่เปิดอยู่</button>
-            </div>
-            <div class="mt-4"><label class="label">Public Base URL</label><input data-path="seo.publicBaseUrl" id="seo-public-url" class="field" placeholder="https://example.com/ หรือ https://username.github.io/repository/"></div>
-            <div class="flex flex-wrap gap-2 mt-4"><button id="download-sitemap" class="btn-primary">ดาวน์โหลด sitemap.xml</button><button id="download-robots" class="btn-secondary">ดาวน์โหลด robots.txt</button></div>
-          </div>
-
-          <div class="glass rounded-[2rem] p-6 sm:p-8">
-            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3"><div><h3 class="text-lg font-bold">Error Center</h3><p class="section-help">รวม JavaScript/resource errors และปัญหาสร้างใบ/ภาพจากระบบบริจาค</p></div><button id="refresh-system-errors" class="btn-secondary">รีเฟรช Error</button></div>
-            <div id="system-health" class="grid sm:grid-cols-3 gap-3 mt-5"></div>
-            <div id="system-error-list" class="space-y-3 mt-5"></div>
-          </div>
         </section>
 
         <section data-panel="admins" class="panel hidden space-y-6">
@@ -270,6 +204,6 @@
     </div>
   </div>
   <div id="toast" class="hidden"></div>
-  <script src="manager.js?v=20261007-v31-school-system"></script>
+  <script src="manager.js?v=20260925-login-school-logo"></script>
 </body>
 </html>

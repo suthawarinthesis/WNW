@@ -12,9 +12,7 @@ window.SCHOOL_APP_CONFIG = {
   ADMISSION_STORAGE_BUCKET: 'admission-files',
   STUDENT_PORTAL_STORAGE_BUCKET: 'student-portal-files',
   DONATION_SLIP_BUCKET: 'donation-slips',
-  DONATION_ASSETS_BUCKET: 'donation-assets',
-  // Donation certificate generator (Google Apps Script Web App)
-  DONATION_GOOGLE_APPS_SCRIPT_URL: 'https://script.google.com/macros/s/AKfycby2RD2z8dMwB3Ajp0JPCPHN_rKFIL1M5IckIN4VyUMG2yNAV_2gW4kWaGjx-49CXECJ4A/exec'
+  DONATION_ASSETS_BUCKET: 'donation-assets'
 };
 
 (() => {
@@ -104,50 +102,4 @@ window.SCHOOL_APP_CONFIG = {
   window.refreshSchoolFavicon = refreshSchoolFavicon;
   // Run without blocking page rendering.
   Promise.resolve().then(refreshSchoolFavicon);
-})();
-
-
-/* ============================================================
-   WNW Privacy & Cookie Consent
-   Loads on every page that already uses app-config.js
-   ============================================================ */
-(() => {
-  try {
-    const current = document.currentScript?.src || '';
-    const privacyScriptUrl = current
-      ? new URL('./privacy-consent.js?v=20261007-v31', current).href
-      : './assets/privacy-consent.js?v=20261007-v31';
-    if (document.querySelector('script[data-wnw-privacy-loader]')) return;
-    const script = document.createElement('script');
-    script.src = privacyScriptUrl;
-    script.defer = true;
-    script.dataset.wnwPrivacyLoader = '1';
-    document.head.appendChild(script);
-  } catch (err) {
-    console.warn('Unable to load privacy consent module:', err);
-  }
-})();
-
-
-/* ============================================================
-   WNW Site Runtime V31
-   - Maintenance mode
-   - Error monitoring
-   - Shared runtime services
-   ============================================================ */
-(() => {
-  try {
-    const current = document.currentScript?.src || '';
-    const runtimeUrl = current
-      ? new URL('./site-runtime.js?v=20261007-v31', current).href
-      : './assets/site-runtime.js?v=20261007-v31';
-    if (document.querySelector('script[data-wnw-runtime-loader]')) return;
-    const script = document.createElement('script');
-    script.src = runtimeUrl;
-    script.defer = true;
-    script.dataset.wnwRuntimeLoader = '1';
-    document.head.appendChild(script);
-  } catch (err) {
-    console.warn('Unable to load WNW runtime:', err);
-  }
 })();

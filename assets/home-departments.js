@@ -4,60 +4,25 @@
   const esc = (v='') => String(v).replace(/[&<>'"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]));
   const thDate = v => v ? new Date(v+'T00:00:00').toLocaleDateString('th-TH',{day:'numeric',month:'short',year:'numeric'}) : '-';
 
-  function videoEmbedInfo(url='') {
-    const s=String(url||'').trim();
-    if(!s) return {embed:'',provider:'',openLabel:'เปิดวิดีโอ'};
+  function youtubeEmbed(url='') {
+    const s=String(url||'').trim(); if(!s) return '';
     try {
       const u=new URL(s);
-      const host=u.hostname.replace(/^www\./,'').toLowerCase();
-      if(host==='facebook.com' || host.endsWith('.facebook.com') || host==='fb.watch' || host==='m.facebook.com') {
-        const isPost=/\/(reel|posts|share\/r)\//i.test(u.pathname);
-        const plugin=isPost?'post.php':'video.php';
-        const params=new URLSearchParams({href:s,show_text:'false',width:'1280'});
-        return {embed:`https://www.facebook.com/plugins/${plugin}?${params.toString()}`,provider:'facebook',openLabel:'เปิดวิดีโอบน Facebook'};
-      }
       let id='';
-      if(host==='youtu.be') id=u.pathname.replace(/^\//,'').split('/')[0];
-      else if(host==='youtube.com' || host.endsWith('.youtube.com')) id=u.searchParams.get('v') || (u.pathname.match(/\/(?:embed|shorts)\/([^/?]+)/)||[])[1] || '';
-      if(id) return {embed:`https://www.youtube.com/embed/${encodeURIComponent(id)}?rel=0`,provider:'youtube',openLabel:'เปิดวิดีโอบน YouTube'};
-    } catch(_) {}
-    return {embed:'',provider:'',openLabel:'เปิดวิดีโอ'};
+      if(u.hostname.includes('youtu.be')) id=u.pathname.replace(/^\//,'').split('/')[0];
+      else if(u.hostname.includes('youtube.com')) id=u.searchParams.get('v') || (u.pathname.match(/\/(?:embed|shorts)\/([^/?]+)/)||[])[1] || '';
+      return id ? `https://www.youtube.com/embed/${encodeURIComponent(id)}?rel=0` : '';
+    } catch(_) { return ''; }
   }
 
   function renderVideo(settings={}) {
     const section=$('#school-video-section'), frame=$('#school-video-frame'), fallback=$('#school-video-fallback'), open=$('#school-video-open');
     if(!section||!frame) return;
-    const raw=settings?.media?.videoPromo||'';
-    const info=videoEmbedInfo(raw);
+    const raw=settings?.media?.videoPromo||''; const embed=youtubeEmbed(raw);
     section.classList.remove('hidden');
-    if(info.embed){
-      frame.src=info.embed;
-      frame.classList.remove('hidden');
-      fallback?.classList.add('hidden');
-    } else {
-      frame.removeAttribute('src');
-      frame.classList.add('hidden');
-      fallback?.classList.remove('hidden');
-    }
-    if(open){
-      open.href=raw||'#';
-      open.firstChild && (open.firstChild.textContent=info.openLabel+' ');
-      open.classList.toggle('pointer-events-none',!raw);
-      open.classList.toggle('opacity-50',!raw);
-    }
-  }
-
-  function renderNikorn(donationSettings={}) {
-    const section=$('#home-nikorn-section'), img=$('#home-nikorn-image'), fallback=$('#home-nikorn-fallback');
-    if(!section) return;
-    const enabled=donationSettings?.nikorn_enabled !== false;
-    section.classList.toggle('hidden', !enabled);
-    if(!enabled) return;
-    const url=String(donationSettings?.nikorn_fallback_photo_url||'').trim();
-    if(img && url){
-      img.src=url; img.classList.remove('hidden'); fallback?.classList.add('hidden');
-      img.onerror=()=>{img.classList.add('hidden'); fallback?.classList.remove('hidden')};
-    } else { img?.classList.add('hidden'); fallback?.classList.remove('hidden'); }
+    if(embed){frame.src=embed;frame.classList.remove('hidden');fallback?.classList.add('hidden');}
+    else {frame.removeAttribute('src');frame.classList.add('hidden');fallback?.classList.remove('hidden');}
+    if(open){open.href=raw||'#';open.classList.toggle('pointer-events-none',!raw);open.classList.toggle('opacity-50',!raw);}
   }
 
   function renderAcademic(posts=[],files=[]) {
@@ -84,16 +49,13 @@
         db.from('site_settings').select('data').eq('id',1).maybeSingle(),
         db.from('academic_posts').select('id,title,summary,body,publish_date,pinned').eq('published',true).order('pinned',{ascending:false}).order('publish_date',{ascending:false}).limit(1),
         db.from('academic_files').select('id,title,file_url,publish_date,category').eq('published',true).order('publish_date',{ascending:false}).limit(1),
-        db.from('student_activity_posts').select('id,title,event_date,featured').eq('published',true).order('featured',{ascending:false}).order('event_date',{ascending:false}).limit(3),
-        db.from('donation_settings').select('*').eq('id',1).maybeSingle()
+        db.from('student_activity_posts').select('id,title,event_date,featured').eq('published',true).order('featured',{ascending:false}).order('event_date',{ascending:false}).limit(3)
       ]);
       const s=settled[0].status==='fulfilled'?settled[0].value:null; if(s?.data?.data)settings=s.data.data; renderVideo(settings);
       const posts=settled[1].status==='fulfilled'&&!settled[1].value.error?(settled[1].value.data||[]):[];
       const files=settled[2].status==='fulfilled'&&!settled[2].value.error?(settled[2].value.data||[]):[];
       renderAcademic(posts,files);
       const acts=settled[3].status==='fulfilled'&&!settled[3].value.error?(settled[3].value.data||[]):[];
-      const donationSettings=settled[4].status==='fulfilled'&&!settled[4].value.error?(settled[4].value.data||{}):{};
-      renderNikorn(donationSettings);
       let imgs=[]; if(acts.length){const r=await db.from('student_activity_images').select('activity_id,image_url,sort_order').in('activity_id',acts.map(x=>x.id)).order('sort_order',{ascending:true}); if(!r.error)imgs=r.data||[];}
       renderActivities(acts,imgs);
     } catch(e){console.warn('home departments:',e);renderVideo(settings);}

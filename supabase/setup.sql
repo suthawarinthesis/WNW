@@ -222,7 +222,7 @@ values (1, $sitejson$
     "embedIframe": "https://maps.google.com/maps?q=โรงเรียนวัดหนองแวงวิทยา%20ขอนแก่น&t=&z=16&ie=UTF8&iwloc=&output=embed"
   },
   "media": {
-    "videoPromo": "",
+    "videoPromo": "https://www.youtube.com/watch?v=YOUR_VIDEO_ID",
     "vrTour": "https://my.matterport.com/show/?m=YOUR_VR_ID"
   },
   "examDate": "2026-02-15T09:00:00",

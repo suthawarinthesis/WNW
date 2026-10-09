@@ -25,14 +25,6 @@
       if (settings.promptpay) { document.getElementById('promptpay').textContent=settings.promptpay; document.getElementById('promptpay-row').classList.remove('hidden'); }
       if (settings.qr_image_url) { const img=document.getElementById('qr-image'); img.src=settings.qr_image_url; img.classList.remove('hidden'); document.getElementById('qr-empty').classList.add('hidden'); }
       if (settings.donation_note) { const note=document.getElementById('donation-note'); note.textContent=settings.donation_note; note.classList.remove('hidden'); }
-      const nikornSection=document.getElementById('donation-nikorn-section');
-      if(nikornSection){
-        const enabled=settings.nikorn_enabled !== false;
-        nikornSection.classList.toggle('hidden',!enabled);
-        const img=document.getElementById('donation-nikorn-image'), fallback=document.getElementById('donation-nikorn-fallback');
-        const preview=String(settings.nikorn_fallback_photo_url||'').trim();
-        if(enabled && img && preview){img.src=preview;img.classList.remove('hidden');fallback?.classList.add('hidden');img.onerror=()=>{img.classList.add('hidden');fallback?.classList.remove('hidden')}}
-      }
     }
 
     document.getElementById('stat-amount').textContent = C.formatTHB(stats.totalAmount || 0);

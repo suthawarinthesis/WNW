@@ -89,6 +89,7 @@
       form.classList.add('hidden'); document.getElementById('success-card').classList.remove('hidden');
       document.getElementById('success-request').textContent=saved.request_no||row.request_no;
       document.getElementById('success-history').textContent=saved.history_code||row.history_code;
+      const nikornLink=document.getElementById('success-nikorn-link'); if(nikornLink)nikornLink.href=`../nikorn/?code=${encodeURIComponent(saved.history_code||row.history_code)}`;
       window.scrollTo({top:0,behavior:'smooth'}); lucide.createIcons();
     }catch(err){console.error(err);showStatus('ส่งข้อมูลไม่สำเร็จ: '+(err.message||err));btn.disabled=false;btn.innerHTML='<span class="inline-flex items-center gap-2"><i data-lucide="send" class="w-5 h-5"></i> ส่งข้อมูลการร่วมบุญ</span>';lucide.createIcons();}
   });

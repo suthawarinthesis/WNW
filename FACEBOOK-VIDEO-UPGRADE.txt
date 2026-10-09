@@ -1,0 +1,11 @@
+Facebook School Introduction Video upgrade
+
+- Website Manager > บริการ / ลิงก์ / เอกสาร > Social / แผนที่ / วิดีโอ
+- วาง URL ของ Facebook Video / Reel ที่เป็น Public ในช่อง “วิดีโอแนะนำโรงเรียน (Facebook)”
+- Manager จะแสดงตัวอย่าง Video Preview
+- หน้าเว็บหลักจะแสดง Facebook Embedded Player โดยตรง
+- ปุ่มด้านข้างจะเปิดวิดีโอบน Facebook
+- ยังรองรับ YouTube URL เดิมเพื่อ backward compatibility
+- ไม่ต้องรัน SQL เพิ่ม
+
+หมายเหตุ: Facebook ต้องอนุญาตการ Embed และโพสต์/วิดีโอต้องเข้าถึงได้แบบ Public มิฉะนั้น Facebook อาจไม่แสดง Player ใน iframe

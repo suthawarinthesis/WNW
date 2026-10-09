@@ -68,6 +68,27 @@ const colorOptions=[
   ['orange','ส้ม','bg-orange-100','text-orange-600'],['blue','น้ำเงิน','bg-blue-100','text-blue-600'],['green','เขียว','bg-green-100','text-green-600'],['red','แดง','bg-red-100','text-red-600'],['amber','เหลือง','bg-amber-100','text-amber-600'],['purple','ม่วง','bg-purple-100','text-purple-600']
 ];
 const badgeColors={red:'bg-red-100 text-red-600',green:'bg-green-100 text-green-600',blue:'bg-blue-100 text-blue-600',orange:'bg-orange-100 text-orange-600',purple:'bg-purple-100 text-purple-600',amber:'bg-amber-100 text-amber-600'};
+
+function managerVideoEmbed(url=''){
+  const s=String(url||'').trim();if(!s)return '';
+  try{
+    const u=new URL(s),host=u.hostname.replace(/^www\./,'').toLowerCase();
+    if(host==='facebook.com'||host.endsWith('.facebook.com')||host==='fb.watch'||host==='m.facebook.com'){
+      const plugin=/\/(reel|posts|share\/r)\//i.test(u.pathname)?'post.php':'video.php';
+      const q=new URLSearchParams({href:s,show_text:'false',width:'1280'});
+      return `https://www.facebook.com/plugins/${plugin}?${q.toString()}`;
+    }
+    let id='';if(host==='youtu.be')id=u.pathname.replace(/^\//,'').split('/')[0];else if(host==='youtube.com'||host.endsWith('.youtube.com'))id=u.searchParams.get('v')||(u.pathname.match(/\/(?:embed|shorts)\/([^/?]+)/)||[])[1]||'';
+    return id?`https://www.youtube.com/embed/${encodeURIComponent(id)}?rel=0`:'';
+  }catch(_){return ''}
+}
+function refreshManagerVideoPreview(){
+  const frame=$('#manager-video-preview'),wrap=$('#manager-video-preview-wrap'),note=$('#manager-video-preview-note');
+  if(!frame||!wrap)return;
+  const raw=getPath(settings,'media.videoPromo')||'',embed=managerVideoEmbed(raw);
+  if(embed){frame.src=embed;wrap.classList.remove('hidden');note?.classList.add('hidden')}
+  else{frame.removeAttribute('src');wrap.classList.add('hidden');note?.classList.toggle('hidden',!raw)}
+}
 const newsSchema={
   defaults:{date_text:'',month_year:'',category:'ข่าวสาร',category_color:'bg-orange-100 text-orange-600',title:'',summary:'',image_url:'',url:'',published:true},
   fields:[
@@ -205,7 +226,7 @@ function renderAll(){
   refreshStaticImagePreviews();renderBanners();renderStaff();renderNewsManager();Object.keys(collectionSchemas).forEach(renderCollection);renderAchievements();refreshDerived(false);
 }
 function refreshDerived(dirty=true){
-  $('#dash-students').textContent=getPath(settings,'info.stats.0.value')||'-';$('#dash-staff').textContent=getPath(settings,'info.stats.1.value')||'-';$('#dash-teachers').textContent=(settings.teachers?.length||0)+(settings.executives?.length||0)+(settings.specialTeachers?.length||0);if($('#dash-news'))$('#dash-news').textContent=news.length;$('#dash-achievements').textContent=achievements.length;if(dirty)markDirty();
+  $('#dash-students').textContent=getPath(settings,'info.stats.0.value')||'-';$('#dash-staff').textContent=getPath(settings,'info.stats.1.value')||'-';$('#dash-teachers').textContent=(settings.teachers?.length||0)+(settings.executives?.length||0)+(settings.specialTeachers?.length||0);if($('#dash-news'))$('#dash-news').textContent=news.length;$('#dash-achievements').textContent=achievements.length;refreshManagerVideoPreview();if(dirty)markDirty();
 }
 
 async function saveSettings(){

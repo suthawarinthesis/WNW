@@ -131,8 +131,3 @@ end $$;
 
 comment on table public.personnel is
 'Dedicated personnel directory. Website and Manager read/write this table directly; public can read published rows only.';
-
--- Academic qualification fields (added 2026-10-08)
-alter table if exists public.personnel
-  add column if not exists naktham_level text default '',
-  add column if not exists pali_level text default '';

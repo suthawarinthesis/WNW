@@ -23,7 +23,7 @@
 
     <!-- Supabase (GitHub Pages compatible) -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="./assets/app-config.js?v=20260926-favicon"></script>
+    <script src="./assets/app-config.js?v=20261007-v31-school-system"></script>
 
     <style>
         body { font-family: 'Noto Sans Thai', sans-serif; background-color: #f8fafc; }
@@ -89,16 +89,8 @@
         }
         @media (prefers-reduced-motion: reduce) { .alumni-home-viewport { scroll-behavior: smooth; } }
     
-        .history33-hero{background:linear-gradient(135deg,rgba(255,247,237,.96),rgba(255,255,255,.95) 48%,rgba(255,251,235,.92));}
-        .history33-number{font-size:clamp(4.8rem,10vw,8.5rem);font-weight:900;line-height:.78;letter-spacing:-.08em;color:transparent;background:linear-gradient(145deg,#fb923c,#c2410c);-webkit-background-clip:text;background-clip:text;filter:drop-shadow(0 12px 24px rgba(234,88,12,.14));}
-        .history33-story-content p:first-child::first-letter{float:left;font-size:3rem;line-height:.85;font-weight:900;color:#f97316;margin:.18rem .55rem 0 0;}
-        .history33-preview>button,.history33-preview .grid>button{box-shadow:0 14px 34px rgba(124,45,18,.09);}
-        .history33-image-error{background:linear-gradient(135deg,#fff7ed,#ffedd5);}
-        .history33-image-error::after{content:'ไม่สามารถโหลดภาพนี้ได้';position:absolute;inset:0;display:flex;align-items:center;justify-content:center;padding:1.25rem;text-align:center;font-size:.72rem;font-weight:700;color:#c2410c;}
-        .history33-gallery-grid{display:grid;grid-template-columns:repeat(1,minmax(0,1fr));gap:1rem;}
-        @media(min-width:640px){.history33-gallery-grid{grid-template-columns:repeat(2,minmax(0,1fr));}}
-        @media(min-width:1024px){.history33-gallery-grid{grid-template-columns:repeat(3,minmax(0,1fr));}}
-    </style>
+        .nikorn-main-viewport{overflow:hidden}.nikorn-main-track{display:flex;gap:1rem;transition:transform .45s ease}.nikorn-main-card{width:320px;flex:0 0 320px}.nikorn-main-card img{width:100%;aspect-ratio:5/7;object-fit:contain;background:#f8fafc;border-radius:1.5rem}@media (max-width:640px){.nikorn-main-card{width:84vw;flex-basis:84vw}}
+</style>
 </head>
 <body class="intro-boot min-h-screen text-slate-800 selection:bg-orange-200 selection:text-orange-900 relative overflow-x-hidden pt-10">
 
@@ -169,6 +161,14 @@
                                     <i data-lucide="landmark" class="w-5 h-5 text-orange-500 mt-0.5"></i>
                                     <div><p class="font-semibold text-slate-800">ประวัติโรงเรียน</p><p class="text-xs text-slate-500">ข้อมูลและความเป็นมาของโรงเรียน</p></div>
                                 </a>
+                                <a href="./about-60/" class="flex items-start gap-3 px-3 py-3 rounded-xl hover:bg-orange-50 transition-colors">
+                                    <i data-lucide="timer" class="w-5 h-5 text-orange-500 mt-0.5"></i>
+                                    <div><p class="font-semibold text-slate-800">รู้จักโรงเรียนใน 60 วินาที</p><p class="text-xs text-slate-500">หลักสูตร ค่าใช้จ่าย จุดเด่น และวิธีสมัคร</p></div>
+                                </a>
+                                <a href="./responsibilities/" class="flex items-start gap-3 px-3 py-3 rounded-xl hover:bg-orange-50 transition-colors">
+                                    <i data-lucide="contact-round" class="w-5 h-5 text-orange-500 mt-0.5"></i>
+                                    <div><p class="font-semibold text-slate-800">ติดต่อฝ่ายงาน</p><p class="text-xs text-slate-500">งานทะเบียน วัดผล ประชาสัมพันธ์ และงานทุน</p></div>
+                                </a>
                                 <a href="#staff-section" class="flex items-start gap-3 px-3 py-3 rounded-xl hover:bg-orange-50 transition-colors">
                                     <i data-lucide="users" class="w-5 h-5 text-orange-500 mt-0.5"></i>
                                     <div><p class="font-semibold text-slate-800">ทำเนียบบุคลากร</p><p class="text-xs text-slate-500">คณะผู้บริหาร ครู และบุคลากร</p></div>
@@ -177,17 +177,9 @@
                                     <i data-lucide="bar-chart-3" class="w-5 h-5 text-orange-500 mt-0.5"></i>
                                     <div><p class="font-semibold text-slate-800">สถิติผลการสอบ</p><p class="text-xs text-slate-500">ผลการสอบนักธรรมและบาลี</p></div>
                                 </a>
-                                <a href="./news/" class="flex items-start gap-3 px-3 py-3 rounded-xl hover:bg-orange-50 transition-colors">
+                                <a href="#news-section" class="flex items-start gap-3 px-3 py-3 rounded-xl hover:bg-orange-50 transition-colors">
                                     <i data-lucide="newspaper" class="w-5 h-5 text-orange-500 mt-0.5"></i>
                                     <div><p class="font-semibold text-slate-800">ข่าวสาร</p><p class="text-xs text-slate-500">ประกาศและความเคลื่อนไหวล่าสุด</p></div>
-                                </a>
-                                <a href="./academic/" class="flex items-start gap-3 px-3 py-3 rounded-xl hover:bg-orange-50 transition-colors">
-                                    <i data-lucide="graduation-cap" class="w-5 h-5 text-orange-500 mt-0.5"></i>
-                                    <div><p class="font-semibold text-slate-800">ฝ่ายวิชาการ</p><p class="text-xs text-slate-500">ประกาศ เอกสารการเงิน และประกันคุณภาพ</p></div>
-                                </a>
-                                <a href="./activities/" class="flex items-start gap-3 px-3 py-3 rounded-xl hover:bg-orange-50 transition-colors">
-                                    <i data-lucide="images" class="w-5 h-5 text-orange-500 mt-0.5"></i>
-                                    <div><p class="font-semibold text-slate-800">ฝ่ายกิจกรรมนักเรียน</p><p class="text-xs text-slate-500">ภาพกิจกรรมและความเคลื่อนไหวนักเรียน</p></div>
                                 </a>
                                 <a href="./donation/" class="flex items-start gap-3 px-3 py-3 rounded-xl hover:bg-orange-50 transition-colors">
                                     <i data-lucide="heart-handshake" class="w-5 h-5 text-orange-500 mt-0.5"></i>
@@ -268,11 +260,12 @@
                     </summary>
                     <div class="px-3 pb-3 space-y-1">
                         <a href="#history-section" class="block px-3 py-2.5 rounded-xl text-slate-700 hover:bg-orange-50">ประวัติโรงเรียน</a>
+                        <a href="./about-60/" class="block px-3 py-2.5 rounded-xl text-slate-700 hover:bg-orange-50">รู้จักโรงเรียนใน 60 วินาที</a>
+                        <a href="./responsibilities/" class="block px-3 py-2.5 rounded-xl text-slate-700 hover:bg-orange-50">ติดต่อฝ่ายงาน / ติดต่อใคร</a>
+                        <a href="./emergency/" class="block px-3 py-2.5 rounded-xl text-rose-700 hover:bg-rose-50 font-semibold">ข้อมูลฉุกเฉิน</a>
                         <a href="#staff-section" class="block px-3 py-2.5 rounded-xl text-slate-700 hover:bg-orange-50">ทำเนียบบุคลากร</a>
                         <a href="#stats-section" class="block px-3 py-2.5 rounded-xl text-slate-700 hover:bg-orange-50">สถิติผลการสอบ</a>
-                        <a href="./news/" class="block px-3 py-2.5 rounded-xl text-slate-700 hover:bg-orange-50">ข่าวสาร</a>
-                        <a href="./academic/" class="block px-3 py-2.5 rounded-xl text-slate-700 hover:bg-orange-50">ฝ่ายวิชาการ</a>
-                        <a href="./activities/" class="block px-3 py-2.5 rounded-xl text-slate-700 hover:bg-orange-50">ฝ่ายกิจกรรมนักเรียน</a>
+                        <a href="#news-section" class="block px-3 py-2.5 rounded-xl text-slate-700 hover:bg-orange-50">ข่าวสาร</a>
                         <a href="./donation/" class="block px-3 py-2.5 rounded-xl text-orange-700 hover:bg-orange-50 font-semibold">ร่วมทำบุญและบริจาค</a>
                     </div>
                 </details>
@@ -335,26 +328,6 @@
         </div>
     </section>
 
-    <!-- วิดีโอแนะนำโรงเรียน: แยกเป็นกล่องเฉพาะ -->
-    <section id="school-video-section" class="hidden max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-6 relative z-10">
-        <div class="glass-panel rounded-[2rem] overflow-hidden border border-orange-100/80 shadow-lg shadow-orange-100/30">
-            <div class="grid lg:grid-cols-[1.45fr_.55fr] items-stretch">
-                <div class="relative aspect-video bg-slate-950">
-                    <iframe id="school-video-frame" class="hidden absolute inset-0 w-full h-full" src="" title="วิดีโอแนะนำโรงเรียน" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
-                    <div id="school-video-fallback" class="absolute inset-0 flex items-center justify-center bg-gradient-to-br from-slate-900 to-slate-800 text-center p-6">
-                        <div><div class="w-16 h-16 rounded-full bg-orange-500/20 text-orange-400 mx-auto flex items-center justify-center mb-4"><i data-lucide="play-circle" class="w-8 h-8"></i></div><p class="font-bold text-white">วิดีโอแนะนำโรงเรียน</p><p class="text-xs text-slate-400 mt-1">ตั้งค่าลิงก์ YouTube ได้จาก Website Manager</p></div>
-                    </div>
-                </div>
-                <div class="p-6 sm:p-8 bg-gradient-to-br from-white via-orange-50/60 to-amber-50/50 flex flex-col justify-center">
-                    <span class="inline-flex w-fit items-center gap-2 rounded-full bg-orange-100 text-orange-700 px-3 py-1.5 text-[11px] font-bold"><i data-lucide="clapperboard" class="w-3.5 h-3.5"></i> School Introduction</span>
-                    <h2 class="text-2xl font-black text-slate-900 mt-4">วิดีโอแนะนำโรงเรียน</h2>
-                    <p class="text-sm text-slate-600 leading-7 mt-3">ทำความรู้จักโรงเรียนวัดหนองแวงวิทยา การจัดการศึกษาธรรม–บาลีและสามัญศึกษา บรรยากาศการเรียนรู้ และวิถีชีวิตของสามเณรนักเรียน</p>
-                    <a id="school-video-open" href="#" target="_blank" rel="noopener" class="mt-5 inline-flex w-fit items-center gap-2 rounded-full bg-orange-500 hover:bg-orange-600 text-white px-5 py-2.5 text-sm font-bold shadow-md shadow-orange-200">เปิดวิดีโอบน YouTube <i data-lucide="external-link" class="w-4 h-4"></i></a>
-                </div>
-            </div>
-        </div>
-    </section>
-
     <!-- ========================================== -->
     <!-- 🟢 พื้นที่หลัก: Bento Grid (กล่องข้อมูลต่างๆ) -->
     <!-- ========================================== -->
@@ -376,10 +349,15 @@
                             <i data-lucide="moon" class="w-3.5 h-3.5 text-amber-300"></i> <span id="holy-day-display">กำลังโหลดวันพระ...</span>
                         </div>
                     </div>
-                    <h2 class="text-3xl lg:text-4xl font-bold mb-3 leading-tight text-white drop-shadow-md">ยินดีต้อนรับสู่<br/>รั้วแสด-ขาว</h2>
+                    <h2 class="text-3xl lg:text-4xl font-bold mb-3 leading-tight text-white drop-shadow-md">ยินดีต้อนรับสู่<br/>รั้วเหลือง-ฟ้า</h2>
                     <p class="text-slate-200 mb-6 max-w-md text-sm lg:text-base drop-shadow-sm">โรงเรียนวัดหนองแวงวิทยา มุ่งมั่นพัฒนาวิชาการ ปลูกฝังคุณธรรม จริยธรรม สร้างผู้นำแห่งอนาคต ภายใต้ร่มเงาพระพุทธศาสนา</p>
-                    <div class="inline-flex items-center gap-2 text-xs text-slate-200/90">
-                        <i data-lucide="sparkles" class="w-4 h-4 text-orange-300"></i> เรียนรู้ • คุณธรรม • ศาสนทายาท
+                    <div class="flex gap-3">
+                        <button id="video-promo-btn" class="bg-gradient-to-r from-orange-500 to-orange-600 text-white px-6 py-2.5 rounded-full font-semibold hover:from-orange-600 hover:to-orange-700 transition-all shadow-lg hover:shadow-orange-500/30 flex items-center gap-2 cursor-pointer">
+                            <i data-lucide="play-circle" class="w-5 h-5"></i> วิดีโอแนะนำโรงเรียน
+                        </button>
+                        <a href="./about-60/" class="bg-white/15 hover:bg-white/25 border border-white/25 text-white px-5 py-2.5 rounded-full font-semibold transition-all flex items-center gap-2">
+                            <i data-lucide="timer" class="w-5 h-5"></i> รู้จักโรงเรียนใน 60 วินาที
+                        </a>
                     </div>
                 </div>
             </div>
@@ -438,38 +416,29 @@
                 </div>
             </div>
 
-            <!-- Box: ค้นหาพระไตรปิฎก (Tripitaka Search Widget) -->
-            <div class="col-span-1 md:col-span-1 lg:col-span-1 row-span-1 glass-panel rounded-[2rem] p-5 flex flex-col justify-center group border-amber-200">
-                <div class="flex justify-between items-start mb-2">
-                    <h3 class="text-sm font-bold text-slate-800 flex items-center gap-2">
-                        <i data-lucide="book-marked" class="w-4 h-4 text-amber-600"></i> ค้นหาพระไตรปิฎก
-                    </h3>
+            <!-- Box: บาลีวันละคำ — อัปเดตตามวันอัตโนมัติ -->
+            <div class="col-span-1 md:col-span-1 lg:col-span-1 row-span-1 glass-panel rounded-[2rem] p-5 flex flex-col justify-center items-center text-center group hover:border-indigo-300 transition-colors bg-gradient-to-br from-indigo-50/70 to-white/70">
+                <div class="flex items-center justify-between w-full mb-2">
+                    <span class="text-[10px] font-black text-indigo-700 bg-indigo-50 border border-indigo-100 px-2.5 py-1 rounded-full">อัปเดตทุกวัน</span>
+                    <i data-lucide="languages" class="w-5 h-5 text-indigo-500"></i>
                 </div>
-                <div class="relative mt-2">
-                    <input type="text" id="tripitaka-search" placeholder="พิมพ์คำค้นหา..." class="w-full bg-white/70 border border-slate-200 rounded-full py-2 pl-4 pr-10 text-sm focus:outline-none focus:ring-2 focus:ring-amber-400 transition-shadow">
-                    <button onclick="searchTripitaka()" class="absolute right-1 top-1 w-8 h-8 bg-amber-500 text-white rounded-full flex items-center justify-center hover:bg-amber-600 transition-colors">
-                        <i data-lucide="search" class="w-4 h-4"></i>
-                    </button>
-                </div>
-            </div>
-
-            <!-- Box: บาลีวันละคำ -->
-            <div class="col-span-1 md:col-span-1 lg:col-span-1 row-span-1 glass-panel rounded-[2rem] p-5 flex flex-col justify-center items-center text-center group cursor-pointer hover:border-indigo-300 transition-colors bg-gradient-to-br from-indigo-50/50 to-white/50">
-                <div class="w-10 h-10 bg-indigo-100/80 border border-indigo-200 rounded-full flex items-center justify-center text-indigo-600 mb-2 shadow-sm group-hover:scale-110 transition-transform"><i data-lucide="languages" class="w-5 h-5"></i></div>
                 <p class="text-[10px] text-slate-500 font-bold mb-1 uppercase tracking-wider">บาลีวันละคำ</p>
                 <h4 class="text-xl font-black text-indigo-700 drop-shadow-sm mb-0.5" id="pali-word">...</h4>
-                <p class="text-[11px] text-indigo-400 font-medium mb-1" id="pali-reading">...</p>
-                <p class="text-xs font-medium text-slate-700 bg-white/60 px-3 py-1 rounded-full border border-white" id="pali-meaning">...</p>
+                <p class="text-[11px] text-indigo-500 font-medium mb-1" id="pali-reading">...</p>
+                <p class="text-xs font-medium text-slate-700 bg-white/70 px-3 py-1 rounded-full border border-white" id="pali-meaning">...</p>
+                <p class="text-[9px] text-slate-400 mt-2" id="pali-source">หมุนเวียนอัตโนมัติตามวันที่</p>
             </div>
 
-            <!-- Box: พุทธสุภาษิต -->
-            <div class="col-span-1 md:col-span-1 lg:col-span-1 row-span-1 glass-panel rounded-[2rem] p-5 flex flex-col justify-between group hover:border-orange-300 transition-colors cursor-pointer">
+            <!-- Box: พุทธสุภาษิต — อัปเดตตามวันอัตโนมัติ -->
+            <div class="col-span-1 md:col-span-1 lg:col-span-1 row-span-1 glass-panel rounded-[2rem] p-5 flex flex-col justify-between group hover:border-orange-300 transition-colors bg-gradient-to-br from-orange-50/60 to-white/70">
                 <div class="flex justify-between items-start mb-2">
                     <h3 class="text-sm font-bold text-slate-800 flex items-center gap-2"><i data-lucide="quote" class="w-4 h-4 text-orange-500"></i> พุทธสุภาษิตวันนี้</h3>
+                    <span class="text-[9px] font-black text-orange-700 bg-orange-50 border border-orange-100 px-2 py-1 rounded-full">DAILY</span>
                 </div>
                 <div class="text-center mt-2 group-hover:-translate-y-1 transition-transform flex-1 flex flex-col justify-center">
                     <p class="font-bold text-orange-700 text-sm mb-1 leading-snug" id="dhamma-pali">...</p>
                     <p class="text-[11px] text-slate-600 mt-1" id="dhamma-thai">...</p>
+                    <p class="text-[9px] text-slate-400 mt-2" id="dhamma-source">หมุนเวียนอัตโนมัติตามวันที่</p>
                 </div>
             </div>
 
@@ -497,41 +466,47 @@
                 <div class="flex-1 flex flex-col gap-4 justify-between" id="news-container"></div>
             </div>
 
-            <!-- Box: Smart Environment (PM 2.5) -->
-            <div class="col-span-1 md:col-span-2 lg:col-span-2 row-span-1 glass-panel rounded-[2rem] p-5 flex flex-col justify-between group">
-                <div class="flex justify-between items-start mb-2">
-                    <div>
+            <!-- Box: Smart Environment — ข้อมูลจริงจากพิกัดโรงเรียน -->
+            <div class="col-span-1 md:col-span-2 lg:col-span-2 row-span-1 glass-panel rounded-[2rem] p-5 flex flex-col justify-between group border-emerald-100">
+                <div class="flex justify-between items-start gap-3 mb-3">
+                    <div class="min-w-0">
                         <h3 class="text-sm font-bold text-slate-800 flex items-center gap-2"><i data-lucide="leaf" class="w-4 h-4 text-green-500"></i> Smart Environment</h3>
-                        <div class="flex items-center gap-1 text-[10px] text-slate-500 mt-1"><i data-lucide="map-pin" class="w-3 h-3 text-orange-500"></i> พิกัด: รร.วัดหนองแวงวิทยา</div>
+                        <div class="flex items-center gap-1 text-[10px] text-slate-500 mt-1 min-w-0"><i data-lucide="map-pin" class="w-3 h-3 text-orange-500 shrink-0"></i><span id="env-location-label" class="truncate">โรงเรียนวัดหนองแวงวิทยา • CR5M+HG Khon Kaen</span></div>
                     </div>
-                    <div class="bg-white/60 px-2 py-0.5 rounded-full text-[10px] font-bold text-slate-500 border border-white/50 backdrop-blur-sm shadow-sm">Real-time</div>
+                    <div class="bg-emerald-50 px-2.5 py-1 rounded-full text-[10px] font-bold text-emerald-700 border border-emerald-100">Live data</div>
                 </div>
-                <div class="flex gap-4 items-center mt-2">
-                    <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-green-400 to-green-500 text-white flex flex-col items-center justify-center shadow-lg shadow-green-500/20 group-hover:-translate-y-1 transition-transform">
-                        <span class="text-2xl font-black leading-none" id="aqi-value">24</span><span class="text-[10px] font-medium opacity-90">AQI</span>
+                <div class="grid grid-cols-[72px_1fr] gap-4 items-center">
+                    <div id="aqi-box" class="w-[72px] h-[72px] rounded-2xl bg-gradient-to-br from-slate-400 to-slate-500 text-white flex flex-col items-center justify-center shadow-lg transition-all">
+                        <span class="text-2xl font-black leading-none" id="aqi-value">--</span><span class="text-[10px] font-medium opacity-90">US AQI</span>
                     </div>
-                    <div>
-                        <p class="text-[11px] text-slate-500 mb-0.5">คุณภาพอากาศ (PM 2.5)</p>
-                        <p class="text-sm font-bold text-green-600 mb-1" id="aqi-status">อากาศดีมาก</p>
-                        <div class="flex items-center gap-1 text-xs text-slate-600 font-medium"><i data-lucide="thermometer" class="w-3.5 h-3.5 text-orange-500"></i> <span id="env-temp">32°C</span></div>
+                    <div class="min-w-0">
+                        <p class="text-sm font-bold text-slate-700" id="aqi-status">กำลังโหลดข้อมูลอากาศ...</p>
+                        <div class="grid grid-cols-3 gap-2 mt-2 text-[10px]">
+                            <div class="rounded-xl bg-white/70 border border-white p-2"><span class="text-slate-400 block">PM2.5</span><b id="pm25-value" class="text-slate-700">--</b></div>
+                            <div class="rounded-xl bg-white/70 border border-white p-2"><span class="text-slate-400 block">อุณหภูมิ</span><b id="env-temp" class="text-slate-700">--</b></div>
+                            <div class="rounded-xl bg-white/70 border border-white p-2"><span class="text-slate-400 block">ความชื้น</span><b id="env-humidity" class="text-slate-700">--</b></div>
+                        </div>
                     </div>
+                </div>
+                <div class="flex items-center justify-between gap-3 mt-3 text-[9px] text-slate-400">
+                    <span id="env-updated">รอการอัปเดต</span>
+                    <a href="https://open-meteo.com/" target="_blank" rel="noopener" class="hover:text-emerald-600">ข้อมูล: Open-Meteo ↗</a>
                 </div>
             </div>
 
-            <!-- Box: ติดต่อเราแบบยาว (Contact Bottom Bar) -->
-            <div class="col-span-1 md:col-span-3 lg:col-span-4 row-span-1 glass-panel rounded-[2rem] p-6 flex flex-col justify-between group hover:border-orange-200 transition-colors">
-                <div class="flex flex-col md:flex-row md:items-center justify-between gap-6 h-full">
-                    <div class="flex-1 flex flex-col md:flex-row md:items-center gap-6">
-                        <h3 class="text-base font-bold text-slate-800 flex items-center gap-2 whitespace-nowrap"><i data-lucide="map-pin" class="w-5 h-5 text-orange-500"></i> ติดต่อเรา / Contact Us</h3>
-                        <div class="flex flex-wrap gap-4">
-                            <div class="flex items-center gap-2 text-sm text-slate-600 bg-white/40 px-4 py-2 rounded-xl border border-white/50"><i data-lucide="phone" class="w-4 h-4 text-orange-600"></i><span class="font-medium" id="contact-phone">...</span></div>
-                            <div class="flex items-center gap-2 text-sm text-slate-600 bg-white/40 px-4 py-2 rounded-xl border border-white/50"><i data-lucide="mail" class="w-4 h-4 text-orange-600"></i><span class="font-medium" id="contact-email">...</span></div>
-                        </div>
+            <!-- Box: ค้นหาพระไตรปิฎก — ย้ายลงมาเป็นเครื่องมือเสริม -->
+            <div class="col-span-1 md:col-span-3 lg:col-span-4 row-span-1 glass-panel rounded-[2rem] p-5 sm:p-6 border-amber-100">
+                <div class="flex flex-col md:flex-row md:items-center gap-4">
+                    <div class="md:w-72 shrink-0">
+                        <p class="text-[10px] font-black tracking-wider text-amber-600 uppercase">Dhamma Research Tool</p>
+                        <h3 class="text-base font-bold text-slate-800 flex items-center gap-2 mt-1"><i data-lucide="book-marked" class="w-5 h-5 text-amber-600"></i> ค้นหาพระไตรปิฎก</h3>
+                        <p class="text-[11px] text-slate-500 mt-1">เครื่องมือเสริมสำหรับค้นคำในพระไตรปิฎกจาก 84000.org</p>
                     </div>
-                    <div class="md:w-auto">
-                        <a href="#" target="_blank" class="map-link w-full bg-white/80 hover:bg-orange-500 text-slate-700 hover:text-white text-sm font-bold px-8 py-3 rounded-xl transition-all shadow-sm flex items-center justify-center gap-2 border border-white">
-                            <i data-lucide="map"></i> เปิดแผนที่นำทาง
-                        </a>
+                    <div class="relative flex-1">
+                        <input type="text" id="tripitaka-search" placeholder="พิมพ์คำหรือข้อความที่ต้องการค้นหา..." class="w-full bg-white/80 border border-slate-200 rounded-2xl py-3 pl-4 pr-12 text-sm focus:outline-none focus:ring-2 focus:ring-amber-400 transition-shadow">
+                        <button onclick="searchTripitaka()" class="absolute right-1.5 top-1.5 w-9 h-9 bg-amber-500 text-white rounded-xl flex items-center justify-center hover:bg-amber-600 transition-colors" aria-label="ค้นหาพระไตรปิฎก">
+                            <i data-lucide="search" class="w-4 h-4"></i>
+                        </button>
                     </div>
                 </div>
             </div>
@@ -543,54 +518,40 @@
     <!-- ========================================== -->
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-16 relative z-10">
         
-        <!-- 33 ปี โรงเรียนวัดหนองแวงวิทยา -->
-        <section id="history-section" class="scroll-mt-32">
-            <div class="history33-shell overflow-hidden rounded-[2.2rem] border border-orange-100/80 bg-white/80 shadow-[0_24px_70px_rgba(124,45,18,.08)] backdrop-blur-xl">
-                <div class="history33-hero relative overflow-hidden p-6 sm:p-9 lg:p-12">
-                    <div class="absolute -right-12 -top-20 h-56 w-56 rounded-full bg-orange-200/35 blur-3xl"></div>
-                    <div class="absolute -left-16 bottom-0 h-44 w-44 rounded-full bg-amber-100/60 blur-3xl"></div>
-                    <div class="relative grid gap-8 lg:grid-cols-[1.08fr_.92fr] lg:items-center">
-                        <div>
-                            <div class="mb-5 flex flex-wrap items-center gap-2">
-                                <span class="inline-flex items-center gap-2 rounded-full border border-orange-200 bg-white/85 px-3.5 py-2 text-xs font-bold text-orange-700 shadow-sm">
-                                    <i data-lucide="landmark" class="h-4 w-4"></i> จากรากฐานสู่วันนี้
-                                </span>
-                                <span class="inline-flex items-center rounded-full bg-slate-900 px-3.5 py-2 text-xs font-bold text-white">พ.ศ. ๒๕๓๖ — ปัจจุบัน</span>
-                            </div>
-                            <div class="flex items-end gap-4 sm:gap-5">
-                                <div class="history33-number shrink-0" aria-hidden="true">๓๓</div>
-                                <div class="pb-2">
-                                    <p class="text-xs font-bold uppercase tracking-[.22em] text-orange-500">Years of faith & education</p>
-                                    <h2 id="history33-title" class="mt-1 text-2xl font-black leading-tight text-slate-900 sm:text-3xl lg:text-4xl">๓๓ ปี โรงเรียนวัดหนองแวงวิทยา</h2>
-                                </div>
-                            </div>
-                            <p id="history33-lead" class="mt-6 max-w-3xl text-[15px] leading-8 text-slate-600 sm:text-base"></p>
-                            <div class="mt-7 flex flex-wrap gap-3">
-                                <button id="history33-toggle" type="button" onclick="toggleHistory33()" class="inline-flex items-center gap-2 rounded-2xl bg-orange-500 px-5 py-3 text-sm font-bold text-white shadow-lg shadow-orange-200 transition hover:-translate-y-0.5 hover:bg-orange-600" aria-expanded="false">
-                                    <i data-lucide="book-open" class="h-4 w-4"></i><span>อ่านเรื่องราวทั้งหมด</span><i data-lucide="chevron-down" class="history33-chevron h-4 w-4 transition-transform"></i>
-                                </button>
-                                <button id="history33-gallery-btn" type="button" onclick="openHistory33Gallery()" class="hidden inline-flex items-center gap-2 rounded-2xl border border-orange-200 bg-white px-5 py-3 text-sm font-bold text-orange-700 shadow-sm transition hover:bg-orange-50">
-                                    <i data-lucide="images" class="h-4 w-4"></i><span>ดูภาพทั้งหมด</span><span id="history33-gallery-count" class="rounded-full bg-orange-100 px-2 py-0.5 text-[10px]">0</span>
-                                </button>
-                            </div>
-                        </div>
-                        <div id="history33-preview" class="history33-preview min-h-[280px]"></div>
+        <!-- ประวัติโรงเรียน (History with Before/After Slider) -->
+        <section id="history-section">
+            <div class="flex items-center gap-3 mb-8">
+                <div class="w-2 h-8 bg-gradient-to-b from-orange-400 to-orange-600 rounded-full shadow-md"></div>
+                <h2 class="text-3xl font-bold text-slate-800 drop-shadow-sm">ประวัติโรงเรียนวัดหนองแวงวิทยา</h2>
+            </div>
+            <div class="glass-panel rounded-[2rem] p-6 sm:p-10 flex flex-col lg:flex-row gap-10 items-center">
+                <div class="lg:w-1/2 order-2 lg:order-1 space-y-4 text-slate-600">
+                    <p class="leading-relaxed" id="history-p1">...</p>
+                    <p class="leading-relaxed" id="history-p2">...</p>
+                    <div class="mt-6 bg-orange-50 border-l-4 border-orange-500 p-4 rounded-r-xl">
+                        <h4 class="font-bold text-orange-700 mb-1">ปรัชญาโรงเรียน</h4>
+                        <p class="text-sm font-medium text-orange-600" id="history-vision">...</p>
                     </div>
                 </div>
-
-                <div id="history33-story" class="hidden border-t border-orange-100/70 bg-gradient-to-b from-white to-orange-50/35 px-6 py-8 sm:px-9 lg:px-12 lg:py-10">
-                    <div class="mx-auto max-w-4xl">
-                        <div class="mb-7 grid gap-3 sm:grid-cols-3">
-                            <div class="rounded-2xl border border-orange-100 bg-white p-4"><p class="text-[10px] font-bold uppercase tracking-widest text-orange-500">ก่อกำเนิด</p><p class="mt-1 text-lg font-black text-slate-900">พ.ศ. ๒๕๓๖</p></div>
-                            <div class="rounded-2xl border border-orange-100 bg-white p-4"><p class="text-[10px] font-bold uppercase tracking-widest text-orange-500">รากฐาน</p><p class="mt-1 text-sm font-bold text-slate-800">ธรรม • บาลี • สามัญศึกษา</p></div>
-                            <div class="rounded-2xl border border-orange-100 bg-white p-4"><p class="text-[10px] font-bold uppercase tracking-widest text-orange-500">ปณิธาน</p><p class="mt-1 text-sm font-bold text-slate-800">สร้างศาสนทายาทที่มีคุณภาพ</p></div>
+                <div class="lg:w-1/2 order-1 lg:order-2 w-full">
+                    <div class="ba-slider group">
+                        <!-- อดีต (ล่างสุด) -->
+                        <img id="history-img-old" src="" alt="ภาพอดีต" />
+                        <!-- ปัจจุบัน (ซ้อนทับ) -->
+                        <div class="img-after absolute top-0 left-0 h-full" id="history-img-after-wrapper">
+                            <img id="history-img-new" src="" alt="ภาพปัจจุบัน" />
                         </div>
-                        <div id="history33-story-content" class="history33-story-content"></div>
-                        <div class="mt-8 rounded-3xl border border-orange-200 bg-orange-500 p-6 text-white shadow-lg shadow-orange-100 sm:p-7">
-                            <div class="flex items-start gap-4"><div class="mt-0.5 rounded-2xl bg-white/15 p-3"><i data-lucide="heart-handshake" class="h-6 w-6"></i></div><div><p class="text-xs font-bold uppercase tracking-[.18em] text-orange-100">ความทรงจำที่ส่งต่อ</p><p class="mt-2 text-lg font-bold leading-relaxed">“เพิ่นจั่งฮักกันแพงกัน...”</p><p class="mt-1 text-sm leading-7 text-orange-50">จากวันแรกที่มีเพียงอาคารติณชาติ สู่ร่มเงาแห่งการศึกษาที่เติบโตด้วยความรัก ความเสียสละ และศรัทธาในพระศาสนา</p></div></div>
+                        <!-- ตัวเลื่อน -->
+                        <input type="range" min="0" max="100" value="50" id="ba-slider-input" oninput="updateSlider(this.value)">
+                        <!-- ไอคอนลากตรงกลาง -->
+                        <div class="slider-button" id="ba-slider-btn">
+                            <i data-lucide="chevrons-left-right" class="w-5 h-5"></i>
                         </div>
-                        <div class="mt-8 text-center"><button type="button" onclick="toggleHistory33(false)" class="inline-flex items-center gap-2 rounded-xl bg-white px-4 py-2.5 text-xs font-bold text-slate-600 shadow-sm ring-1 ring-slate-200 hover:bg-slate-50"><i data-lucide="chevron-up" class="h-4 w-4"></i> ย่อเรื่องราว</button></div>
+                        <!-- Labels -->
+                        <span class="absolute top-4 right-4 bg-black/60 text-white text-xs px-2 py-1 rounded backdrop-blur-sm pointer-events-none">อดีต</span>
+                        <span class="absolute top-4 left-4 bg-orange-500/80 text-white text-xs px-2 py-1 rounded backdrop-blur-sm pointer-events-none z-20">ปัจจุบัน</span>
                     </div>
+                    <p class="text-center text-xs text-slate-400 mt-3 font-medium"><i data-lucide="mouse-pointer-click" class="w-3 h-3 inline"></i> เลื่อนซ้าย-ขวา เพื่อเปรียบเทียบอดีตและปัจจุบัน</p>
                 </div>
             </div>
         </section>
@@ -605,29 +566,12 @@
                         <p class="text-sm text-slate-500 mt-1">ข่าวประชาสัมพันธ์ ประกาศ และความเคลื่อนไหวล่าสุดของโรงเรียน</p>
                     </div>
                 </div>
-                <a href="./news/" class="inline-flex items-center gap-2 text-xs font-bold text-orange-600 bg-orange-50 hover:bg-orange-100 border border-orange-100 px-4 py-2 rounded-full w-fit transition-colors">
-                    <i data-lucide="newspaper" class="w-4 h-4"></i> ดูข่าวทั้งหมด <i data-lucide="arrow-right" class="w-3.5 h-3.5"></i>
-                </a>
+                <div class="inline-flex items-center gap-2 text-xs font-bold text-orange-600 bg-orange-50 border border-orange-100 px-4 py-2 rounded-full w-fit">
+                    <i data-lucide="newspaper" class="w-4 h-4"></i> ข่าวล่าสุด
+                </div>
             </div>
             <div id="news-section-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"></div>
             <div id="news-section-empty" class="hidden glass-panel rounded-[2rem] p-10 text-center text-slate-400">ยังไม่มีข่าวสารที่เผยแพร่</div>
-        </section>
-
-        <!-- ฝ่ายวิชาการ & ฝ่ายกิจกรรมนักเรียน -->
-        <section id="department-updates-section" class="scroll-mt-32">
-            <div class="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-7">
-                <div class="flex items-center gap-3"><div class="w-2 h-8 bg-gradient-to-b from-orange-400 to-orange-600 rounded-full shadow-md"></div><div><h2 class="text-2xl sm:text-3xl font-bold text-slate-800">จากฝ่ายงานของโรงเรียน</h2><p class="text-sm text-slate-500 mt-1">ประกาศวิชาการและภาพกิจกรรมนักเรียนล่าสุด</p></div></div>
-            </div>
-            <div class="grid lg:grid-cols-[.8fr_1.2fr] gap-6">
-                <div class="rounded-[2rem] p-6 sm:p-7 bg-gradient-to-br from-orange-50 via-white to-amber-50 border border-orange-100 shadow-sm">
-                    <div class="flex items-center justify-between gap-3 mb-5"><div><div class="w-11 h-11 rounded-2xl bg-orange-100 text-orange-600 flex items-center justify-center mb-3"><i data-lucide="graduation-cap" class="w-5 h-5"></i></div><h3 class="text-xl font-bold text-slate-900">ฝ่ายวิชาการ</h3><p class="text-xs text-slate-500 mt-1">ประกาศและเอกสารเผยแพร่</p></div><a href="./academic/" class="text-xs font-bold text-orange-600 bg-white px-3 py-2 rounded-full border border-orange-100">ดูทั้งหมด →</a></div>
-                    <div id="home-academic-content"></div>
-                </div>
-                <div class="rounded-[2rem] p-6 sm:p-7 bg-gradient-to-br from-white via-orange-50/60 to-rose-50/60 border border-orange-100 shadow-sm">
-                    <div class="flex items-center justify-between gap-3 mb-5"><div><div class="w-11 h-11 rounded-2xl bg-rose-100 text-rose-600 flex items-center justify-center mb-3"><i data-lucide="images" class="w-5 h-5"></i></div><h3 class="text-xl font-bold text-slate-900">ฝ่ายกิจกรรมนักเรียน</h3><p class="text-xs text-slate-500 mt-1">ภาพกิจกรรมและความเคลื่อนไหวล่าสุด</p></div><a href="./activities/" class="text-xs font-bold text-orange-600 bg-white px-3 py-2 rounded-full border border-orange-100">ดูทั้งหมด →</a></div>
-                    <div id="home-activity-grid" class="grid sm:grid-cols-3 gap-3"></div>
-                </div>
-            </div>
         </section>
 
         <!-- สถิติผลการสอบ (Exam Results Dashboard) -->
@@ -652,8 +596,8 @@
             </div>
         </section>
 
-        <!-- กิจวัตรประจำวัน -->
-        <section>
+        <!-- กิจวัตรประจำวัน — เปิด/ปิดจาก Manager -->
+        <section id="routine-section" class="hidden">
             <div class="flex items-center gap-3 mb-8">
                 <div class="w-2 h-8 bg-gradient-to-b from-orange-400 to-orange-600 rounded-full shadow-md"></div>
                 <h2 class="text-2xl font-bold text-slate-800 drop-shadow-sm">กิจวัตรประจำวันสามเณร</h2>
@@ -776,6 +720,21 @@
         </div>
     </section>
 
+
+    <section id="nikorn-main-section" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-14 hidden">
+        <div class="glass-panel rounded-[2rem] p-6 sm:p-8">
+            <div class="flex flex-col sm:flex-row sm:items-end justify-between gap-3 mb-5">
+                <div>
+                    <p class="text-xs font-bold uppercase tracking-[.2em] text-orange-500">ระบบของพม.นิกร</p>
+                    <h2 class="text-2xl sm:text-3xl font-bold mt-2">ภาพประชาสัมพันธ์ผู้ร่วมทำบุญ</h2>
+                    <p class="text-sm text-slate-500 mt-2">ภาพล่าสุดจากระบบบริจาคของโรงเรียน จะเลื่อนอัตโนมัติบนหน้าแรกเว็บไซต์</p>
+                </div>
+                <a href="./donation/" class="inline-flex items-center gap-2 px-4 py-2.5 rounded-2xl bg-orange-500 text-white font-bold"><i data-lucide="heart-handshake" class="w-4 h-4"></i> ไปหน้าบริจาค</a>
+            </div>
+            <div class="nikorn-main-viewport"><div id="nikorn-main-track" class="nikorn-main-track"></div></div>
+            <div id="nikorn-main-dots" class="flex items-center gap-2 mt-4"></div>
+        </div>
+    </section>
     <footer class="bg-slate-900/95 backdrop-blur-xl text-slate-300 py-12 mt-12 border-t-4 border-orange-500 relative z-10">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 grid grid-cols-1 md:grid-cols-3 gap-8">
             <div>
@@ -786,7 +745,12 @@
                     </div>
                     <div><h2 class="text-lg font-bold text-white leading-tight" id="footer-school-name-th">...</h2><p class="text-xs text-orange-400" id="footer-school-name-en">...</p></div>
                 </div>
-                <p class="text-sm text-slate-400 mb-4 max-w-xs" id="footer-address">...</p>
+                <p class="text-sm text-slate-400 mb-3 max-w-sm" id="footer-address">...</p>
+                <div class="space-y-1.5 text-xs text-slate-400">
+                    <p class="flex items-center gap-2"><i data-lucide="phone" class="w-3.5 h-3.5 text-orange-400"></i><span>สำนักงาน: <a id="footer-phone" href="tel:043320171" class="hover:text-orange-300">043-320-171</a></span></p>
+                    <p class="flex items-center gap-2"><i data-lucide="phone-call" class="w-3.5 h-3.5 text-rose-400"></i><span>สายด่วนผู้อำนวยการ: <a id="footer-hotline" href="tel:0840286034" class="hover:text-orange-300">084-028-6034</a></span></p>
+                    <p class="flex items-center gap-2"><i data-lucide="mail" class="w-3.5 h-3.5 text-orange-400"></i><a id="footer-email" href="#" class="hover:text-orange-300">...</a></p>
+                </div>
             </div>
             <div>
                 <h3 class="text-white font-bold mb-4">ลิงก์ที่เกี่ยวข้อง</h3>
@@ -797,6 +761,9 @@
                     <li><a href="./student-portal/" class="hover:text-orange-400 transition-colors">Student Portal</a></li>
                     <li><a href="./university-admission/" class="hover:text-orange-400 transition-colors">ประชาสัมพันธ์รับสมัครมหาวิทยาลัย</a></li>
                     <li><a href="./donation/" class="hover:text-orange-400 transition-colors text-orange-400">ร่วมทำบุญและใบอนุโมทนาบัตร</a></li>
+                    <li><a href="./about-60/" class="hover:text-orange-400 transition-colors">รู้จักโรงเรียนใน 60 วินาที</a></li>
+                    <li><a href="./responsibilities/" class="hover:text-orange-400 transition-colors">ติดต่อฝ่ายงาน</a></li>
+                    <li><a href="./emergency/" class="hover:text-rose-300 transition-colors text-rose-400">ข้อมูลฉุกเฉิน</a></li>
                 </ul>
             </div>
             <div>
@@ -811,6 +778,10 @@
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-8 pt-8 border-t border-slate-800 text-xs text-center text-slate-500">
             <div class="flex flex-col sm:flex-row gap-3 items-center justify-center">
                 <span>© <span id="current-year"></span> <span id="copyright-name"></span> All rights reserved.</span>
+                <span class="hidden sm:inline text-slate-700">•</span>
+                <a href="./privacy/" class="inline-flex items-center gap-1.5 text-slate-500 hover:text-orange-400 transition-colors"><i data-lucide="shield" class="w-3.5 h-3.5"></i> Privacy Policy</a>
+                <span class="hidden sm:inline text-slate-700">•</span>
+                <button type="button" onclick="window.WNWPrivacy?.openSettings()" class="inline-flex items-center gap-1.5 text-slate-500 hover:text-orange-400 transition-colors"><i data-lucide="cookie" class="w-3.5 h-3.5"></i> ตั้งค่าคุกกี้</button>
                 <span class="hidden sm:inline text-slate-700">•</span>
                 <a href="./manager/" class="inline-flex items-center gap-1.5 text-slate-500 hover:text-orange-400 transition-colors" title="ระบบผู้ดูแลเว็บไซต์">
                     <i data-lucide="shield-check" class="w-3.5 h-3.5"></i> ระบบ Manager
@@ -849,14 +820,6 @@
                     <div class="sm:col-span-2 rounded-2xl bg-slate-50 border border-slate-100 p-5">
                         <h4 class="font-bold text-slate-800 flex items-center gap-2 mb-3"><i data-lucide="graduation-cap" class="w-4 h-4 text-orange-500"></i> ประวัติการศึกษา</h4>
                         <div id="staff-modal-education" class="space-y-2 text-sm text-slate-600 leading-relaxed"><p>–</p></div>
-                    </div>
-                    <div class="rounded-2xl bg-amber-50/60 border border-amber-100 p-4">
-                        <p class="text-[11px] font-bold text-slate-400 mb-1">วุฒินักธรรม</p>
-                        <p id="staff-modal-naktham" class="text-sm font-semibold text-amber-800">–</p>
-                    </div>
-                    <div class="rounded-2xl bg-orange-50/60 border border-orange-100 p-4">
-                        <p class="text-[11px] font-bold text-slate-400 mb-1">วุฒิบาลี</p>
-                        <p id="staff-modal-pali" class="text-sm font-semibold text-orange-800">–</p>
                     </div>
                     <div class="rounded-2xl bg-orange-50/60 border border-orange-100 p-4">
                         <p class="text-[11px] font-bold text-slate-400 mb-1">เบอร์โทรศัพท์</p>
@@ -899,18 +862,6 @@
                 <p id="donation-name" class="text-sm text-slate-600 mt-1">...</p>
             </div>
             <p class="text-xs text-rose-600 font-medium">"ผู้ให้การศึกษา ย่อมชื่อว่าให้แสงสว่างแห่งปัญญา"</p>
-        </div>
-    </div>
-
-
-    <!-- MODAL: 33 ปี - ภาพความทรงจำ -->
-    <div id="history33-gallery-modal" class="fixed inset-0 z-[120] hidden items-center justify-center bg-slate-950/75 p-4 backdrop-blur-md" onclick="if(event.target===this) closeHistory33Gallery()">
-        <div class="flex max-h-[92vh] w-full max-w-6xl flex-col overflow-hidden rounded-[2rem] bg-white shadow-2xl">
-            <div class="flex items-center justify-between border-b border-slate-100 px-5 py-4 sm:px-7">
-                <div><p class="text-[10px] font-bold uppercase tracking-[.18em] text-orange-500">Memory Gallery</p><h3 class="text-lg font-black text-slate-900 sm:text-xl">ภาพความทรงจำ ๓๓ ปี</h3></div>
-                <button type="button" onclick="closeHistory33Gallery()" class="rounded-full bg-slate-100 p-2.5 text-slate-500 transition hover:bg-slate-200" aria-label="ปิด"><i data-lucide="x" class="h-5 w-5"></i></button>
-            </div>
-            <div id="history33-gallery-grid" class="history33-gallery-grid flex-1 overflow-y-auto p-4 sm:p-6"></div>
         </div>
     </div>
 
@@ -963,60 +914,23 @@
                 directorName: "พระครูสุธีกิตติวรญาณ",
                 directorImage: "",
                 directorMsg: "เรามุ่งมั่นที่จะสร้างสภาพแวดล้อมแห่งการเรียนรู้ที่ผสมผสานหลักธรรมทางพระพุทธศาสนาเข้ากับวิชาการสมัยใหม่ เปิดโอกาสให้นักเรียนทุกคนได้ค้นพบศักยภาพของตนเองอย่างเต็มที่",
-                phone: "043-123-4567",
+                phone: "043-320-171",
                 email: "info@nongwang.ac.th",
-                address: "123 ถนนประชาสโมสร ตำบลในเมือง อำเภอเมือง จังหวัดขอนแก่น 40000",
+                address: "593 ถ.กลางเมือง อ.เมือง จ.ขอนแก่น 40000",
+                directorHotline: "084-028-6034",
                 stats: [
                     { label: "สามเณรนักเรียน", value: "1,845", icon: "users" },
                     { label: "บุคลากร", value: "112", icon: "award" }
                 ]
             },
 
-            // 📌 3. เรื่องราว 33 ปี และแกลเลอรีภาพประวัติศาสตร์
+            // 📌 3. ประวัติโรงเรียนและภาพเปรียบเทียบ (Before & After)
             history: {
-                anniversaryTitle: "๓๓ ปี โรงเรียนวัดหนองแวงวิทยา",
-                anniversaryLead: `๓๓ ปีหากเป็นตัวเลขบอกวงรอบของต้นไม้คงอยู่ในช่วงกำลังเติบโตแผ่กิ่งก้านสาขาให้ร่มเงาแก่เหล่าสัตว์นานาชนิดได้อาศัย ในวันที่ต้นไม้ใหญ่แผ่กิ่งก้านให้ร่มเงา ครั้งหนึ่งมันเริ่มต้นจากเมล็ดพันธุ์เล็ก ๆ ที่มีคนลงมือปลูกด้วยความรัก ความศรัทธาและความหวัง โรงเรียนวัดหนองแวงวิทยาก็เช่นกัน`,
-                anniversaryStory: `โรงเรียนวัดหนองแวงวิทยา แผนกสามัญศึกษา ต่อยอดมาจากสำนักศาสนศึกษาวัดหนองแวงแผนกธรรม-บาลี เมื่อปี พ.ศ.๒๕๓๖ จัดการเรียนการสอนทั้งแผนกธรรม แผนกบาลี และแผนกสามัญฯ ก่อกำเนิดขึ้นด้วยวิสัยทัศน์อันกว้างไกลของ พระเดชพระคุณหลวงปู่พระธรรมวิสุทธาจารย์ (คูณ ขนฺติโก ป.ธ.๔)  ผู้ก่อตั้งและดำรงตำแหน่งผู้จัดการโรงเรียนรูปแรก ท่านอยากจะสร้างพระภิกษุสามเณรให้เป็นพลเมืองที่ดีของชาติ และศาสนทายาทที่มีคุณภาพของพระศาสนา โดยให้การส่งเสริมสนับสนุนการศึกษาทั้งด้านนักธรรม บาลี และสามัญศึกษา โดยเฉพาะการศึกษาภาษาบาลีนั้น ได้ให้ความสำคัญเป็นอย่างยิ่งเพราะถือเป็นหัวใจสำคัญของการศึกษาสำหรับพระภิกษุสามเณร พระเดชพระคุณหลวงปู่ฯ ได้ติดตามการจัดการเรียนการสอนอย่างใกล้ชิด ตลอดจนให้กำลังใจแก่คณาจารย์และนักเรียนต่อการพัฒนาคุณภาพการศึกษา
-
-ในวันแรกเริ่ม แม้ทุกสิ่งยังไม่พร้อม ทั้งอาคารสถานที่ต้องอาศัยอาคารติณชาติมุงด้วยจาก (ติณชาติวิทยาคาร) สื่อวัสดุอุปกรณ์ สิ่งอำนวยความสะดวกและงบประมาณ แต่สิ่งที่มีเต็มเปี่ยมคือความตั้งใจและทุ่มเทเสียสละของหลวงพ่อพระครูสุขุมสังฆการ (วรเมธ โพธิสาโร ป.ธ.๖) ครูใหญ่/อาจารย์ใหญ่รูปแรก ผู้รับภาระอันหนักอึ้งในการวางระบบ ระเบียบ หลักสูตรและแบบแผนการเรียนการสอน ขอบอกให้ทราบว่าหลวงพ่อสุขุมท่านเป็นผู้เข้าไปกราบเรียนพระเดชพระคุณหลวงปู่ฯ ขอเปิดแผนกสามัญศึกษา เพราะดูแนวโน้มจำนวนนักเรียนที่ลดลงแล้วคงจะไปต่อลำบากเพราะนักเรียนบางรูปก็ต้องการวุฒิไปศึกษาต่อท่านใช้คำว่า นักเรียนเต้นข้ามกำแพง (ไปเรียนสายสามัญฯ) นับเป็นคุณูปการสำคัญของท่านที่ได้วางรากฐานไว้ เป็นรากแก้วที่หยั่งลึก ทำให้ต้นไม้ต้นนี้ยืนหยัดมั่นคงมาได้จนทุกวันนี้
-
-โรงเรียนจะเดินหน้าไม่ได้เลย หากปราศจากฟันเฟืองเหล่านี้ที่หมุนไปพร้อมกัน นั่นคือ คณาจารย์ยุคบุกเบิก มาถวายความรู้พระเณรด้วยจิตวิญญาณของครูมาด้วยใจรักและความทุ่มเท เท่าที่สืบค้นข้อมูลได้คณาจารย์ยุคบุกเบิก ประกอบด้วย
-
-๑. พระเดชพระคุณหลวงปู่พระธรรมวิสุทธาจารย์  ผู้ก่อตั้ง
-๒. หลวงพ่อพระครูสุขุมสังฆการ  อดีตครูใหญ่/อาจารย์ใหญ่รูปแรก
-๓. หลวงพ่อพระครูมัชฌิมธรรมโสภณ  นายทะเบียน/ครูวิชาสันสกฤต ศป.
-๔. หลวงพ่อพระครูธรรมสารสุมณฑ์   ครูวิชาศาสนปฏิบัติ (ศป.)
-๕. พระครูสโมธานเขตคณารักษ์  ผู้จัดทำหลักสูตรโรงเรียน
-๖. พ่อครูวุฒิพงศ์  ประนัตตะเน  ครูวิชาสังคม
-๗. พ่อครูสุทัศน์  จิติวงศ์  ครูวิชาเคมี/วิทย์
-๘. พ่อครูอรุณ  บุญชู  ครูวิชาภาษาไทย
-๙. พ่อครูวิเชียร  สังกะเพศ  ครูวิชาชีววิทยา/วิทย์
-๑๐. พ่อครูสรศักดิ์  สุรินพา  ครูวิชาสุขศึกษา
-๑๑. พ่อครูบัญชา  นามปาน  ครูวิชาคณิตฯ/อังกฤษ
-๑๒. แม่ครูจารุณี  สุระเสียง   ครูภาษาไทย
-๑๓. พ่อครูวิรัช  เหลาสะอาด  กรรมการบริหาร/ครูวิชาสุขศึกษา
-๑๔. พ่อครูจรูญ   (ใครทราบข้อมูลช่วยแจ้งด้วยนะครับ)
-๑๕. แม่ครูขจร     ครูวิชาอังกฤษ
-๑๖. แม่ครูอุทุมพร  กับกระโทก   ครูวิชาวิทย์ ม.ต้น
-๑๗. แม่ครูมุกดา  ใสวารี  ครูคณิตฯ  ม.ต้น
-๑๘. แม่ครูเพ็ญศรี           ครูวิชาอังกฤษ
-๑๙. พ่อครูพลเผ่า  เพ็งวิภาส    ครูวิชาสังคม
-๒๐. พ่อครูสุนทร ทอดทอง  ครูวิชาสุขศึกษา
-๒๑. พ่อครูลำครองสิทธิ์  คำสงค์  ครูคณิตฯ ม.ต้น
-๒๒. พ่อครูสมจิตร  แดนขนบ ครูวิชาสังคมฯ
-๒๓. พ่อครูสุดใจ เนื่องแก้ว ครูวิชาฟิสิกส์/เคมี
-๒๔. แม่ครูอ้อยใจ สันทร  ครูวิชาสังคม
-
-บูรพาจารย์เหล่านี้มาสอนด้วยความรักความทุ่มเทและศรัทธาในพระศาสนาเชื่อมั่นในลูกๆ นักเรียนของท่านว่าซักวันพระเณรเหล่านี้จะเติบโตเป็นพลเมืองที่ดีของชาติ เป็นศาสนทายาทที่มีคุณภาพของพระศาสนา
-
-อย่างที่กล่าวไว้ตอนต้นว่าด้วยความไม่พร้อมของอาคารสถานที่ มีเพียงอาคารติณชาติ (ติณชาติวิทยาคาร) และสวนมะพร้าวแต่สิ่งเหล่านี้ไม่เคยเป็นอุปสรรคต่อการจัดการเรียนการสอนเลย ท่านเหล่านี้มีจิตวิญญาณของความเป็นครูเต็มเปี่ยม นักเรียนก็ใจสู้อดทน สมัยแรกเริ่มนั้นนักเรียนท่องบาลี แปลหนังสือธรรมบท ตามร่มไม้ ห้องนอน ขอบสระน้ำ ยิ่งสภาพความเป็นอยู่ยุคนั้นนอนรวมกันห้องละ ๔-๕ รูปไปบิณฑบาตบางวันได้ข้าวเหนียวกับไข่เข็ม ๑ ฟองต้องเอามายำไข่เค็มแล้วแบ่งกันฉัน เป็นบรรยากาศที่อบอุ่น เพราะพระเณรลำบากมาด้วยกันจึงรักและดูแลกัน เพิ่นจั่งฮักกันแพงกัน...`,
-                galleryImages: [],
-                // คงฟิลด์เดิมไว้เพื่อให้ข้อมูลเก่าจาก Supabase ยังใช้งานร่วมกันได้
-                paragraph1: "",
-                paragraph2: "",
-                vision: "",
-                oldImage: "",
-                newImage: ""
+                paragraph1: "โรงเรียนวัดหนองแวงวิทยา เป็นโรงเรียนพระปริยัติธรรม แผนกสามัญศึกษา สังกัดสำนักงานพระพุทธศาสนาแห่งชาติ ตั้งอยู่ ณ วัดหนองแวง พระอารามหลวง จังหวัดขอนแก่น ก่อตั้งขึ้นโดยมีวัตถุประสงค์หลักเพื่อให้การศึกษาแก่พระภิกษุสามเณร ทั้งในด้านหลักธรรมคำสอนทางพระพุทธศาสนา ควบคู่ไปกับวิชาการทางโลกตามหลักสูตรแกนกลางการศึกษาขั้นพื้นฐาน",
+                paragraph2: "จากอดีตที่เริ่มต้นจากศาลาการเปรียญเล็กๆ สู่การเป็นสถานศึกษาที่มีอาคารเรียนอันทันสมัย โรงเรียนวัดหนองแวงวิทยาได้ผลิตศาสนทายาทและบุคลากรที่มีคุณภาพออกสู่สังคมอย่างต่อเนื่อง ถือเป็นเสาหลักสำคัญในการสืบทอดพระพุทธศาสนาในภาคตะวันออกเฉียงเหนือ",
+                vision: `"มุ่งพัฒนาศาสนทายาท ให้เพียบพร้อมด้วยศีลาจารวัตร และเป็นเลิศทางวิชาการ สู่มาตรฐานสากล"`,
+                oldImage: "https://images.unsplash.com/photo-1574345511867-0c7f212f4ba1?q=80&w=1200&auto=format&fit=crop&grayscale=1", // ภาพอดีต (แนะนำภาพขาวดำ)
+                newImage: "https://pukmudmuangthai.com/wp-content/uploads/2021/02/%E0%B8%82%E0%B8%AD%E0%B8%99%E0%B9%81%E0%B8%81%E0%B9%88%E0%B8%99-%E0%B8%A7%E0%B8%B1%E0%B8%94%E0%B8%AB%E0%B8%99%E0%B8%AD%E0%B8%87%E0%B9%81%E0%B8%A7%E0%B8%87%E0%B8%9E%E0%B8%A3%E0%B8%B0%E0%B8%AD%E0%B8%B2%E0%B8%A3%E0%B8%B2%E0%B8%A1%E0%B8%AB%E0%B8%A5%E0%B8%A7%E0%B8%87-Medium.jpg" // ภาพปัจจุบัน
             },
 
             // 📌 4. สถิติผลการสอบ (แท่งกราฟ)
@@ -1048,8 +962,8 @@
                 youtube: "#" // ใส่ลิงก์ Youtube
             },
             map: {
-                linkUrl: "https://maps.app.goo.gl/C1YfMnZP2YkvTuoa7", // ลิงก์สำหรับกดเพื่อเปิด Google Maps
-                embedIframe: "https://maps.google.com/maps?q=โรงเรียนวัดหนองแวงวิทยา%20ขอนแก่น&t=&z=16&ie=UTF8&iwloc=&output=embed" // ลิงก์สำหรับโชว์แผนที่บนเว็บ
+                linkUrl: "https://www.google.com/maps/search/?api=1&query=CR5M%2BHG%2C%20Khon%20Kaen%2C%20Thailand", // พิกัดโรงเรียน
+                embedIframe: "https://maps.google.com/maps?q=16.4089375,102.8338125&t=&z=17&ie=UTF8&iwloc=&output=embed" // โหลดเมื่อผู้ใช้ยอมรับคุกกี้ภายนอก
             },
 
             // 📌 7. สื่อวิดีโอ และ 360 VR (เปิดแท็บใหม่เมื่อกดปุ่ม)
@@ -1133,8 +1047,24 @@
                 { title: "ปฏิทินวิชาการ ประจำภาคเรียนที่ 1/2569", size: "0.8 MB", type: "PDF" }
             ],
 
-            // 📌 20. สภาพแวดล้อม PM2.5 (ระบบจำลอง)
-            environment: { aqi: 24, status: "อากาศดีมาก", temp: 32 },
+            // 📌 20. Smart Environment — ข้อมูลจริงตามพิกัดโรงเรียน
+            environment: {
+                auto: true,
+                latitude: 16.4089375,
+                longitude: 102.8338125,
+                locationLabel: "โรงเรียนวัดหนองแวงวิทยา • CR5M+HG Khon Kaen",
+                refreshMinutes: 10,
+                // ค่า fallback ใช้เฉพาะตอน API ภายนอกไม่ตอบ
+                aqi: 24,
+                status: "กำลังอัปเดตข้อมูล",
+                temp: 32
+            },
+
+            // ฟีเจอร์ที่เปิด/ปิดได้จาก Manager
+            features: {
+                routinesEnabled: false,
+                dailyWisdomAuto: true
+            },
 
             // 📌 21. กิจวัตรประจำวันสามเณร
             routines: [
@@ -1165,6 +1095,62 @@
         let HOME_ALUMNI = [];
         let homeAlumniAnimationFrame = null;
         let homeAlumniPaused = false;
+
+        const DAILY_PALI_WORDS = [
+            {word:"เมตฺตา",reading:"เมต-ตา",meaning:"ความปรารถนาดี ความเป็นมิตร"},
+            {word:"กรุณา",reading:"กะ-รุ-นา",meaning:"ความสงสารและคิดช่วยให้พ้นทุกข์"},
+            {word:"มุทิตา",reading:"มุ-ทิ-ตา",meaning:"ความยินดีเมื่อผู้อื่นได้ดี"},
+            {word:"อุเปกฺขา",reading:"อุ-เปก-ขา",meaning:"ความวางใจเป็นกลางอย่างมีปัญญา"},
+            {word:"สติ",reading:"สะ-ติ",meaning:"ความระลึกรู้ ไม่เผลอ"},
+            {word:"สมาธิ",reading:"สะ-มา-ทิ",meaning:"ความตั้งมั่นแห่งจิต"},
+            {word:"ปญฺญา",reading:"ปัน-ยา",meaning:"ปัญญา ความรู้ทั่วถึงตามความเป็นจริง"},
+            {word:"วิริย",reading:"วิ-ริ-ยะ",meaning:"ความเพียร ความพยายาม"},
+            {word:"ขนฺติ",reading:"ขัน-ติ",meaning:"ความอดทน อดกลั้น"},
+            {word:"สจฺจ",reading:"สัด-จะ",meaning:"ความจริง ความซื่อตรง"},
+            {word:"ทาน",reading:"ทา-นะ",meaning:"การให้ การแบ่งปัน"},
+            {word:"สีล",reading:"สี-ละ",meaning:"ความประพฤติดีทางกายและวาจา"},
+            {word:"ภาวนา",reading:"พา-วะ-นา",meaning:"การอบรมและพัฒนาจิตใจ"},
+            {word:"กตญฺญุตา",reading:"กะ-ตัน-ยู-ตา",meaning:"ความรู้คุณผู้อื่น"},
+            {word:"อปฺปมาท",reading:"อับ-ปะ-มา-ทะ",meaning:"ความไม่ประมาท"},
+            {word:"หิริ",reading:"หิ-ริ",meaning:"ความละอายต่อการทำชั่ว"},
+            {word:"โอตฺตปฺป",reading:"โอด-ตับ-ปะ",meaning:"ความเกรงกลัวต่อผลของความชั่ว"},
+            {word:"สนฺตุฏฺฐิ",reading:"สัน-ตุด-ถิ",meaning:"ความสันโดษ ยินดีในสิ่งที่มีโดยชอบ"},
+            {word:"อธิฏฺฐาน",reading:"อะ-ทิด-ถา-นะ",meaning:"ความตั้งใจมั่น ความตั้งมั่น"},
+            {word:"สามคฺคี",reading:"สา-มัก-คี",meaning:"ความพร้อมเพรียง ความร่วมมือ"},
+            {word:"กุสล",reading:"กุ-สะ-ละ",meaning:"สิ่งที่ดีงาม ฉลาด และเกื้อกูล"}
+        ];
+
+        const DAILY_DHAMMA_QUOTES = [
+            {pali:"นตฺถิ ปญฺญาสมา อาภา",thai:"แสงสว่างเสมอด้วยปัญญา ไม่มี"},
+            {pali:"อตฺตา หิ อตฺตโน นาโถ",thai:"ตนแลเป็นที่พึ่งของตน"},
+            {pali:"อปฺปมาโท อมตํ ปทํ",thai:"ความไม่ประมาทเป็นทางแห่งความไม่ตาย"},
+            {pali:"ขนฺตี ปรมํ ตโป ตีติกฺขา",thai:"ขันติ คือความอดทน เป็นตบะอย่างยิ่ง"},
+            {pali:"น หิ เวเรน เวรานิ สมฺมนฺตีธ กุทาจนํ",thai:"เวรย่อมไม่ระงับด้วยเวรในกาลไหน ๆ"},
+            {pali:"จิตฺตํ ทนฺตํ สุขาวหํ",thai:"จิตที่ฝึกดีแล้ว นำสุขมาให้"},
+            {pali:"สุโข ปุญฺญสฺส อุจฺจโย",thai:"การสั่งสมบุญ นำสุขมาให้"},
+            {pali:"อโรคฺยา ปรมา ลาภา",thai:"ความไม่มีโรค เป็นลาภอันประเสริฐ"},
+            {pali:"สนฺตุฏฺฐี ปรมํ ธนํ",thai:"ความสันโดษ เป็นทรัพย์อย่างยิ่ง"},
+            {pali:"วิสฺสาสปรมา ญาติ",thai:"ความคุ้นเคยไว้วางใจกัน เป็นญาติอย่างยิ่ง"},
+            {pali:"นิพฺพานํ ปรมํ สุขํ",thai:"นิพพาน เป็นสุขอย่างยิ่ง"},
+            {pali:"ธมฺโม หเว รกฺขติ ธมฺมจารึ",thai:"ธรรมย่อมรักษาผู้ประพฤติธรรม"},
+            {pali:"สพฺพปาปสฺส อกรณํ",thai:"การไม่ทำบาปทั้งปวง เป็นหลักแห่งความดี"},
+            {pali:"กุสลสฺสูปสมฺปทา",thai:"การทำกุศลให้ถึงพร้อม"},
+            {pali:"สจิตฺตปริโยทปนํ",thai:"การทำจิตของตนให้ผ่องใส"},
+            {pali:"วิริเยน ทุกฺขมจฺเจติ",thai:"คนล่วงทุกข์ได้ด้วยความเพียร"},
+            {pali:"ปญฺญา โลกสฺมิ ปชฺโชโต",thai:"ปัญญาเป็นแสงสว่างในโลก"},
+            {pali:"สุขา สงฺฆสฺส สามคฺคี",thai:"ความพร้อมเพรียงของหมู่คณะ นำมาซึ่งความสุข"},
+            {pali:"ททมาโน ปิโย โหติ",thai:"ผู้ให้ ย่อมเป็นที่รัก"},
+            {pali:"สติ โลกสฺมิ ชาคโร",thai:"สติเป็นธรรมเครื่องตื่นอยู่ในโลก"},
+            {pali:"ยถาวาที ตถาการี",thai:"พูดอย่างไร ควรทำอย่างนั้น"}
+        ];
+
+        function bangkokDaySerial() {
+            const parts = new Intl.DateTimeFormat('en-CA', {
+                timeZone:'Asia/Bangkok', year:'numeric', month:'2-digit', day:'2-digit'
+            }).formatToParts(new Date()).reduce((o,p)=>{o[p.type]=p.value;return o},{});
+            return Math.floor(Date.UTC(Number(parts.year), Number(parts.month)-1, Number(parts.day)) / 86400000);
+        }
+
 
         window.addEventListener('pageshow', () => {
             // Recover from bfcache / interrupted modal states that can leave the page unscrollable.
@@ -1199,6 +1185,7 @@
             safeRun('dhamma quote', renderDhammaQuote);
             safeRun('pali word', renderPaliWord);
             safeRun('routines', renderRoutines);
+            safeRun('smart environment', initSmartEnvironment);
             safeRun('exam stats', renderExamStats);
             safeRun('countdown', initCountdown);
             safeRun('external links', bindExternalLinks);
@@ -1220,11 +1207,6 @@
         });
 
         // --- Supabase Data Layer (fallback to embedded SCHOOL_DATA if not configured) ---
-
-        function escapeHtml(value='') {
-            return String(value).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-        }
-
         function deepMerge(target, source) {
             if (!source || typeof source !== 'object') return target;
             Object.keys(source).forEach(key => {
@@ -1266,7 +1248,6 @@
                         img: row.image_url || '', education: row.education || '', phone: row.phone || '', email: row.email || '',
                         isAlumni: !!row.is_alumni, alumniBatch: row.alumni_batch || '',
                         isRoyalScholarship: !!row.is_royal_scholarship, royalScholarshipBatch: row.royal_scholarship_batch || '', royalScholarshipPhase: row.royal_scholarship_phase || '',
-                        nakthamLevel: row.naktham_level || '', paliLevel: row.pali_level || '',
                         published: row.published !== false,
                         sortOrder: Number(row.sort_order || 0), created_at: row.created_at
                     });
@@ -1301,6 +1282,10 @@
             try { renderNews(); } catch (_) {}
             try { renderAchievements(); } catch (_) {}
             try { renderHomeAlumni(); } catch (_) {}
+            try { renderPaliWord(); } catch (_) {}
+            try { renderDhammaQuote(); } catch (_) {}
+            try { renderRoutines(); } catch (_) {}
+            try { initSmartEnvironment(); } catch (_) {}
             Promise.resolve().then(() => initPromoSlider()).catch(err => console.warn('Late promo refresh failed.', err));
             try { lucide.createIcons(); } catch (_) {}
         }
@@ -1312,7 +1297,7 @@
                 db.from('site_settings').select('data').eq('id', 1).maybeSingle(),
                 db.from('achievements').select('id,title,year,image_url,description,created_at').eq('published', true).order('created_at', { ascending: false }).limit(3),
                 db.from('news').select('id,title,summary,image_url,category,category_color,date_text,month_year,url,sort_order,created_at').eq('published', true).order('sort_order', { ascending: true }).order('created_at', { ascending: false }),
-                db.from('personnel').select('id,staff_type,full_name,position,department,image_url,education,phone,email,is_alumni,alumni_batch,is_royal_scholarship,royal_scholarship_batch,royal_scholarship_phase,naktham_level,pali_level,published,sort_order,created_at').eq('published', true).order('staff_type', { ascending: true }).order('sort_order', { ascending: true }).order('created_at', { ascending: true }),
+                db.from('personnel').select('id,staff_type,full_name,position,department,image_url,education,phone,email,is_alumni,alumni_batch,is_royal_scholarship,royal_scholarship_batch,royal_scholarship_phase,published,sort_order,created_at').eq('published', true).order('staff_type', { ascending: true }).order('sort_order', { ascending: true }).order('created_at', { ascending: true }),
                 db.from('alumni').select('*').eq('published', true).order('featured', { ascending: false }).order('sort_order', { ascending: true }).order('created_at', { ascending: false }).limit(16)
             ]);
             let timedOut = false;
@@ -1398,100 +1383,20 @@
             }, 500);
         }
         
-        // --- 33 Years History / compact expandable story + gallery ---
-        function history33ImageUrl(rawUrl) {
-            return normalizePromoImageUrl(rawUrl);
-        }
-
-        function history33Images() {
-            return (SCHOOL_DATA.history?.galleryImages || [])
-                .filter(item => item && item.published !== false && String(item.url || '').trim())
-                .map(item => ({ ...item, url: history33ImageUrl(item.url) }));
-        }
-
-        function renderHistoryStoryText(raw) {
-            const box = document.getElementById('history33-story-content');
-            if (!box) return;
-            box.innerHTML = '';
-            const blocks = String(raw || '').split(/\n\s*\n/).map(x => x.trim()).filter(Boolean);
-            blocks.forEach(block => {
-                const lines = block.split('\n').map(x => x.trim()).filter(Boolean);
-                const isNumbered = lines.length > 1 && lines.filter(x => /^[๑๒๓๔๕๖๗๘๙๐]+\./.test(x)).length >= Math.min(3, lines.length);
-                if (isNumbered) {
-                    const wrap = document.createElement('div');
-                    wrap.className = 'my-7 rounded-3xl border border-orange-100 bg-white p-5 sm:p-6';
-                    const title = document.createElement('h4');
-                    title.className = 'mb-4 flex items-center gap-2 text-base font-black text-slate-900';
-                    title.innerHTML = '<span class="inline-flex h-8 w-8 items-center justify-center rounded-xl bg-orange-100 text-orange-600"><i data-lucide="users-round" class="h-4 w-4"></i></span> คณาจารย์ยุคบุกเบิก';
-                    wrap.appendChild(title);
-                    const grid = document.createElement('div');
-                    grid.className = 'grid gap-x-6 gap-y-2 md:grid-cols-2';
-                    lines.forEach(line => { const p=document.createElement('p'); p.className='text-sm leading-7 text-slate-600'; p.textContent=line; grid.appendChild(p); });
-                    wrap.appendChild(grid); box.appendChild(wrap);
-                } else {
-                    lines.forEach(line => { const p=document.createElement('p'); p.className='mb-5 text-[15px] leading-8 text-slate-600 sm:text-base'; p.textContent=line; box.appendChild(p); });
-                }
-            });
-        }
-
-        function history33PreviewCard(item, index, cls='') {
-            const caption = item.caption || `ภาพความทรงจำ ${index + 1}`;
-            const year = item.year ? `<span class="absolute left-3 top-3 rounded-full bg-black/55 px-2.5 py-1 text-[10px] font-bold text-white backdrop-blur">${escapeHtml(item.year)}</span>` : '';
-            return `<button type="button" onclick="openHistory33Gallery(${index})" class="group relative overflow-hidden rounded-3xl bg-orange-50 text-left ${cls}"><img src="${escapeHtml(item.url)}" alt="${escapeHtml(caption)}" class="h-full w-full object-cover transition duration-500 group-hover:scale-[1.04]" loading="lazy" onerror="this.closest('button').classList.add('history33-image-error');this.remove()">${year}<div class="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent p-4 pt-12"><p class="line-clamp-2 text-xs font-bold text-white">${escapeHtml(caption)}</p></div></button>`;
-        }
-
+        // --- History Before/After Slider Logic ---
         function renderHistory() {
-            const history = SCHOOL_DATA.history || {};
-            const title = document.getElementById('history33-title');
-            const lead = document.getElementById('history33-lead');
-            if (title) title.textContent = history.anniversaryTitle || '๓๓ ปี โรงเรียนวัดหนองแวงวิทยา';
-            if (lead) lead.textContent = history.anniversaryLead || history.paragraph1 || '';
-            renderHistoryStoryText(history.anniversaryStory || history.paragraph2 || '');
-
-            const images = history33Images();
-            const preview = document.getElementById('history33-preview');
-            const galleryBtn = document.getElementById('history33-gallery-btn');
-            const count = document.getElementById('history33-gallery-count');
-            if (count) count.textContent = images.length;
-            if (galleryBtn) galleryBtn.classList.toggle('hidden', images.length === 0);
-            if (!preview) return;
-            if (!images.length) {
-                preview.innerHTML = `<div class="flex min-h-[280px] h-full items-center justify-center rounded-[2rem] border border-dashed border-orange-200 bg-gradient-to-br from-orange-50 to-white p-8 text-center"><div><div class="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-white text-orange-500 shadow-sm"><i data-lucide="images" class="h-6 w-6"></i></div><p class="font-bold text-slate-700">พื้นที่ภาพความทรงจำ ๓๓ ปี</p><p class="mt-2 text-xs leading-6 text-slate-400">เพิ่มลิงก์ภาพผ่าน Website Manager ได้ประมาณ 10 ภาพ<br>หน้าแรกจะแสดงเพียงบางภาพเพื่อไม่ให้หน้าเว็บยาว</p></div></div>`;
-            } else if (images.length === 1) {
-                preview.innerHTML = history33PreviewCard(images[0],0,'h-[300px] sm:h-[360px]');
-            } else {
-                preview.innerHTML = `<div class="grid h-[320px] grid-cols-5 grid-rows-2 gap-3 sm:h-[380px]">${history33PreviewCard(images[0],0,'col-span-3 row-span-2')}${history33PreviewCard(images[1],1,'col-span-2')}${images[2]?history33PreviewCard(images[2],2,'col-span-2'):`<button type="button" onclick="openHistory33Gallery()" class="col-span-2 flex items-center justify-center rounded-3xl border border-dashed border-orange-200 bg-orange-50 text-xs font-bold text-orange-600">ดูภาพทั้งหมด</button>`}</div>`;
-            }
-            lucide.createIcons();
+            document.getElementById('history-p1').textContent = SCHOOL_DATA.history.paragraph1;
+            document.getElementById('history-p2').textContent = SCHOOL_DATA.history.paragraph2;
+            document.getElementById('history-vision').textContent = SCHOOL_DATA.history.vision;
+            document.getElementById('history-img-old').src = SCHOOL_DATA.history.oldImage;
+            document.getElementById('history-img-new').src = SCHOOL_DATA.history.newImage;
         }
 
-        function toggleHistory33(force) {
-            const story = document.getElementById('history33-story');
-            const btn = document.getElementById('history33-toggle');
-            if (!story || !btn) return;
-            const open = typeof force === 'boolean' ? force : story.classList.contains('hidden');
-            story.classList.toggle('hidden', !open);
-            btn.setAttribute('aria-expanded', String(open));
-            const label = btn.querySelector('span');
-            if (label) label.textContent = open ? 'ย่อเรื่องราว' : 'อ่านเรื่องราวทั้งหมด';
-            btn.querySelector('.history33-chevron')?.classList.toggle('rotate-180', open);
-            if (!open) document.getElementById('history-section')?.scrollIntoView({behavior:'smooth', block:'start'});
-            lucide.createIcons();
-        }
-
-        function openHistory33Gallery(startIndex=0) {
-            const images = history33Images();
-            if (!images.length) return;
-            const modal = document.getElementById('history33-gallery-modal');
-            const grid = document.getElementById('history33-gallery-grid');
-            grid.innerHTML = images.map((item,i)=>`<figure class="group overflow-hidden rounded-3xl border border-slate-100 bg-slate-50 ${i===Number(startIndex)?'ring-2 ring-orange-400 ring-offset-2':''}" id="history33-photo-${i}"><div class="aspect-[4/3] overflow-hidden bg-orange-50"><img src="${escapeHtml(item.url)}" alt="${escapeHtml(item.caption||`ภาพความทรงจำ ${i+1}`)}" class="h-full w-full object-cover transition duration-500 group-hover:scale-[1.03]" loading="lazy"></div><figcaption class="p-4"><div class="flex items-start justify-between gap-3"><p class="text-sm font-bold leading-6 text-slate-800">${escapeHtml(item.caption||`ภาพความทรงจำ ${i+1}`)}</p>${item.year?`<span class="shrink-0 rounded-full bg-orange-50 px-2.5 py-1 text-[10px] font-bold text-orange-600">${escapeHtml(item.year)}</span>`:''}</div></figcaption></figure>`).join('');
-            modal.classList.remove('hidden'); modal.classList.add('flex'); document.body.style.overflow='hidden'; lucide.createIcons();
-            requestAnimationFrame(()=>document.getElementById(`history33-photo-${Number(startIndex)||0}`)?.scrollIntoView({block:'nearest'}));
-        }
-
-        function closeHistory33Gallery() {
-            const modal = document.getElementById('history33-gallery-modal');
-            modal?.classList.add('hidden'); modal?.classList.remove('flex'); unlockPageScroll();
+        function updateSlider(val) {
+            const wrapper = document.getElementById('history-img-after-wrapper');
+            const btn = document.getElementById('ba-slider-btn');
+            wrapper.style.width = val + "%";
+            btn.style.left = val + "%";
         }
 
         function initAnnouncement() {
@@ -1526,23 +1431,43 @@
             });
         }
 
+        function applyThirdPartyEmbeds() {
+            const allowed = window.WNWPrivacy?.canUseThirdParty?.() === true;
+            const mapIframe = document.getElementById('map-iframe');
+            const fbIframe = document.getElementById('fb-iframe');
+            const blockedHtml = (name) => `<!doctype html><html lang="th"><body style="margin:0;height:100vh;display:flex;align-items:center;justify-content:center;background:#f8fafc;font-family:sans-serif;color:#64748b;text-align:center;padding:24px;box-sizing:border-box"><div><b style="color:#334155">${name} ยังไม่ถูกโหลด</b><p style="font-size:12px;line-height:1.6">เลือก “ยอมรับทั้งหมด” ในการตั้งค่าคุกกี้เพื่อโหลดเนื้อหาจากผู้ให้บริการภายนอก</p></div></body></html>`;
+            if (mapIframe) {
+                if (allowed) { mapIframe.removeAttribute('srcdoc'); mapIframe.src = SCHOOL_DATA.map.embedIframe; }
+                else { mapIframe.removeAttribute('src'); mapIframe.srcdoc = blockedHtml('Google Maps'); }
+            }
+            if (fbIframe) {
+                if (allowed) {
+                    fbIframe.removeAttribute('srcdoc');
+                    fbIframe.src = `https://www.facebook.com/plugins/page.php?href=${encodeURIComponent(SCHOOL_DATA.social.facebook)}&tabs=timeline&width=800&height=300&small_header=false&adapt_container_width=true&hide_cover=false&show_facepile=true&appId`;
+                } else {
+                    fbIframe.removeAttribute('src');
+                    fbIframe.srcdoc = blockedHtml('Facebook');
+                }
+            }
+        }
+
         function bindExternalLinks() {
             document.querySelectorAll('.fb-link').forEach(el => el.href = SCHOOL_DATA.social.facebook);
-            document.getElementById('footer-line-link').href = SCHOOL_DATA.social.line;
-            document.getElementById('footer-yt-link').href = SCHOOL_DATA.social.youtube;
-            document.getElementById('map-iframe').src = SCHOOL_DATA.map.embedIframe;
+            const lineLink = document.getElementById('footer-line-link'), ytLink = document.getElementById('footer-yt-link');
+            if (lineLink) lineLink.href = SCHOOL_DATA.social.line;
+            if (ytLink) ytLink.href = SCHOOL_DATA.social.youtube;
             document.querySelectorAll('.map-link').forEach(el => el.href = SCHOOL_DATA.map.linkUrl);
-            const fbIframe = document.getElementById('fb-iframe');
-            if(fbIframe) { fbIframe.src = `https://www.facebook.com/plugins/page.php?href=${encodeURIComponent(SCHOOL_DATA.social.facebook)}&tabs=timeline&width=800&height=300&small_header=false&adapt_container_width=true&hide_cover=false&show_facepile=true&appId`; }
             const videoBtn = document.getElementById('video-promo-btn');
-            if(videoBtn) videoBtn.onclick = () => window.open(SCHOOL_DATA.media.videoPromo, '_blank');
-            document.getElementById('donation-bank').textContent = SCHOOL_DATA.donation.bankName;
-            document.getElementById('donation-acc').textContent = SCHOOL_DATA.donation.accNumber;
-            document.getElementById('donation-name').textContent = SCHOOL_DATA.donation.accName;
-            document.getElementById('donation-qr').src = SCHOOL_DATA.donation.qrImage;
-            document.getElementById('tripitaka-search').addEventListener('keypress', function(e) {
-                if (e.key === 'Enter') searchTripitaka();
-            });
+            if(videoBtn) videoBtn.onclick = () => window.open(SCHOOL_DATA.media.videoPromo, '_blank', 'noopener');
+            const bank = document.getElementById('donation-bank'), acc = document.getElementById('donation-acc'), name = document.getElementById('donation-name'), qr = document.getElementById('donation-qr');
+            if (bank) bank.textContent = SCHOOL_DATA.donation.bankName;
+            if (acc) acc.textContent = SCHOOL_DATA.donation.accNumber;
+            if (name) name.textContent = SCHOOL_DATA.donation.accName;
+            if (qr) qr.src = SCHOOL_DATA.donation.qrImage;
+            const tripitaka = document.getElementById('tripitaka-search');
+            tripitaka?.addEventListener('keypress', function(e) { if (e.key === 'Enter') searchTripitaka(); });
+            applyThirdPartyEmbeds();
+            window.addEventListener('wnw:consent-change', applyThirdPartyEmbeds);
         }
 
         function initCountdown() {
@@ -1616,22 +1541,39 @@
                     }
                 }
             });
-            document.getElementById('contact-phone').textContent = SCHOOL_DATA.info.phone;
-            document.getElementById('contact-email').textContent = SCHOOL_DATA.info.email;
-            document.getElementById('footer-address').textContent = SCHOOL_DATA.info.address;
+            const footerAddress = document.getElementById('footer-address');
+            const footerPhone = document.getElementById('footer-phone');
+            const footerHotline = document.getElementById('footer-hotline');
+            const footerEmail = document.getElementById('footer-email');
+            if (footerAddress) footerAddress.textContent = SCHOOL_DATA.info.address || '';
+            if (footerPhone) { footerPhone.textContent = SCHOOL_DATA.info.phone || '-'; footerPhone.href = 'tel:' + String(SCHOOL_DATA.info.phone || '').replace(/\D/g,''); }
+            if (footerHotline) { footerHotline.textContent = SCHOOL_DATA.info.directorHotline || '-'; footerHotline.href = 'tel:' + String(SCHOOL_DATA.info.directorHotline || '').replace(/\D/g,''); }
+            if (footerEmail) { footerEmail.textContent = SCHOOL_DATA.info.email || '-'; footerEmail.href = SCHOOL_DATA.info.email ? 'mailto:' + SCHOOL_DATA.info.email : '#'; }
             document.getElementById('holy-day-display').textContent = getNextHolyDay();
             document.getElementById('welcome-bg-image').src = SCHOOL_DATA.welcomeImage;
         }
 
         function renderPaliWord() {
-            document.getElementById('pali-word').textContent = SCHOOL_DATA.paliWord.word;
-            document.getElementById('pali-reading').textContent = `คำอ่าน: ${SCHOOL_DATA.paliWord.reading}`;
-            document.getElementById('pali-meaning').textContent = `แปลว่า: ${SCHOOL_DATA.paliWord.meaning}`;
+            const auto = SCHOOL_DATA.features?.dailyWisdomAuto !== false;
+            const item = auto
+                ? DAILY_PALI_WORDS[bangkokDaySerial() % DAILY_PALI_WORDS.length]
+                : (SCHOOL_DATA.paliWord || {});
+            document.getElementById('pali-word').textContent = item.word || '-';
+            document.getElementById('pali-reading').textContent = `คำอ่าน: ${item.reading || '-'}`;
+            document.getElementById('pali-meaning').textContent = `แปลว่า: ${item.meaning || '-'}`;
+            const source = document.getElementById('pali-source');
+            if (source) source.textContent = auto ? 'อัปเดตอัตโนมัติตามวันที่ประเทศไทย' : 'โหมดกำหนดเองจาก Manager';
         }
 
         function renderRoutines() {
+            const section = document.getElementById('routine-section');
             const container = document.getElementById('routine-container');
-            SCHOOL_DATA.routines.filter(routine => routine.published !== false).forEach((routine) => {
+            const enabled = SCHOOL_DATA.features?.routinesEnabled === true;
+            if (section) section.classList.toggle('hidden', !enabled);
+            if (!container) return;
+            container.innerHTML = '';
+            if (!enabled) return;
+            (SCHOOL_DATA.routines || []).filter(routine => routine.published !== false).forEach((routine) => {
                 container.innerHTML += `
                     <div class="mb-8 md:mb-0 relative pl-6 md:pl-0 md:flex-1 md:text-center group">
                         <div class="absolute -left-[21px] md:left-1/2 md:-top-[42px] md:-translate-x-1/2 w-10 h-10 bg-white/80 backdrop-blur-sm border border-orange-200 rounded-full flex items-center justify-center text-orange-500 shadow-md group-hover:bg-gradient-to-br group-hover:from-orange-400 group-hover:to-orange-500 group-hover:text-white group-hover:border-transparent transition-all z-10 group-hover:scale-110">
@@ -1644,8 +1586,14 @@
         }
 
         function renderDhammaQuote() {
-            document.getElementById('dhamma-pali').textContent = SCHOOL_DATA.dhammaQuote.pali;
-            document.getElementById('dhamma-thai').textContent = SCHOOL_DATA.dhammaQuote.thai;
+            const auto = SCHOOL_DATA.features?.dailyWisdomAuto !== false;
+            const item = auto
+                ? DAILY_DHAMMA_QUOTES[bangkokDaySerial() % DAILY_DHAMMA_QUOTES.length]
+                : (SCHOOL_DATA.dhammaQuote || {});
+            document.getElementById('dhamma-pali').textContent = item.pali || '-';
+            document.getElementById('dhamma-thai').textContent = item.thai || '-';
+            const source = document.getElementById('dhamma-source');
+            if (source) source.textContent = auto ? 'อัปเดตอัตโนมัติตามวันที่ประเทศไทย' : 'โหมดกำหนดเองจาก Manager';
         }
 
         let currentPromoIdx = 0;
@@ -1828,10 +1776,10 @@
                 container.innerHTML = '';
                 items.slice(0, 3).forEach(item => {
                     container.innerHTML += `
-                        <a href="${item.url || `./news/?id=${encodeURIComponent(item.id || '')}`}" ${item.url ? 'target="_blank" rel="noopener"' : ''} class="group flex items-start gap-4 p-3 -mx-3 rounded-2xl hover:bg-slate-50 transition-colors cursor-pointer border border-transparent hover:border-slate-100">
+                        <${item.url ? 'a' : 'div'} ${item.url ? `href="${item.url}" target="_blank" rel="noopener"` : ''} class="group flex items-start gap-4 p-3 -mx-3 rounded-2xl hover:bg-slate-50 transition-colors cursor-pointer border border-transparent hover:border-slate-100">
                             <div class="bg-orange-100 text-orange-600 rounded-xl p-3 text-center min-w-[64px] shadow-sm"><span class="block text-xl font-bold leading-none">${item.date || '-'}</span><span class="block text-[10px] font-semibold mt-1">${item.monthYear || ''}</span></div>
                             <div class="flex-1 pt-1"><span class="text-[10px] font-bold px-2 py-0.5 rounded-full mb-1.5 inline-block ${item.typeColor || 'bg-orange-100 text-orange-600'}">${item.type || 'ข่าวสาร'}</span><h4 class="text-sm font-bold text-slate-800 group-hover:text-orange-600 transition-colors line-clamp-2">${item.title || ''}</h4></div>
-                        </a>`;
+                        </${item.url ? 'a' : 'div'}>`;
                 });
             }
 
@@ -1842,8 +1790,8 @@
             if (!items.length) { if (empty) empty.classList.remove('hidden'); return; }
             if (empty) empty.classList.add('hidden');
             items.slice(0, 6).forEach(item => {
-                const tag = 'a';
-                const linkAttrs = item.url ? `href="${item.url}" target="_blank" rel="noopener"` : `href="./news/?id=${encodeURIComponent(item.id || '')}"`;
+                const tag = item.url ? 'a' : 'article';
+                const linkAttrs = item.url ? `href="${item.url}" target="_blank" rel="noopener"` : '';
                 const image = item.image ? `<img src="${item.image}" alt="${item.title || 'ข่าวสาร'}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" loading="lazy">` : `<div class="w-full h-full bg-gradient-to-br from-orange-100 via-amber-50 to-white flex items-center justify-center text-orange-300"><i data-lucide="newspaper" class="w-14 h-14"></i></div>`;
                 section.innerHTML += `
                     <${tag} ${linkAttrs} class="group glass-panel rounded-[2rem] overflow-hidden hover:-translate-y-1 hover:shadow-xl transition-all duration-300 border border-white/70">
@@ -1855,7 +1803,7 @@
                             </div>
                             <h3 class="font-bold text-slate-800 text-base sm:text-lg leading-relaxed line-clamp-2 group-hover:text-orange-600 transition-colors">${item.title || ''}</h3>
                             ${item.summary ? `<p class="text-sm text-slate-500 mt-3 leading-relaxed line-clamp-3">${item.summary}</p>` : ''}
-                            <div class="mt-5 flex items-center gap-1 text-xs font-bold text-orange-600">อ่านรายละเอียด <i data-lucide="arrow-right" class="w-3.5 h-3.5"></i></div>
+                            <div class="mt-5 flex items-center gap-1 text-xs font-bold text-orange-600">${item.url ? 'อ่านเพิ่มเติม <i data-lucide="arrow-right" class="w-3.5 h-3.5"></i>' : 'ข่าวประชาสัมพันธ์'}</div>
                         </div>
                     </${tag}>`;
             });
@@ -1930,11 +1878,6 @@
                 const p = document.createElement('p'); p.textContent = '–'; education.appendChild(p);
             }
 
-            const nakthamEl = document.getElementById('staff-modal-naktham');
-            const paliEl = document.getElementById('staff-modal-pali');
-            if (nakthamEl) nakthamEl.textContent = person.nakthamLevel || '–';
-            if (paliEl) paliEl.textContent = person.paliLevel || '–';
-
             document.getElementById('staff-modal-alumni-status').textContent = person.isAlumni ? 'เคยเป็นศิษย์เก่าโรงเรียน' : 'ไม่ได้ระบุว่าเป็นศิษย์เก่า';
             document.getElementById('staff-modal-alumni-batch').textContent = person.isAlumni ? (person.alumniBatch || '–') : '–';
             const scholarshipEl = document.getElementById('staff-modal-royal-scholarship');
@@ -1962,7 +1905,7 @@
                 try {
                     const { data, error } = await window.SCHOOL_SUPABASE
                         .from('personnel')
-                        .select('id,staff_type,full_name,position,department,image_url,education,phone,email,is_alumni,alumni_batch,is_royal_scholarship,royal_scholarship_batch,royal_scholarship_phase,naktham_level,pali_level,published,sort_order,created_at')
+                        .select('id,staff_type,full_name,position,department,image_url,education,phone,email,is_alumni,alumni_batch,is_royal_scholarship,royal_scholarship_batch,royal_scholarship_phase,published,sort_order,created_at')
                         .eq('id', person.id)
                         .maybeSingle();
                     if (error) throw error;
@@ -1980,9 +1923,7 @@
                             alumniBatch: data.alumni_batch || '',
                             isRoyalScholarship: !!data.is_royal_scholarship,
                             royalScholarshipBatch: data.royal_scholarship_batch || '',
-                            royalScholarshipPhase: data.royal_scholarship_phase || '',
-                            nakthamLevel: data.naktham_level || '',
-                            paliLevel: data.pali_level || ''
+                            royalScholarshipPhase: data.royal_scholarship_phase || ''
                         });
                         // อัปเดต object ในหน้าเว็บด้วย เพื่อ click ครั้งถัดไปเห็นข้อมูลล่าสุดทันที
                         Object.assign(rawPerson, fresh);
@@ -2022,9 +1963,7 @@
                 phone: raw.phone ?? raw.tel ?? raw.telephone ?? '',
                 email: raw.email ?? raw.mail ?? '',
                 isAlumni,
-                alumniBatch: raw.alumniBatch ?? raw.alumni_batch ?? raw.batch ?? '',
-                nakthamLevel: raw.nakthamLevel ?? raw.naktham_level ?? '',
-                paliLevel: raw.paliLevel ?? raw.pali_level ?? ''
+                alumniBatch: raw.alumniBatch ?? raw.alumni_batch ?? raw.batch ?? ''
             };
         }
 
@@ -2198,6 +2137,105 @@
             try { lucide.createIcons(); } catch (_) {}
         }
 
+
+        let smartEnvironmentTimer = null;
+
+        function environmentAqiMeta(aqi) {
+            const n = Number(aqi);
+            if (!Number.isFinite(n)) return {label:'ไม่ทราบสถานะ', box:'from-slate-400 to-slate-500', text:'text-slate-600'};
+            if (n <= 50) return {label:'อากาศดี', box:'from-emerald-400 to-green-500', text:'text-emerald-600'};
+            if (n <= 100) return {label:'ปานกลาง', box:'from-yellow-400 to-amber-500', text:'text-amber-600'};
+            if (n <= 150) return {label:'มีผลต่อกลุ่มเสี่ยง', box:'from-orange-400 to-orange-600', text:'text-orange-600'};
+            if (n <= 200) return {label:'ไม่ดีต่อสุขภาพ', box:'from-rose-500 to-red-600', text:'text-rose-600'};
+            if (n <= 300) return {label:'ไม่ดีต่อสุขภาพมาก', box:'from-purple-500 to-violet-700', text:'text-purple-700'};
+            return {label:'อันตราย', box:'from-fuchsia-700 to-rose-950', text:'text-rose-800'};
+        }
+
+        function renderEnvironmentSnapshot(data, cached=false) {
+            const aqi = Number(data?.aqi);
+            const pm25 = Number(data?.pm25);
+            const temp = Number(data?.temp);
+            const humidity = Number(data?.humidity);
+            const meta = environmentAqiMeta(aqi);
+            const aqiValue = document.getElementById('aqi-value');
+            const aqiStatus = document.getElementById('aqi-status');
+            const box = document.getElementById('aqi-box');
+            if (aqiValue) aqiValue.textContent = Number.isFinite(aqi) ? Math.round(aqi) : '--';
+            if (aqiStatus) { aqiStatus.textContent = data?.status || meta.label; aqiStatus.className = `text-sm font-bold ${meta.text}`; }
+            if (box) box.className = `w-[72px] h-[72px] rounded-2xl bg-gradient-to-br ${meta.box} text-white flex flex-col items-center justify-center shadow-lg transition-all`;
+            const pmEl = document.getElementById('pm25-value'), tEl = document.getElementById('env-temp'), hEl = document.getElementById('env-humidity');
+            if (pmEl) pmEl.textContent = Number.isFinite(pm25) ? `${pm25.toFixed(1)} µg/m³` : '--';
+            if (tEl) tEl.textContent = Number.isFinite(temp) ? `${temp.toFixed(1)}°C` : '--';
+            if (hEl) hEl.textContent = Number.isFinite(humidity) ? `${Math.round(humidity)}%` : '--';
+            const updated = document.getElementById('env-updated');
+            if (updated) {
+                const ts = data?.updatedAt ? new Date(data.updatedAt) : new Date();
+                updated.textContent = `${cached ? 'ข้อมูลล่าสุดที่บันทึกไว้ • ' : 'อัปเดต • '}${ts.toLocaleTimeString('th-TH',{hour:'2-digit',minute:'2-digit'})} น.`;
+            }
+        }
+
+        async function fetchJsonWithTimeout(url, timeoutMs=8000) {
+            const controller = new AbortController();
+            const timer = setTimeout(() => controller.abort(), timeoutMs);
+            try {
+                const response = await fetch(url, {signal:controller.signal, cache:'no-store'});
+                if (!response.ok) throw new Error(`HTTP ${response.status}`);
+                return await response.json();
+            } finally { clearTimeout(timer); }
+        }
+
+        async function initSmartEnvironment() {
+            const cfg = SCHOOL_DATA.environment || {};
+            const label = document.getElementById('env-location-label');
+            if (label) label.textContent = cfg.locationLabel || 'โรงเรียนวัดหนองแวงวิทยา';
+            const lat = Number(cfg.latitude ?? 16.4089375);
+            const lon = Number(cfg.longitude ?? 102.8338125);
+            const refreshMinutes = Math.max(5, Number(cfg.refreshMinutes || 10));
+
+            if (cfg.auto === false) {
+                renderEnvironmentSnapshot({
+                    aqi: cfg.aqi,
+                    pm25: null,
+                    temp: cfg.temp,
+                    humidity: null,
+                    status: cfg.status || 'โหมดกำหนดเองจาก Manager',
+                    updatedAt: new Date().toISOString()
+                }, true);
+                clearTimeout(smartEnvironmentTimer);
+                return;
+            }
+
+            try {
+                const weatherUrl = `https://api.open-meteo.com/v1/forecast?latitude=${encodeURIComponent(lat)}&longitude=${encodeURIComponent(lon)}&current=temperature_2m,relative_humidity_2m&timezone=Asia%2FBangkok`;
+                const airUrl = `https://air-quality-api.open-meteo.com/v1/air-quality?latitude=${encodeURIComponent(lat)}&longitude=${encodeURIComponent(lon)}&current=pm2_5,us_aqi&timezone=Asia%2FBangkok`;
+                const [weather, air] = await Promise.all([
+                    fetchJsonWithTimeout(weatherUrl),
+                    fetchJsonWithTimeout(airUrl)
+                ]);
+                const snapshot = {
+                    aqi: air?.current?.us_aqi,
+                    pm25: air?.current?.pm2_5,
+                    temp: weather?.current?.temperature_2m,
+                    humidity: weather?.current?.relative_humidity_2m,
+                    updatedAt: new Date().toISOString()
+                };
+                renderEnvironmentSnapshot(snapshot, false);
+                try { localStorage.setItem('wnw-smart-environment-v1', JSON.stringify(snapshot)); } catch (_) {}
+            } catch (err) {
+                console.warn('Smart Environment API failed:', err);
+                let cached = null;
+                try { cached = JSON.parse(localStorage.getItem('wnw-smart-environment-v1') || 'null'); } catch (_) {}
+                if (cached) renderEnvironmentSnapshot(cached, true);
+                else renderEnvironmentSnapshot({
+                    aqi: cfg.aqi, pm25: null, temp: cfg.temp, humidity: null,
+                    status: cfg.status || 'ไม่สามารถโหลดข้อมูลสดได้', updatedAt:new Date().toISOString()
+                }, true);
+            }
+
+            clearTimeout(smartEnvironmentTimer);
+            smartEnvironmentTimer = setTimeout(initSmartEnvironment, refreshMinutes * 60 * 1000);
+        }
+
         function renderDocuments() {
             const container = document.getElementById('documents-container');
             if (!container) return;
@@ -2205,11 +2243,6 @@
             (SCHOOL_DATA.documents || []).filter(doc => doc.published !== false).forEach(doc => {
                 container.innerHTML += `<${doc.url ? 'a' : 'div'} ${doc.url ? `href="${doc.url}" target="_blank" rel="noopener"` : ''} class="flex items-center justify-between p-3 border border-white/60 bg-white/40 backdrop-blur-sm rounded-xl hover:bg-white/80 hover:shadow-md transition-all cursor-pointer group"><div class="flex items-center gap-3"><div class="w-10 h-10 bg-red-100/80 text-red-500 rounded-lg flex items-center justify-center group-hover:bg-red-500 group-hover:text-white transition-colors border border-white/50"><i data-lucide="file-text" class="w-5 h-5"></i></div><div><h4 class="text-sm font-bold text-slate-800">${doc.title}</h4><p class="text-xs text-slate-500">${doc.type || 'FILE'}${doc.size ? ` • ${doc.size}` : ''}</p></div></div><span class="w-8 h-8 rounded-full bg-white/80 text-slate-600 flex items-center justify-center border border-white/50 group-hover:bg-orange-500 group-hover:text-white group-hover:border-orange-500 transition-colors shadow-sm"><i data-lucide="download" class="w-4 h-4"></i></span></${doc.url ? 'a' : 'div'}>`;
             });
-            const env = SCHOOL_DATA.environment || {};
-            const aqiValue = document.getElementById('aqi-value'), aqiStatus = document.getElementById('aqi-status'), envTemp = document.getElementById('env-temp');
-            if (aqiValue) aqiValue.textContent = env.aqi ?? '-';
-            if (aqiStatus) aqiStatus.textContent = env.status || '-';
-            if (envTemp) envTemp.textContent = env.temp != null ? env.temp + "°C" : '-';
         }
 
         function renderCurriculums() {
@@ -2229,6 +2262,6 @@
         updateDateTime(); setInterval(updateDateTime, 60000);
         document.getElementById('current-year').textContent = new Date().getFullYear();
     </script>
-    <script src="./assets/home-departments.js?v=20261008"></script>
+  <script src="./assets/nikorn-home-gallery.js?v=20261005"></script>
 </body>
 </html>

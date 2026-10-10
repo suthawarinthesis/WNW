@@ -1,31 +1,36 @@
 -- ============================================================
--- Donation + Anumodana Certificate System
--- Wat Nongwang Wittaya School
--- Run once in Supabase > SQL Editor. Safe to run again.
+-- WNW DONATION SYSTEM - CLEAN INSTALL
+-- For the current Supabase schema supplied by the user
+-- Run this WHOLE FILE once in Supabase > SQL Editor > New query
+--
+-- This file creates ONLY Donation objects.
+-- It does not alter Alumni, Personnel, Student Portal, Admission,
+-- News, Achievements, University Admission, or site_settings.
 -- ============================================================
 
-create extension if not exists pgcrypto;
+-- ------------------------------------------------------------
+-- 0) Manager helper
+-- Same rule used by the current website:
+-- every authenticated, non-anonymous Auth user is a Website Manager.
+-- ------------------------------------------------------------
+BEGIN;
 
--- Same convention as the rest of this website:
--- every authenticated non-anonymous Supabase Auth user is a Website Manager.
 create or replace function public.is_site_admin()
 returns boolean
 language sql
 stable
 security invoker
 set search_path = public
-as $$
+as $wnw_admin$
   select auth.uid() is not null
-     and coalesce((auth.jwt()->>'is_anonymous')::boolean, false) = false;
-$$;
+     and coalesce((auth.jwt()->>'is_anonymous')::boolean, false) = false
+$wnw_admin$;
 
 revoke all on function public.is_site_admin() from public;
 grant execute on function public.is_site_admin() to authenticated;
 
 -- ------------------------------------------------------------
--- Settings shown on the public donation subweb.
--- certificate_layout uses percentage coordinates so a template can
--- be changed later without changing code.
+-- 1) Donation settings
 -- ------------------------------------------------------------
 create table if not exists public.donation_settings (
   id smallint primary key default 1 check (id = 1),
@@ -39,41 +44,72 @@ create table if not exists public.donation_settings (
   qr_image_url text not null default '',
   donation_note text not null default '',
   is_open boolean not null default true,
+
   certificate_prefix text not null default 'WNW-DN',
+  certificate_provider text not null default 'google_slides',
+  google_apps_script_url text not null default '',
+  google_slides_template_id text not null default '',
+  google_drive_folder_id text not null default '',
+
+  -- Kept for compatibility with the current frontend fallback renderer.
   certificate_template_url text not null default '',
   certificate_template_type text not null default 'image'
     check (certificate_template_type in ('image','pdf')),
   certificate_layout jsonb not null default
-    '{
-      "name":{"x":50,"y":43,"fontSize":3.0,"align":"center","maxWidth":82},
-      "amount":{"x":50,"y":52,"fontSize":2.7,"align":"center","maxWidth":75},
-      "certificate_no":{"x":82,"y":13,"fontSize":1.55,"align":"center","maxWidth":30}
-    }'::jsonb,
+    '{"name":{"x":50,"y":43,"fontSize":3.0,"align":"center","maxWidth":82},"amount":{"x":50,"y":52,"fontSize":2.7,"align":"center","maxWidth":75},"certificate_no":{"x":82,"y":13,"fontSize":1.55,"align":"center","maxWidth":30}}'::jsonb,
+
   updated_at timestamptz not null default now(),
   updated_by uuid
 );
 
-insert into public.donation_settings (id)
-values (1)
-on conflict (id) do nothing;
+-- Add the Google fields too, in case an earlier partial install created the table.
+alter table public.donation_settings
+  add column if not exists certificate_provider text not null default 'google_slides',
+  add column if not exists google_apps_script_url text not null default '',
+  add column if not exists google_slides_template_id text not null default '',
+  add column if not exists google_drive_folder_id text not null default '';
+
+insert into public.donation_settings (
+  id,
+  certificate_provider,
+  google_apps_script_url,
+  google_slides_template_id,
+  google_drive_folder_id
+)
+values (
+  1,
+  'google_slides',
+  'https://script.google.com/macros/s/AKfycby2RD2z8dMwB3Ajp0JPCPHN_rKFIL1M5IckIN4VyUMG2yNAV_2gW4kWaGjx-49CXECJ4A/exec',
+  '1N0OEEhnCdfqn5ohtZa47pUfenVYizdePtXo9vGsVGy4',
+  '1JUTSXLLdR7X5KiV6KINe6Nk85DS-YdYk'
+)
+on conflict (id) do update set
+  certificate_provider = excluded.certificate_provider,
+  google_apps_script_url = excluded.google_apps_script_url,
+  google_slides_template_id = excluded.google_slides_template_id,
+  google_drive_folder_id = excluded.google_drive_folder_id,
+  updated_at = now();
 
 alter table public.donation_settings enable row level security;
 
-drop policy if exists "public read donation settings" on public.donation_settings;
-create policy "public read donation settings"
-on public.donation_settings for select
+drop policy if exists "donation settings public read" on public.donation_settings;
+create policy "donation settings public read"
+on public.donation_settings
+for select
 to anon, authenticated
 using (id = 1);
 
-drop policy if exists "admin insert donation settings" on public.donation_settings;
-create policy "admin insert donation settings"
-on public.donation_settings for insert
+drop policy if exists "donation settings manager insert" on public.donation_settings;
+create policy "donation settings manager insert"
+on public.donation_settings
+for insert
 to authenticated
 with check (public.is_site_admin());
 
-drop policy if exists "admin update donation settings" on public.donation_settings;
-create policy "admin update donation settings"
-on public.donation_settings for update
+drop policy if exists "donation settings manager update" on public.donation_settings;
+create policy "donation settings manager update"
+on public.donation_settings
+for update
 to authenticated
 using (public.is_site_admin())
 with check (public.is_site_admin());
@@ -82,8 +118,7 @@ grant select on public.donation_settings to anon, authenticated;
 grant insert, update on public.donation_settings to authenticated;
 
 -- ------------------------------------------------------------
--- Donation submissions. Public users never read this table directly.
--- They use limited RPC functions below.
+-- 2) Donation records
 -- ------------------------------------------------------------
 create table if not exists public.donations (
   id uuid primary key default gen_random_uuid(),
@@ -132,10 +167,24 @@ create table if not exists public.donations (
 
   certificate_no text unique,
   certificate_issued_at timestamptz,
+  certificate_pdf_url text not null default '',
+  certificate_drive_file_id text not null default '',
+  certificate_generated_at timestamptz,
+  certificate_generation_status text not null default 'not_generated'
+    check (certificate_generation_status in ('not_generated','generating','ready','error')),
+  certificate_generation_error text not null default '',
 
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now()
 );
+
+-- Compatibility with a possible partial earlier install.
+alter table public.donations
+  add column if not exists certificate_pdf_url text not null default '',
+  add column if not exists certificate_drive_file_id text not null default '',
+  add column if not exists certificate_generated_at timestamptz,
+  add column if not exists certificate_generation_status text not null default 'not_generated',
+  add column if not exists certificate_generation_error text not null default '';
 
 create index if not exists donations_status_idx
   on public.donations (status, submitted_at desc);
@@ -145,120 +194,111 @@ create index if not exists donations_certificate_no_idx
   on public.donations (certificate_no);
 create index if not exists donations_transfer_date_idx
   on public.donations (transfer_date desc);
-
--- Keep display_name and updated_at correct whenever a manager edits a row.
-create or replace function public.donation_before_write()
-returns trigger
-language plpgsql
-set search_path = public
-as $$
-begin
-  new.updated_at := now();
-
-  if new.donor_type = 'monastic' then
-    new.display_name := concat_ws(' ',
-      nullif(btrim(new.donor_prefix),''),
-      nullif(btrim(new.first_name),''),
-      nullif(btrim(new.dhamma_name),''),
-      nullif(btrim(new.last_name),'')
-    );
-  else
-    new.display_name := concat_ws(' ',
-      nullif(btrim(new.donor_prefix),''),
-      nullif(btrim(new.first_name),''),
-      nullif(btrim(new.last_name),'')
-    );
-  end if;
-
-  return new;
-end;
-$$;
-
-drop trigger if exists donations_before_write on public.donations;
-create trigger donations_before_write
-before insert or update on public.donations
-for each row execute function public.donation_before_write();
+create index if not exists donations_certificate_generation_idx
+  on public.donations (certificate_generation_status, certificate_generated_at desc);
 
 alter table public.donations enable row level security;
 
-drop policy if exists "admin read donations" on public.donations;
-create policy "admin read donations"
-on public.donations for select
+drop policy if exists "donations manager read" on public.donations;
+create policy "donations manager read"
+on public.donations
+for select
 to authenticated
 using (public.is_site_admin());
 
-drop policy if exists "admin update donations" on public.donations;
-create policy "admin update donations"
-on public.donations for update
+drop policy if exists "donations manager update" on public.donations;
+create policy "donations manager update"
+on public.donations
+for update
 to authenticated
 using (public.is_site_admin())
 with check (public.is_site_admin());
 
-drop policy if exists "admin delete donations" on public.donations;
-create policy "admin delete donations"
-on public.donations for delete
+drop policy if exists "donations manager delete" on public.donations;
+create policy "donations manager delete"
+on public.donations
+for delete
 to authenticated
 using (public.is_site_admin());
 
 grant select, update, delete on public.donations to authenticated;
 
--- Certificate running number by Buddhist year.
+-- ------------------------------------------------------------
+-- 3) Certificate running number by Buddhist year
+-- ------------------------------------------------------------
 create table if not exists public.donation_certificate_counters (
   year_be integer primary key,
-  last_no integer not null default 0,
+  last_no integer not null default 0 check (last_no >= 0),
   updated_at timestamptz not null default now()
 );
 
 alter table public.donation_certificate_counters enable row level security;
 
-drop policy if exists "admin read donation counters" on public.donation_certificate_counters;
-create policy "admin read donation counters"
-on public.donation_certificate_counters for select
+drop policy if exists "donation counters manager read" on public.donation_certificate_counters;
+create policy "donation counters manager read"
+on public.donation_certificate_counters
+for select
 to authenticated
 using (public.is_site_admin());
 
 grant select on public.donation_certificate_counters to authenticated;
 
 -- ------------------------------------------------------------
--- Helpers
+-- 4) Helper: random readable code
 -- ------------------------------------------------------------
-create or replace function public.donation_random_code(p_bytes integer default 6)
+drop function if exists public.donation_random_code(integer);
+create function public.donation_random_code(p_chars integer default 16)
 returns text
 language sql
 volatile
 security definer
 set search_path = public
-as $$
-  select upper(substr(encode(gen_random_bytes(greatest(4,least(p_bytes,16))), 'hex'), 1, greatest(8,least(p_bytes*2,32))));
-$$;
+as $wnw_random$
+  select upper(substr(replace(gen_random_uuid()::text, '-', ''), 1, greatest(8, least(p_chars, 32))))
+$wnw_random$;
 
 revoke all on function public.donation_random_code(integer) from public;
 
 -- ------------------------------------------------------------
--- Public: create the row before slip upload.
--- Returns an upload token used only for the private slip path.
+-- 5) Public RPC: start a donation submission
 -- ------------------------------------------------------------
-create or replace function public.create_donation_submission(p_payload jsonb)
-returns table(id uuid, request_no text, history_code text, upload_token uuid)
+drop function if exists public.create_donation_submission(jsonb);
+create function public.create_donation_submission(p_payload jsonb)
+returns table(
+  id uuid,
+  request_no text,
+  history_code text,
+  upload_token uuid
+)
 language plpgsql
 security definer
 set search_path = public
-as $$
+as $wnw_create$
 declare
-  v_row public.donations;
+  v_id uuid := gen_random_uuid();
+  v_upload_token uuid := gen_random_uuid();
+  v_request_no text;
+  v_history_code text;
+  v_type text := coalesce(btrim(p_payload->>'donorType'), '');
+  v_prefix text := coalesce(btrim(p_payload->>'donorPrefix'), '');
+  v_first text := coalesce(btrim(p_payload->>'firstName'), '');
+  v_dhamma text := coalesce(btrim(p_payload->>'dhammaName'), '');
+  v_last text := coalesce(btrim(p_payload->>'lastName'), '');
+  v_phone text := coalesce(btrim(p_payload->>'phone'), '');
+  v_email text := lower(coalesce(btrim(p_payload->>'email'), ''));
+  v_history_in text := upper(coalesce(btrim(p_payload->>'historyCode'), ''));
+  v_display text;
   v_amount numeric(12,2);
   v_date date;
   v_time time;
-  v_type text := coalesce(btrim(p_payload->>'donorType'),'');
-  v_phone text := coalesce(btrim(p_payload->>'phone'),'');
-  v_email text := lower(coalesce(btrim(p_payload->>'email'),''));
-  v_history text := upper(coalesce(btrim(p_payload->>'historyCode'),''));
-  v_request text;
   v_open boolean;
-  i integer;
+  v_try integer;
 begin
-  select is_open into v_open from public.donation_settings where id = 1;
-  if coalesce(v_open,true) is false then
+  select is_open into v_open
+  from public.donation_settings
+  where donation_settings.id = 1;
+
+  if coalesce(v_open, true) is false then
     raise exception 'ระบบรับบริจาคปิดรับรายการชั่วคราว';
   end if;
 
@@ -266,33 +306,33 @@ begin
     raise exception 'กรุณาเลือกประเภทผู้บริจาค';
   end if;
 
-  if coalesce(btrim(p_payload->>'firstName'),'') = '' then
+  if v_first = '' then
     raise exception 'กรุณาระบุชื่อ';
   end if;
 
-  if v_type = 'layperson' and coalesce(btrim(p_payload->>'lastName'),'') = '' then
+  if v_type = 'layperson' and v_last = '' then
     raise exception 'กรุณาระบุนามสกุล';
   end if;
 
   if v_type = 'monastic' then
-    if coalesce(btrim(p_payload->>'donorPrefix'),'') = '' then
+    if v_prefix = '' then
       raise exception 'กรุณาเลือกคำนำหน้าพระ/สามเณร';
     end if;
-    if coalesce(btrim(p_payload->>'templeName'),'') = '' then
+    if coalesce(btrim(p_payload->>'templeName'), '') = '' then
       raise exception 'กรุณาระบุชื่อวัด';
     end if;
-    if coalesce(btrim(p_payload->>'subdistrict'),'') = ''
-      or coalesce(btrim(p_payload->>'district'),'') = ''
-      or coalesce(btrim(p_payload->>'province'),'') = '' then
+    if coalesce(btrim(p_payload->>'subdistrict'), '') = ''
+       or coalesce(btrim(p_payload->>'district'), '') = ''
+       or coalesce(btrim(p_payload->>'province'), '') = '' then
       raise exception 'กรุณาระบุตำบล อำเภอ และจังหวัดของวัด';
     end if;
   end if;
 
   if v_phone = '' and v_email = '' then
-    raise exception 'กรุณาระบุเบอร์โทรศัพท์หรือ Email อย่างน้อย 1 ช่อง เพื่อใช้ดูประวัติย้อนหลัง';
+    raise exception 'กรุณาระบุเบอร์โทรศัพท์หรือ Email อย่างน้อย 1 ช่อง';
   end if;
 
-  if coalesce((p_payload->>'consentAccepted')::boolean,false) is not true then
+  if coalesce((p_payload->>'consentAccepted')::boolean, false) is not true then
     raise exception 'กรุณายอมรับเงื่อนไขก่อนส่งข้อมูล';
   end if;
 
@@ -301,6 +341,7 @@ begin
   exception when others then
     raise exception 'จำนวนเงินไม่ถูกต้อง';
   end;
+
   if v_amount <= 0 then
     raise exception 'จำนวนเงินต้องมากกว่า 0 บาท';
   end if;
@@ -317,190 +358,269 @@ begin
     raise exception 'เวลาโอนไม่ถูกต้อง';
   end;
 
-  -- Reuse the browser's previous history code only when contact data also matches.
-  if v_history ~ '^HIS-[A-F0-9]{12,24}$' and exists (
-    select 1 from public.donations d
-    where d.history_code = v_history
-      and (
-        (v_phone <> '' and regexp_replace(d.phone,'[^0-9]','','g') = regexp_replace(v_phone,'[^0-9]','','g'))
-        or (v_email <> '' and lower(d.email) = v_email)
-      )
-  ) then
-    null;
+  if v_type = 'monastic' then
+    v_display := concat_ws(' ', nullif(v_prefix,''), nullif(v_first,''), nullif(v_dhamma,''), nullif(v_last,''));
   else
-    loop
-      v_history := 'HIS-' || public.donation_random_code(8);
-      exit when not exists (select 1 from public.donations where history_code = v_history);
-    end loop;
+    v_display := concat_ws(' ', nullif(v_prefix,''), nullif(v_first,''), nullif(v_last,''));
   end if;
 
-  for i in 1..8 loop
-    v_request := 'REQ-' || to_char(current_date,'YYYYMMDD') || '-' || public.donation_random_code(4);
-    exit when not exists (select 1 from public.donations where request_no = v_request);
+  -- Reuse a previous history code only if contact information matches.
+  if v_history_in ~ '^HIS-[A-F0-9]{12,32}$'
+     and exists (
+       select 1
+       from public.donations d
+       where d.history_code = v_history_in
+         and (
+           (v_phone <> '' and regexp_replace(d.phone, '[^0-9]', '', 'g') = regexp_replace(v_phone, '[^0-9]', '', 'g'))
+           or
+           (v_email <> '' and lower(d.email) = v_email)
+         )
+     ) then
+    v_history_code := v_history_in;
+  else
+    v_history_code := 'HIS-' || public.donation_random_code(16);
+  end if;
+
+  for v_try in 1..10 loop
+    v_request_no := 'REQ-' || to_char(current_date, 'YYYYMMDD') || '-' || public.donation_random_code(8);
+    exit when not exists (
+      select 1 from public.donations d where d.request_no = v_request_no
+    );
   end loop;
 
   insert into public.donations (
-    request_no, history_code, submission_state, status,
-    donor_type, donor_prefix, first_name, dhamma_name, last_name,
-    organization, temple_name, address_line, subdistrict, district, province, postal_code,
-    phone, email,
-    amount, transfer_date, transfer_time,
-    donor_note, consent_accepted, show_public_name, show_public_amount,
+    id,
+    request_no,
+    history_code,
+    submission_state,
+    status,
+    donor_type,
+    donor_prefix,
+    first_name,
+    dhamma_name,
+    last_name,
+    display_name,
+    organization,
+    temple_name,
+    address_line,
+    subdistrict,
+    district,
+    province,
+    postal_code,
+    phone,
+    email,
+    amount,
+    transfer_date,
+    transfer_time,
+    donor_note,
+    consent_accepted,
+    show_public_name,
+    show_public_amount,
     upload_token
-  ) values (
-    v_request, v_history, 'uploading', 'pending',
+  )
+  values (
+    v_id,
+    v_request_no,
+    v_history_code,
+    'uploading',
+    'pending',
     v_type,
-    coalesce(btrim(p_payload->>'donorPrefix'),''),
-    coalesce(btrim(p_payload->>'firstName'),''),
-    coalesce(btrim(p_payload->>'dhammaName'),''),
-    coalesce(btrim(p_payload->>'lastName'),''),
-    coalesce(btrim(p_payload->>'organization'),''),
-    coalesce(btrim(p_payload->>'templeName'),''),
-    coalesce(btrim(p_payload->>'addressLine'),''),
-    coalesce(btrim(p_payload->>'subdistrict'),''),
-    coalesce(btrim(p_payload->>'district'),''),
-    coalesce(btrim(p_payload->>'province'),''),
-    coalesce(btrim(p_payload->>'postalCode'),''),
-    v_phone, v_email,
-    v_amount, v_date, v_time,
-    coalesce(p_payload->>'donorNote',''),
+    v_prefix,
+    v_first,
+    v_dhamma,
+    v_last,
+    v_display,
+    coalesce(btrim(p_payload->>'organization'), ''),
+    coalesce(btrim(p_payload->>'templeName'), ''),
+    coalesce(btrim(p_payload->>'addressLine'), ''),
+    coalesce(btrim(p_payload->>'subdistrict'), ''),
+    coalesce(btrim(p_payload->>'district'), ''),
+    coalesce(btrim(p_payload->>'province'), ''),
+    coalesce(btrim(p_payload->>'postalCode'), ''),
+    v_phone,
+    v_email,
+    v_amount,
+    v_date,
+    v_time,
+    coalesce(p_payload->>'donorNote', ''),
     true,
-    coalesce((p_payload->>'showPublicName')::boolean,true),
-    coalesce((p_payload->>'showPublicAmount')::boolean,true),
-    gen_random_uuid()
-  ) returning * into v_row;
+    coalesce((p_payload->>'showPublicName')::boolean, true),
+    coalesce((p_payload->>'showPublicAmount')::boolean, true),
+    v_upload_token
+  );
 
-  return query select v_row.id, v_row.request_no, v_row.history_code, v_row.upload_token;
-end;
-$$;
+  return query
+  select v_id, v_request_no, v_history_code, v_upload_token;
+end
+$wnw_create$;
 
 revoke all on function public.create_donation_submission(jsonb) from public;
 grant execute on function public.create_donation_submission(jsonb) to anon, authenticated;
 
--- Public slip upload authorization.
--- Object path must be: <donation-id>/<upload-token>/<filename>
-create or replace function public.can_upload_donation_slip(object_name text)
+-- ------------------------------------------------------------
+-- 6) Storage upload authorization for a private transfer slip
+-- Object path: <donation-id>/<upload-token>/<filename>
+-- ------------------------------------------------------------
+drop function if exists public.can_upload_donation_slip(text);
+create function public.can_upload_donation_slip(object_name text)
 returns boolean
 language plpgsql
-security definer
 stable
+security definer
 set search_path = public
-as $$
+as $wnw_upload$
 declare
+  v_id_text text := split_part(coalesce(object_name,''), '/', 1);
+  v_token_text text := split_part(coalesce(object_name,''), '/', 2);
   v_id uuid;
   v_token uuid;
 begin
-  begin
-    v_id := split_part(object_name, '/', 1)::uuid;
-    v_token := split_part(object_name, '/', 2)::uuid;
-  exception when others then
+  if v_id_text !~* '^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$' then
     return false;
-  end;
+  end if;
+  if v_token_text !~* '^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$' then
+    return false;
+  end if;
+
+  v_id := v_id_text::uuid;
+  v_token := v_token_text::uuid;
 
   return exists (
-    select 1 from public.donations d
+    select 1
+    from public.donations d
     where d.id = v_id
       and d.upload_token = v_token
       and d.submission_state = 'uploading'
   );
-end;
-$$;
+end
+$wnw_upload$;
 
 revoke all on function public.can_upload_donation_slip(text) from public;
 grant execute on function public.can_upload_donation_slip(text) to anon, authenticated;
 
--- Public: finalize after slip upload.
-create or replace function public.finalize_donation_submission(
+-- ------------------------------------------------------------
+-- 7) Public RPC: finalize submission after slip upload
+-- ------------------------------------------------------------
+drop function if exists public.finalize_donation_submission(uuid, uuid, text);
+create function public.finalize_donation_submission(
   p_id uuid,
   p_upload_token uuid,
   p_slip_path text
 )
-returns table(request_no text, history_code text, submitted_at timestamptz, status text)
+returns table(
+  request_no text,
+  history_code text,
+  submitted_at timestamptz,
+  status text
+)
 language plpgsql
 security definer
 set search_path = public
-as $$
+as $wnw_finalize$
 declare
-  v_row public.donations;
+  v_row public.donations%rowtype;
 begin
-  if coalesce(btrim(p_slip_path),'') = '' then
+  if coalesce(btrim(p_slip_path), '') = '' then
     raise exception 'กรุณาแนบหลักฐานการโอนเงิน';
   end if;
 
-  update public.donations
+  if p_slip_path not like p_id::text || '/' || p_upload_token::text || '/%' then
+    raise exception 'ตำแหน่งไฟล์หลักฐานไม่ถูกต้อง';
+  end if;
+
+  update public.donations d
   set slip_path = btrim(p_slip_path),
       submission_state = 'submitted',
       submitted_at = now(),
-      upload_token = null
-  where id = p_id
-    and upload_token = p_upload_token
-    and submission_state = 'uploading'
-  returning * into v_row;
+      upload_token = null,
+      updated_at = now()
+  where d.id = p_id
+    and d.upload_token = p_upload_token
+    and d.submission_state = 'uploading'
+  returning d.* into v_row;
 
   if v_row.id is null then
     raise exception 'ไม่สามารถยืนยันรายการได้ กรุณาลองใหม่';
   end if;
 
-  return query select v_row.request_no, v_row.history_code, v_row.submitted_at, v_row.status;
-end;
-$$;
+  return query
+  select v_row.request_no, v_row.history_code, v_row.submitted_at, v_row.status;
+end
+$wnw_finalize$;
 
-revoke all on function public.finalize_donation_submission(uuid,uuid,text) from public;
-grant execute on function public.finalize_donation_submission(uuid,uuid,text) to anon, authenticated;
+revoke all on function public.finalize_donation_submission(uuid, uuid, text) from public;
+grant execute on function public.finalize_donation_submission(uuid, uuid, text) to anon, authenticated;
 
 -- ------------------------------------------------------------
--- Public dashboard: only verified donations are aggregated.
--- No phone/email/address is exposed.
+-- 8) Public dashboard
 -- ------------------------------------------------------------
-create or replace function public.get_donation_dashboard()
+drop function if exists public.get_donation_dashboard();
+create function public.get_donation_dashboard()
 returns jsonb
 language plpgsql
-security definer
 stable
+security definer
 set search_path = public
-as $$
+as $wnw_dashboard$
 declare
-  v_total numeric(14,2);
-  v_donations bigint;
-  v_donors bigint;
-  v_latest jsonb;
+  v_total numeric(14,2) := 0;
+  v_donation_count bigint := 0;
+  v_donor_count bigint := 0;
+  v_latest jsonb := '[]'::jsonb;
 begin
-  select coalesce(sum(amount),0), count(*), count(distinct history_code)
-  into v_total, v_donations, v_donors
-  from public.donations
-  where status = 'verified' and submission_state = 'submitted';
+  select
+    coalesce(sum(d.amount), 0),
+    count(*),
+    count(distinct lower(btrim(regexp_replace(coalesce(nullif(d.certificate_name_override, ''), d.display_name), '[[:space:]]+', ' ', 'g'))))
+  into v_total, v_donation_count, v_donor_count
+  from public.donations d
+  where d.status = 'verified'
+    and d.submission_state = 'submitted';
 
-  select coalesce(jsonb_agg(jsonb_build_object(
-    'name', case when s.show_public_name then s.public_name else 'ผู้ไม่ประสงค์ออกนาม' end,
-    'amount', case when s.show_public_amount then s.amount else null end,
-    'date', s.transfer_date,
-    'donorType', s.donor_type
-  )), '[]'::jsonb)
+  select coalesce(
+    jsonb_agg(
+      jsonb_build_object(
+        'name', case when x.show_public_name then x.public_name else 'ผู้ไม่ประสงค์ออกนาม' end,
+        'amount', case when x.show_public_amount then x.amount else null end,
+        'date', x.transfer_date,
+        'donorType', x.donor_type
+      )
+    ),
+    '[]'::jsonb
+  )
   into v_latest
   from (
     select
-      coalesce(nullif(certificate_name_override,''),display_name) as public_name,
-      amount, transfer_date, donor_type, show_public_name, show_public_amount
-    from public.donations
-    where status = 'verified' and submission_state = 'submitted'
-    order by verified_at desc nulls last, submitted_at desc
+      coalesce(nullif(d.certificate_name_override,''), d.display_name) as public_name,
+      d.amount,
+      d.transfer_date,
+      d.donor_type,
+      d.show_public_name,
+      d.show_public_amount
+    from public.donations d
+    where d.status = 'verified'
+      and d.submission_state = 'submitted'
+    order by d.verified_at desc nulls last, d.submitted_at desc
     limit 12
-  ) s;
+  ) x;
 
   return jsonb_build_object(
     'totalAmount', v_total,
-    'donationCount', v_donations,
-    'donorCount', v_donors,
+    'donationCount', v_donation_count,
+    'donorCount', v_donor_count,
     'latest', v_latest
   );
-end;
-$$;
+end
+$wnw_dashboard$;
 
 revoke all on function public.get_donation_dashboard() from public;
 grant execute on function public.get_donation_dashboard() to anon, authenticated;
 
--- History uses the random history code shown only to the donor.
-create or replace function public.get_donation_history(p_history_code text)
+-- ------------------------------------------------------------
+-- 9) Donor history by private history code
+-- ------------------------------------------------------------
+drop function if exists public.get_donation_history(text);
+create function public.get_donation_history(p_history_code text)
 returns table(
   request_no text,
   display_name text,
@@ -510,75 +630,96 @@ returns table(
   status text,
   certificate_no text,
   certificate_issued_at timestamptz,
+  certificate_pdf_url text,
+  certificate_generation_status text,
   admin_note text
 )
-language sql
-security definer
+language plpgsql
 stable
+security definer
 set search_path = public
-as $$
+as $wnw_history$
+begin
+  return query
   select
     d.request_no,
-    coalesce(nullif(d.certificate_name_override,''),d.display_name),
+    coalesce(nullif(d.certificate_name_override, ''), d.display_name),
     d.amount,
     d.transfer_date,
     d.transfer_time,
     d.status,
     d.certificate_no,
     d.certificate_issued_at,
+    case when d.status = 'verified' then d.certificate_pdf_url else '' end,
+    case when d.status = 'verified' then d.certificate_generation_status else 'not_generated' end,
     case when d.status = 'rejected' then d.admin_note else '' end
   from public.donations d
   where d.history_code = upper(btrim(p_history_code))
     and d.submission_state = 'submitted'
   order by d.submitted_at desc
   limit 100;
-$$;
+end
+$wnw_history$;
 
 revoke all on function public.get_donation_history(text) from public;
 grant execute on function public.get_donation_history(text) to anon, authenticated;
 
--- Public verification / certificate data.
-create or replace function public.verify_donation_certificate(p_certificate_no text)
+-- ------------------------------------------------------------
+-- 10) Public certificate verification
+-- ------------------------------------------------------------
+drop function if exists public.verify_donation_certificate(text);
+create function public.verify_donation_certificate(p_certificate_no text)
 returns table(
   certificate_no text,
   display_name text,
   amount numeric,
   transfer_date date,
-  certificate_issued_at timestamptz
+  certificate_issued_at timestamptz,
+  certificate_pdf_url text,
+  certificate_generation_status text
 )
-language sql
-security definer
+language plpgsql
 stable
+security definer
 set search_path = public
-as $$
+as $wnw_verify$
+begin
+  return query
   select
     d.certificate_no,
-    coalesce(nullif(d.certificate_name_override,''),d.display_name),
+    coalesce(nullif(d.certificate_name_override, ''), d.display_name),
     d.amount,
     d.transfer_date,
-    d.certificate_issued_at
+    d.certificate_issued_at,
+    d.certificate_pdf_url,
+    d.certificate_generation_status
   from public.donations d
   where upper(d.certificate_no) = upper(btrim(p_certificate_no))
     and d.status = 'verified'
     and d.certificate_no is not null
   limit 1;
-$$;
+end
+$wnw_verify$;
 
 revoke all on function public.verify_donation_certificate(text) from public;
 grant execute on function public.verify_donation_certificate(text) to anon, authenticated;
 
 -- ------------------------------------------------------------
--- Manager: issue certificate number atomically.
+-- 11) Manager: approve and issue certificate number atomically
 -- Example: WNW-DN-2569-000001
 -- ------------------------------------------------------------
-create or replace function public.approve_donation(p_id uuid)
-returns table(certificate_no text, certificate_issued_at timestamptz)
+drop function if exists public.approve_donation(uuid);
+create function public.approve_donation(p_id uuid)
+returns table(
+  certificate_no text,
+  certificate_issued_at timestamptz
+)
 language plpgsql
 security definer
 set search_path = public
-as $$
+as $wnw_approve$
 declare
-  v_row public.donations;
+  v_row public.donations%rowtype;
   v_year_be integer;
   v_serial integer;
   v_prefix text;
@@ -588,156 +729,736 @@ begin
     raise exception 'ไม่มีสิทธิ์ดำเนินการ';
   end if;
 
-  select * into v_row
-  from public.donations
-  where id = p_id
+  select d.*
+  into v_row
+  from public.donations d
+  where d.id = p_id
   for update;
 
   if v_row.id is null then
     raise exception 'ไม่พบรายการบริจาค';
   end if;
+
   if v_row.submission_state <> 'submitted' then
     raise exception 'รายการนี้ยังส่งข้อมูลไม่สมบูรณ์';
   end if;
 
   if v_row.status = 'verified' and v_row.certificate_no is not null then
-    return query select v_row.certificate_no, v_row.certificate_issued_at;
+    return query
+    select v_row.certificate_no, v_row.certificate_issued_at;
     return;
   end if;
 
   v_year_be := extract(year from current_date)::integer + 543;
-  select coalesce(nullif(btrim(certificate_prefix),''),'WNW-DN')
-  into v_prefix
-  from public.donation_settings where id = 1;
 
-  insert into public.donation_certificate_counters (year_be,last_no,updated_at)
-  values (v_year_be,1,now())
+  select coalesce(nullif(btrim(s.certificate_prefix), ''), 'WNW-DN')
+  into v_prefix
+  from public.donation_settings s
+  where s.id = 1;
+
+  if v_prefix is null then
+    v_prefix := 'WNW-DN';
+  end if;
+
+  insert into public.donation_certificate_counters (year_be, last_no, updated_at)
+  values (v_year_be, 1, now())
   on conflict (year_be) do update
   set last_no = public.donation_certificate_counters.last_no + 1,
       updated_at = now()
   returning last_no into v_serial;
 
-  v_cert := v_prefix || '-' || v_year_be::text || '-' || lpad(v_serial::text,6,'0');
+  v_cert := v_prefix || '-' || v_year_be::text || '-' || lpad(v_serial::text, 6, '0');
 
-  update public.donations
+  update public.donations d
   set status = 'verified',
       verified_at = now(),
       verified_by = auth.uid(),
       rejected_at = null,
       rejected_by = null,
       certificate_no = v_cert,
-      certificate_issued_at = now()
-  where id = p_id
-  returning * into v_row;
+      certificate_issued_at = now(),
+      certificate_generation_status = 'not_generated',
+      certificate_generation_error = '',
+      updated_at = now()
+  where d.id = p_id
+  returning d.* into v_row;
 
-  return query select v_row.certificate_no, v_row.certificate_issued_at;
-end;
-$$;
+  return query
+  select v_row.certificate_no, v_row.certificate_issued_at;
+end
+$wnw_approve$;
 
 revoke all on function public.approve_donation(uuid) from public;
 grant execute on function public.approve_donation(uuid) to authenticated;
 
-create or replace function public.reject_donation(p_id uuid, p_note text default '')
+-- ------------------------------------------------------------
+-- 12) Manager: reject a donation
+-- ------------------------------------------------------------
+drop function if exists public.reject_donation(uuid, text);
+create function public.reject_donation(p_id uuid, p_note text default '')
 returns boolean
 language plpgsql
 security definer
 set search_path = public
-as $$
+as $wnw_reject$
 begin
   if not public.is_site_admin() then
     raise exception 'ไม่มีสิทธิ์ดำเนินการ';
   end if;
 
-  update public.donations
+  update public.donations d
   set status = 'rejected',
-      admin_note = coalesce(p_note,''),
+      admin_note = coalesce(p_note, ''),
       rejected_at = now(),
       rejected_by = auth.uid(),
       verified_at = null,
-      verified_by = null
-  where id = p_id and submission_state = 'submitted';
+      verified_by = null,
+      updated_at = now()
+  where d.id = p_id
+    and d.submission_state = 'submitted';
 
   return found;
-end;
-$$;
+end
+$wnw_reject$;
 
-revoke all on function public.reject_donation(uuid,text) from public;
-grant execute on function public.reject_donation(uuid,text) to authenticated;
+revoke all on function public.reject_donation(uuid, text) from public;
+grant execute on function public.reject_donation(uuid, text) to authenticated;
 
 -- ------------------------------------------------------------
--- Storage
--- donation-slips: private, public can upload only to an active token path.
--- donation-assets: public, manager-only writes (banner / QR / template).
+-- 13) Storage buckets
 -- ------------------------------------------------------------
-insert into storage.buckets (id, name, public, file_size_limit, allowed_mime_types)
+insert into storage.buckets (
+  id,
+  name,
+  public,
+  file_size_limit,
+  allowed_mime_types
+)
 values (
-  'donation-slips', 'donation-slips', false, 10485760,
+  'donation-slips',
+  'donation-slips',
+  false,
+  10485760,
   array['image/jpeg','image/png','image/webp','application/pdf']
 )
-on conflict (id) do update
-set public = excluded.public,
-    file_size_limit = excluded.file_size_limit,
-    allowed_mime_types = excluded.allowed_mime_types;
+on conflict (id) do update set
+  public = excluded.public,
+  file_size_limit = excluded.file_size_limit,
+  allowed_mime_types = excluded.allowed_mime_types;
 
-insert into storage.buckets (id, name, public, file_size_limit, allowed_mime_types)
+insert into storage.buckets (
+  id,
+  name,
+  public,
+  file_size_limit,
+  allowed_mime_types
+)
 values (
-  'donation-assets', 'donation-assets', true, 20971520,
+  'donation-assets',
+  'donation-assets',
+  true,
+  20971520,
   array['image/jpeg','image/png','image/webp','application/pdf']
 )
-on conflict (id) do update
-set public = excluded.public,
-    file_size_limit = excluded.file_size_limit,
-    allowed_mime_types = excluded.allowed_mime_types;
+on conflict (id) do update set
+  public = excluded.public,
+  file_size_limit = excluded.file_size_limit,
+  allowed_mime_types = excluded.allowed_mime_types;
 
--- slips
-drop policy if exists "public upload donation slips" on storage.objects;
-create policy "public upload donation slips"
-on storage.objects for insert
+-- Private transfer slips
+drop policy if exists "donation slips public upload" on storage.objects;
+create policy "donation slips public upload"
+on storage.objects
+for insert
 to anon, authenticated
 with check (
   bucket_id = 'donation-slips'
   and public.can_upload_donation_slip(name)
 );
 
-drop policy if exists "admin read donation slips" on storage.objects;
-create policy "admin read donation slips"
-on storage.objects for select
+drop policy if exists "donation slips manager read" on storage.objects;
+create policy "donation slips manager read"
+on storage.objects
+for select
 to authenticated
-using (bucket_id = 'donation-slips' and public.is_site_admin());
+using (
+  bucket_id = 'donation-slips'
+  and public.is_site_admin()
+);
 
-drop policy if exists "admin delete donation slips" on storage.objects;
-create policy "admin delete donation slips"
-on storage.objects for delete
+drop policy if exists "donation slips manager delete" on storage.objects;
+create policy "donation slips manager delete"
+on storage.objects
+for delete
 to authenticated
-using (bucket_id = 'donation-slips' and public.is_site_admin());
+using (
+  bucket_id = 'donation-slips'
+  and public.is_site_admin()
+);
 
--- public assets
-drop policy if exists "public read donation assets" on storage.objects;
-create policy "public read donation assets"
-on storage.objects for select
+-- Public Donation assets: banner, QR, optional image/PDF template
+drop policy if exists "donation assets public read" on storage.objects;
+create policy "donation assets public read"
+on storage.objects
+for select
 to anon, authenticated
 using (bucket_id = 'donation-assets');
 
-drop policy if exists "admin upload donation assets" on storage.objects;
-create policy "admin upload donation assets"
-on storage.objects for insert
+drop policy if exists "donation assets manager upload" on storage.objects;
+create policy "donation assets manager upload"
+on storage.objects
+for insert
 to authenticated
-with check (bucket_id = 'donation-assets' and public.is_site_admin());
+with check (
+  bucket_id = 'donation-assets'
+  and public.is_site_admin()
+);
 
-drop policy if exists "admin update donation assets" on storage.objects;
-create policy "admin update donation assets"
-on storage.objects for update
+drop policy if exists "donation assets manager update" on storage.objects;
+create policy "donation assets manager update"
+on storage.objects
+for update
 to authenticated
-using (bucket_id = 'donation-assets' and public.is_site_admin())
-with check (bucket_id = 'donation-assets' and public.is_site_admin());
+using (
+  bucket_id = 'donation-assets'
+  and public.is_site_admin()
+)
+with check (
+  bucket_id = 'donation-assets'
+  and public.is_site_admin()
+);
 
-drop policy if exists "admin delete donation assets" on storage.objects;
-create policy "admin delete donation assets"
-on storage.objects for delete
+drop policy if exists "donation assets manager delete" on storage.objects;
+create policy "donation assets manager delete"
+on storage.objects
+for delete
 to authenticated
-using (bucket_id = 'donation-assets' and public.is_site_admin());
+using (
+  bucket_id = 'donation-assets'
+  and public.is_site_admin()
+);
+
+
+-- ------------------------------------------------------------
+-- V11: donor photo link + alumni flag + richer donor history
+-- ------------------------------------------------------------
+alter table public.donations
+  add column if not exists photo_url text not null default '',
+  add column if not exists is_alumni boolean not null default false,
+  add column if not exists alumni_batch text not null default '';
+
+create index if not exists donations_alumni_idx
+  on public.donations (is_alumni, alumni_batch, submitted_at desc);
+
+drop function if exists public.set_donation_profile_extras(uuid, uuid, boolean, text, text);
+create function public.set_donation_profile_extras(
+  p_id uuid,
+  p_upload_token uuid,
+  p_is_alumni boolean default false,
+  p_alumni_batch text default '',
+  p_photo_url text default ''
+)
+returns boolean
+language sql
+security definer
+set search_path = public
+begin atomic
+  with changed as (
+    update public.donations d
+    set
+      is_alumni = coalesce(p_is_alumni, false),
+      alumni_batch = case
+        when coalesce(p_is_alumni, false) then btrim(coalesce(p_alumni_batch, ''))
+        else ''
+      end,
+      photo_url = btrim(coalesce(p_photo_url, '')),
+      updated_at = now()
+    where d.id = p_id
+      and d.upload_token = p_upload_token
+      and d.submission_state = 'uploading'
+      and (
+        not coalesce(p_is_alumni, false)
+        or (
+          btrim(coalesce(p_alumni_batch, '')) ~ '^[0-9]{1,2}$'
+          and btrim(coalesce(p_alumni_batch, ''))::integer between 1 and 50
+        )
+      )
+      and (
+        btrim(coalesce(p_photo_url, '')) = ''
+        or btrim(coalesce(p_photo_url, '')) ~* '^https?://'
+      )
+    returning 1
+  )
+  select exists(select 1 from changed);
+end;
+
+revoke all on function public.set_donation_profile_extras(uuid, uuid, boolean, text, text) from public;
+grant execute on function public.set_donation_profile_extras(uuid, uuid, boolean, text, text) to anon, authenticated;
+
+drop function if exists public.get_donation_history_v2(text);
+create function public.get_donation_history_v2(p_history_code text)
+returns table(
+  request_no text,
+  display_name text,
+  amount numeric,
+  transfer_date date,
+  transfer_time time,
+  status text,
+  certificate_no text,
+  certificate_issued_at timestamptz,
+  certificate_pdf_url text,
+  certificate_generation_status text,
+  admin_note text,
+  photo_url text,
+  is_alumni boolean,
+  alumni_batch text
+)
+language sql
+stable
+security definer
+set search_path = public
+begin atomic
+  select
+    d.request_no,
+    coalesce(nullif(d.certificate_name_override, ''), d.display_name) as display_name,
+    d.amount,
+    d.transfer_date,
+    d.transfer_time,
+    d.status,
+    d.certificate_no,
+    d.certificate_issued_at,
+    case when d.status = 'verified' then d.certificate_pdf_url else '' end as certificate_pdf_url,
+    case when d.status = 'verified' then d.certificate_generation_status else 'not_generated' end as certificate_generation_status,
+    case when d.status = 'rejected' then d.admin_note else '' end as admin_note,
+    d.photo_url,
+    d.is_alumni,
+    d.alumni_batch
+  from public.donations d
+  where d.history_code = upper(btrim(p_history_code))
+    and d.submission_state = 'submitted'
+  order by d.submitted_at desc
+  limit 100;
+end;
+
+revoke all on function public.get_donation_history_v2(text) from public;
+grant execute on function public.get_donation_history_v2(text) to anon, authenticated;
 
 comment on table public.donations is
-'Donation submissions, transfer evidence review, certificate numbers and donor history.';
+'WNW Donation submissions, slip review, donor history and Anumodana certificate records.';
+
 comment on table public.donation_settings is
-'Public donation campaign, bank details, banner and certificate template/layout settings.';
+'WNW Donation public campaign settings and Google Slides certificate integration.';
+
+-- ============================================================
+-- END OF INSTALL
+-- If Supabase reports Success / No rows returned, installation is complete.
+-- ============================================================
+
+COMMIT;
+
+
+-- ============================================================
+-- V12 Public Donor Directory
+-- ============================================================
+-- WNW Donation V12: Public Donor Directory
+-- Run this WHOLE file once after Donation V11.
+-- Public output contains only verified donation information intended for the donor directory.
+
+
+DROP FUNCTION IF EXISTS public.get_public_donor_directory(text, integer, integer);
+CREATE FUNCTION public.get_public_donor_directory(
+  p_search text DEFAULT '',
+  p_limit integer DEFAULT 50,
+  p_offset integer DEFAULT 0
+)
+RETURNS TABLE(
+  transfer_date date,
+  transfer_time time,
+  display_name text,
+  amount numeric,
+  certificate_no text,
+  certificate_pdf_url text,
+  certificate_generation_status text,
+  photo_url text,
+  is_alumni boolean,
+  alumni_batch text,
+  total_count bigint
+)
+LANGUAGE sql
+STABLE
+SECURITY DEFINER
+SET search_path = public
+BEGIN ATOMIC
+  SELECT
+    d.transfer_date,
+    d.transfer_time,
+    CASE WHEN d.show_public_name THEN COALESCE(NULLIF(d.certificate_name_override, ''), d.display_name) ELSE 'ผู้ไม่ประสงค์ออกนาม' END AS display_name,
+    CASE WHEN d.show_public_amount THEN d.amount ELSE NULL END AS amount,
+    d.certificate_no,
+    CASE WHEN d.certificate_generation_status = 'ready' THEN d.certificate_pdf_url ELSE '' END AS certificate_pdf_url,
+    d.certificate_generation_status,
+    CASE WHEN d.show_public_name THEN d.photo_url ELSE '' END AS photo_url,
+    CASE WHEN d.show_public_name THEN d.is_alumni ELSE false END AS is_alumni,
+    CASE WHEN d.show_public_name AND d.is_alumni THEN d.alumni_batch ELSE '' END AS alumni_batch,
+    COUNT(*) OVER() AS total_count
+  FROM public.donations d
+  WHERE d.status = 'verified'
+    AND d.submission_state = 'submitted'
+    AND (
+      BTRIM(COALESCE(p_search, '')) = ''
+      OR (d.show_public_name AND COALESCE(NULLIF(d.certificate_name_override, ''), d.display_name) ILIKE '%' || BTRIM(p_search) || '%')
+      OR COALESCE(d.certificate_no, '') ILIKE '%' || BTRIM(p_search) || '%'
+    )
+  ORDER BY d.transfer_date DESC, d.transfer_time DESC, d.verified_at DESC NULLS LAST, d.submitted_at DESC
+  LIMIT LEAST(GREATEST(COALESCE(p_limit, 50), 1), 100)
+  OFFSET GREATEST(COALESCE(p_offset, 0), 0);
+END;
+
+REVOKE ALL ON FUNCTION public.get_public_donor_directory(text, integer, integer) FROM PUBLIC;
+GRANT EXECUTE ON FUNCTION public.get_public_donor_directory(text, integer, integer) TO anon, authenticated;
+
+-- ===== Donation V15 extension =====
+-- WNW Donation V15
+-- Adds: giving-on-behalf type, campaigns + per-campaign certificate prefixes,
+-- period dashboard stats, and QR verification support metadata.
+-- Run ONCE after Donation V14. Existing donation records are preserved.
+
+BEGIN;
+
+-- 1) Campaigns / events -------------------------------------------------------
+CREATE TABLE IF NOT EXISTS public.donation_campaigns (
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  name text NOT NULL,
+  prefix text NOT NULL,
+  description text NOT NULL DEFAULT '',
+  is_active boolean NOT NULL DEFAULT true,
+  is_default boolean NOT NULL DEFAULT false,
+  sort_order integer NOT NULL DEFAULT 0,
+  created_at timestamptz NOT NULL DEFAULT now(),
+  updated_at timestamptz NOT NULL DEFAULT now(),
+  created_by uuid DEFAULT auth.uid(),
+  CONSTRAINT donation_campaigns_prefix_format CHECK (prefix ~ '^[A-Z0-9][A-Z0-9-]{1,19}$')
+);
+
+CREATE INDEX IF NOT EXISTS donation_campaigns_active_idx
+  ON public.donation_campaigns (is_active, is_default DESC, sort_order, name);
+CREATE UNIQUE INDEX IF NOT EXISTS donation_campaigns_prefix_unique_idx
+  ON public.donation_campaigns (UPPER(prefix));
+
+ALTER TABLE public.donation_campaigns ENABLE ROW LEVEL SECURITY;
+
+DROP POLICY IF EXISTS "donation campaigns public read active" ON public.donation_campaigns;
+CREATE POLICY "donation campaigns public read active"
+ON public.donation_campaigns FOR SELECT TO anon, authenticated
+USING (is_active OR public.is_site_admin());
+
+DROP POLICY IF EXISTS "donation campaigns manager insert" ON public.donation_campaigns;
+CREATE POLICY "donation campaigns manager insert"
+ON public.donation_campaigns FOR INSERT TO authenticated
+WITH CHECK (public.is_site_admin());
+
+DROP POLICY IF EXISTS "donation campaigns manager update" ON public.donation_campaigns;
+CREATE POLICY "donation campaigns manager update"
+ON public.donation_campaigns FOR UPDATE TO authenticated
+USING (public.is_site_admin()) WITH CHECK (public.is_site_admin());
+
+DROP POLICY IF EXISTS "donation campaigns manager delete" ON public.donation_campaigns;
+CREATE POLICY "donation campaigns manager delete"
+ON public.donation_campaigns FOR DELETE TO authenticated
+USING (public.is_site_admin());
+
+GRANT SELECT ON public.donation_campaigns TO anon, authenticated;
+GRANT INSERT, UPDATE, DELETE ON public.donation_campaigns TO authenticated;
+
+-- Seed one campaign from the current Donation settings when none exists.
+INSERT INTO public.donation_campaigns (name, prefix, description, is_active, is_default, sort_order)
+SELECT
+  COALESCE(NULLIF(BTRIM(s.campaign_title), ''), 'ร่วมทำบุญเพื่อการศึกษา'),
+  UPPER(COALESCE(NULLIF(REGEXP_REPLACE(BTRIM(s.certificate_prefix), '[^A-Za-z0-9-]', '', 'g'), ''), 'WNW')),
+  COALESCE(s.campaign_description, ''),
+  true,
+  true,
+  0
+FROM public.donation_settings s
+WHERE s.id = 1
+  AND NOT EXISTS (SELECT 1 FROM public.donation_campaigns);
+
+-- Ensure exactly one existing campaign is preferred as default if none is marked.
+UPDATE public.donation_campaigns c
+SET is_default = true, updated_at = now()
+WHERE c.id = (
+  SELECT x.id FROM public.donation_campaigns x
+  ORDER BY x.is_active DESC, x.sort_order, x.created_at
+  LIMIT 1
+)
+AND NOT EXISTS (SELECT 1 FROM public.donation_campaigns d WHERE d.is_default);
+
+-- 2) Donation record snapshots ----------------------------------------------
+ALTER TABLE public.donations
+  ADD COLUMN IF NOT EXISTS giving_as_type text NOT NULL DEFAULT 'person',
+  ADD COLUMN IF NOT EXISTS giving_name text NOT NULL DEFAULT '',
+  ADD COLUMN IF NOT EXISTS contact_name text NOT NULL DEFAULT '',
+  ADD COLUMN IF NOT EXISTS campaign_id uuid,
+  ADD COLUMN IF NOT EXISTS campaign_name text NOT NULL DEFAULT '',
+  ADD COLUMN IF NOT EXISTS campaign_prefix text NOT NULL DEFAULT '';
+
+CREATE INDEX IF NOT EXISTS donations_campaign_idx
+  ON public.donations (campaign_prefix, transfer_date DESC, submitted_at DESC);
+CREATE INDEX IF NOT EXISTS donations_giving_as_idx
+  ON public.donations (giving_as_type, submitted_at DESC);
+
+-- Backfill existing records with the default campaign snapshot.
+UPDATE public.donations d
+SET
+  giving_as_type = COALESCE(NULLIF(d.giving_as_type, ''), 'person'),
+  giving_name = CASE WHEN COALESCE(d.giving_name, '') = '' THEN COALESCE(NULLIF(d.certificate_name_override, ''), d.display_name) ELSE d.giving_name END,
+  contact_name = CASE WHEN COALESCE(d.contact_name, '') = '' THEN d.display_name ELSE d.contact_name END,
+  campaign_id = COALESCE(d.campaign_id, c.id),
+  campaign_name = CASE WHEN COALESCE(d.campaign_name, '') = '' THEN c.name ELSE d.campaign_name END,
+  campaign_prefix = CASE WHEN COALESCE(d.campaign_prefix, '') = '' THEN c.prefix ELSE d.campaign_prefix END,
+  updated_at = now()
+FROM (
+  SELECT id, name, prefix
+  FROM public.donation_campaigns
+  ORDER BY is_default DESC, is_active DESC, sort_order, created_at
+  LIMIT 1
+) c
+WHERE COALESCE(d.campaign_name, '') = '' OR COALESCE(d.campaign_prefix, '') = '' OR d.campaign_id IS NULL;
+
+-- 3) Verification base URL ---------------------------------------------------
+ALTER TABLE public.donation_settings
+  ADD COLUMN IF NOT EXISTS verify_base_url text NOT NULL DEFAULT 'https://wnw-vit.site/donation/verify/?no=';
+
+UPDATE public.donation_settings
+SET verify_base_url = 'https://wnw-vit.site/donation/verify/?no='
+WHERE id = 1 AND COALESCE(BTRIM(verify_base_url), '') = '';
+
+-- 4) Public helper: save V15 fields before the slip is finalized -------------
+DROP FUNCTION IF EXISTS public.set_donation_v15_extras(uuid, uuid, text, text, text, uuid);
+CREATE FUNCTION public.set_donation_v15_extras(
+  p_id uuid,
+  p_upload_token uuid,
+  p_giving_as_type text DEFAULT 'person',
+  p_giving_name text DEFAULT '',
+  p_contact_name text DEFAULT '',
+  p_campaign_id uuid DEFAULT NULL
+)
+RETURNS boolean
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
+AS $wnw_v15_extras$
+DECLARE
+  v_type text := LOWER(BTRIM(COALESCE(p_giving_as_type, 'person')));
+  v_name text := BTRIM(COALESCE(p_giving_name, ''));
+  v_contact text := BTRIM(COALESCE(p_contact_name, ''));
+  v_campaign public.donation_campaigns%ROWTYPE;
+  v_changed integer := 0;
+BEGIN
+  IF v_type NOT IN ('person','family','shop','company','alumni_group','host_group') THEN
+    RAISE EXCEPTION 'ประเภทร่วมบุญในนามไม่ถูกต้อง';
+  END IF;
+
+  IF v_type <> 'person' AND v_name = '' THEN
+    RAISE EXCEPTION 'กรุณาระบุชื่อครอบครัว ร้านค้า บริษัท หรือคณะที่ร่วมบุญ';
+  END IF;
+
+  IF p_campaign_id IS NOT NULL THEN
+    SELECT * INTO v_campaign
+    FROM public.donation_campaigns c
+    WHERE c.id = p_campaign_id AND c.is_active
+    LIMIT 1;
+  END IF;
+
+  IF v_campaign.id IS NULL THEN
+    SELECT * INTO v_campaign
+    FROM public.donation_campaigns c
+    WHERE c.is_active
+    ORDER BY c.is_default DESC, c.sort_order, c.created_at
+    LIMIT 1;
+  END IF;
+
+  IF v_campaign.id IS NULL THEN
+    RAISE EXCEPTION 'ยังไม่ได้ตั้งโครงการ/งานรับบริจาค';
+  END IF;
+
+  UPDATE public.donations d
+  SET
+    giving_as_type = v_type,
+    giving_name = CASE WHEN v_type = 'person' THEN d.display_name ELSE v_name END,
+    contact_name = CASE WHEN v_contact <> '' THEN v_contact ELSE d.display_name END,
+    display_name = CASE WHEN v_type = 'person' THEN d.display_name ELSE v_name END,
+    campaign_id = v_campaign.id,
+    campaign_name = v_campaign.name,
+    campaign_prefix = v_campaign.prefix,
+    updated_at = now()
+  WHERE d.id = p_id
+    AND d.upload_token = p_upload_token
+    AND d.submission_state = 'uploading';
+
+  GET DIAGNOSTICS v_changed = ROW_COUNT;
+  RETURN v_changed = 1;
+END
+$wnw_v15_extras$;
+
+REVOKE ALL ON FUNCTION public.set_donation_v15_extras(uuid, uuid, text, text, text, uuid) FROM PUBLIC;
+GRANT EXECUTE ON FUNCTION public.set_donation_v15_extras(uuid, uuid, text, text, text, uuid) TO anon, authenticated;
+
+-- 5) Per-campaign certificate counters --------------------------------------
+CREATE TABLE IF NOT EXISTS public.donation_certificate_counters_v2 (
+  prefix text NOT NULL,
+  year_be integer NOT NULL,
+  last_no integer NOT NULL DEFAULT 0,
+  updated_at timestamptz NOT NULL DEFAULT now(),
+  PRIMARY KEY (prefix, year_be)
+);
+
+-- Seed the new counters from already-issued certificate numbers.
+INSERT INTO public.donation_certificate_counters_v2(prefix, year_be, last_no, updated_at)
+SELECT
+  (m)[1] AS prefix,
+  ((m)[2])::integer AS year_be,
+  MAX(((m)[3])::integer) AS last_no,
+  now()
+FROM (
+  SELECT regexp_match(UPPER(d.certificate_no), '^(.+)-([0-9]{4})-([0-9]{4,8})$') AS m
+  FROM public.donations d
+  WHERE d.certificate_no IS NOT NULL
+) q
+WHERE m IS NOT NULL
+GROUP BY (m)[1], ((m)[2])::integer
+ON CONFLICT (prefix, year_be) DO UPDATE
+SET last_no = GREATEST(public.donation_certificate_counters_v2.last_no, EXCLUDED.last_no),
+    updated_at = now();
+
+-- New approval RPC: issue certificate number using the donation's campaign prefix.
+DROP FUNCTION IF EXISTS public.approve_donation_v2(uuid);
+CREATE FUNCTION public.approve_donation_v2(p_id uuid)
+RETURNS TABLE(certificate_no text, certificate_issued_at timestamptz)
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
+AS $wnw_approve_v2$
+DECLARE
+  v_row public.donations%ROWTYPE;
+  v_year_be integer;
+  v_serial integer;
+  v_prefix text;
+  v_cert text;
+BEGIN
+  IF NOT public.is_site_admin() THEN
+    RAISE EXCEPTION 'ไม่มีสิทธิ์ดำเนินการ';
+  END IF;
+
+  SELECT d.* INTO v_row
+  FROM public.donations d
+  WHERE d.id = p_id
+  FOR UPDATE;
+
+  IF v_row.id IS NULL THEN RAISE EXCEPTION 'ไม่พบรายการบริจาค'; END IF;
+  IF v_row.submission_state <> 'submitted' THEN RAISE EXCEPTION 'รายการนี้ยังส่งข้อมูลไม่สมบูรณ์'; END IF;
+
+  IF v_row.status = 'verified' AND v_row.certificate_no IS NOT NULL THEN
+    RETURN QUERY SELECT v_row.certificate_no, v_row.certificate_issued_at;
+    RETURN;
+  END IF;
+
+  v_year_be := EXTRACT(YEAR FROM (now() AT TIME ZONE 'Asia/Bangkok'))::integer + 543;
+  v_prefix := UPPER(REGEXP_REPLACE(BTRIM(COALESCE(v_row.campaign_prefix, '')), '[^A-Za-z0-9-]', '', 'g'));
+
+  IF v_prefix = '' THEN
+    SELECT UPPER(REGEXP_REPLACE(BTRIM(COALESCE(s.certificate_prefix, 'WNW')), '[^A-Za-z0-9-]', '', 'g'))
+    INTO v_prefix FROM public.donation_settings s WHERE s.id = 1;
+  END IF;
+  IF COALESCE(v_prefix, '') = '' THEN v_prefix := 'WNW'; END IF;
+
+  INSERT INTO public.donation_certificate_counters_v2(prefix, year_be, last_no, updated_at)
+  VALUES (v_prefix, v_year_be, 1, now())
+  ON CONFLICT (prefix, year_be) DO UPDATE
+  SET last_no = public.donation_certificate_counters_v2.last_no + 1,
+      updated_at = now()
+  RETURNING last_no INTO v_serial;
+
+  v_cert := v_prefix || '-' || v_year_be::text || '-' || LPAD(v_serial::text, 6, '0');
+
+  UPDATE public.donations d
+  SET status = 'verified',
+      verified_at = now(),
+      verified_by = auth.uid(),
+      rejected_at = null,
+      rejected_by = null,
+      certificate_no = v_cert,
+      certificate_issued_at = now(),
+      certificate_generation_status = 'not_generated',
+      certificate_generation_error = '',
+      updated_at = now()
+  WHERE d.id = p_id
+  RETURNING d.* INTO v_row;
+
+  RETURN QUERY SELECT v_row.certificate_no, v_row.certificate_issued_at;
+END
+$wnw_approve_v2$;
+
+REVOKE ALL ON FUNCTION public.approve_donation_v2(uuid) FROM PUBLIC;
+GRANT EXECUTE ON FUNCTION public.approve_donation_v2(uuid) TO authenticated;
+
+-- 6) Dashboard periods -------------------------------------------------------
+DROP FUNCTION IF EXISTS public.get_donation_dashboard_v2();
+CREATE FUNCTION public.get_donation_dashboard_v2()
+RETURNS jsonb
+LANGUAGE plpgsql
+STABLE
+SECURITY DEFINER
+SET search_path = public
+AS $wnw_dashboard_v2$
+DECLARE
+  v_today date := (now() AT TIME ZONE 'Asia/Bangkok')::date;
+  v_latest jsonb := '[]'::jsonb;
+  v_periods jsonb := '{}'::jsonb;
+BEGIN
+  WITH base AS (
+    SELECT
+      d.*,
+      LOWER(BTRIM(REGEXP_REPLACE(COALESCE(NULLIF(d.certificate_name_override, ''), d.display_name), '[[:space:]]+', ' ', 'g'))) AS donor_key
+    FROM public.donations d
+    WHERE d.status = 'verified' AND d.submission_state = 'submitted'
+  ), stats AS (
+    SELECT 'today' AS key, COALESCE(SUM(amount),0)::numeric(14,2) amount, COUNT(*) items, COUNT(DISTINCT donor_key) donors FROM base WHERE transfer_date = v_today
+    UNION ALL
+    SELECT 'month', COALESCE(SUM(amount),0)::numeric(14,2), COUNT(*), COUNT(DISTINCT donor_key) FROM base WHERE transfer_date >= date_trunc('month', v_today)::date AND transfer_date < (date_trunc('month', v_today) + interval '1 month')::date
+    UNION ALL
+    SELECT 'year', COALESCE(SUM(amount),0)::numeric(14,2), COUNT(*), COUNT(DISTINCT donor_key) FROM base WHERE transfer_date >= date_trunc('year', v_today)::date AND transfer_date < (date_trunc('year', v_today) + interval '1 year')::date
+    UNION ALL
+    SELECT 'all', COALESCE(SUM(amount),0)::numeric(14,2), COUNT(*), COUNT(DISTINCT donor_key) FROM base
+  )
+  SELECT jsonb_object_agg(key, jsonb_build_object('totalAmount', amount, 'donationCount', items, 'donorCount', donors))
+  INTO v_periods FROM stats;
+
+  SELECT COALESCE(jsonb_agg(jsonb_build_object(
+    'name', CASE WHEN x.show_public_name THEN x.public_name ELSE 'ผู้ไม่ประสงค์ออกนาม' END,
+    'amount', CASE WHEN x.show_public_amount THEN x.amount ELSE NULL END,
+    'date', x.transfer_date,
+    'donorType', x.donor_type,
+    'campaignName', x.campaign_name,
+    'givingAsType', x.giving_as_type
+  )), '[]'::jsonb)
+  INTO v_latest
+  FROM (
+    SELECT COALESCE(NULLIF(d.certificate_name_override,''), d.display_name) public_name,
+           d.amount, d.transfer_date, d.donor_type, d.show_public_name, d.show_public_amount,
+           d.campaign_name, d.giving_as_type
+    FROM public.donations d
+    WHERE d.status='verified' AND d.submission_state='submitted'
+    ORDER BY d.verified_at DESC NULLS LAST, d.submitted_at DESC
+    LIMIT 12
+  ) x;
+
+  RETURN jsonb_build_object('periods', COALESCE(v_periods,'{}'::jsonb), 'latest', v_latest);
+END
+$wnw_dashboard_v2$;
+
+REVOKE ALL ON FUNCTION public.get_donation_dashboard_v2() FROM PUBLIC;
+GRANT EXECUTE ON FUNCTION public.get_donation_dashboard_v2() TO anon, authenticated;
+
+COMMIT;
+

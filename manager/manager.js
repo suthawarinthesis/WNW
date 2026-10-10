@@ -8,8 +8,6 @@ let newsLoadError = null;
 let personnelTableReady = true;
 let personnelLoadError = null;
 let currentStaffKind = 'teachers';
-let systemErrorRows = [];
-let donationErrorRows = [];
 
 const $ = s => document.querySelector(s);
 const $$ = s => [...document.querySelectorAll(s)];
@@ -65,7 +63,7 @@ async function loadLoginBranding(){
   }
 }
 
-const iconOptions=[['users','ผู้คน'],['book-open','หนังสือ'],['calendar','ปฏิทิน'],['bell','ระฆัง'],['sun','ดวงอาทิตย์'],['moon','พระจันทร์'],['clock','นาฬิกา'],['graduation-cap','การศึกษา'],['monitor-play','สื่อการเรียน'],['book','ตำรา'],['scroll-text','คัมภีร์ / เอกสาร'],['file-text','ไฟล์เอกสาร'],['school','โรงเรียน'],['heart','หัวใจ'],['award','รางวัล'],['star','ดาว'],['link','ลิงก์'],['globe','เว็บไซต์'],['map','แผนที่'],['phone','โทรศัพท์'],['mail','อีเมล'],['languages','ภาษา'],['ambulance','รถพยาบาล'],['badge-alert','แจ้งเหตุ'],['hospital','โรงพยาบาล'],['shield','ตำรวจ / ความปลอดภัย'],['phone-call','โทรด่วน'],['landmark','วัด / สถานที่']];
+const iconOptions=[['users','ผู้คน'],['book-open','หนังสือ'],['calendar','ปฏิทิน'],['bell','ระฆัง'],['sun','ดวงอาทิตย์'],['moon','พระจันทร์'],['clock','นาฬิกา'],['graduation-cap','การศึกษา'],['monitor-play','สื่อการเรียน'],['book','ตำรา'],['scroll-text','คัมภีร์ / เอกสาร'],['file-text','ไฟล์เอกสาร'],['school','โรงเรียน'],['heart','หัวใจ'],['award','รางวัล'],['star','ดาว'],['link','ลิงก์'],['globe','เว็บไซต์'],['map','แผนที่'],['phone','โทรศัพท์'],['mail','อีเมล'],['languages','ภาษา']];
 const colorOptions=[
   ['orange','ส้ม','bg-orange-100','text-orange-600'],['blue','น้ำเงิน','bg-blue-100','text-blue-600'],['green','เขียว','bg-green-100','text-green-600'],['red','แดง','bg-red-100','text-red-600'],['amber','เหลือง','bg-amber-100','text-amber-600'],['purple','ม่วง','bg-purple-100','text-purple-600']
 ];
@@ -90,8 +88,6 @@ const collectionSchemas={
   'examStats.pali':{title:'สถิติแผนกบาลี',empty:'ยังไม่มีสถิติ',summary:x=>`${x.name||''} — ผ่าน ${x.passRate??0}%`,defaults:{name:'',passRate:0,published:true},fields:[{name:'name',label:'ชื่อระดับ',required:true},{name:'passRate',label:'อัตราสอบผ่าน (%)',type:'number',min:0,max:100,required:true},{name:'published',label:'แสดงบนเว็บไซต์',type:'checkbox'}]},
   routines:{title:'กิจวัตรประจำวัน',empty:'ยังไม่มีกิจวัตร',summary:x=>`${x.time||''} • ${x.task||''}`,defaults:{time:'',task:'',icon:'clock',published:true},fields:[{name:'time',label:'เวลา',placeholder:'เช่น 04:30 น.',required:true},{name:'task',label:'กิจวัตร',required:true},{name:'icon',label:'ไอคอน',type:'icon'},{name:'published',label:'แสดงบนเว็บไซต์',type:'checkbox'}]},
   curriculums:{title:'แผนการเรียน',empty:'ยังไม่มีแผนการเรียน',summary:x=>`${x.title||''} • ${x.subtitle||''}`,defaults:{title:'',subtitle:'',desc:'',icon:'book',color:'bg-orange-100 text-orange-600',published:true},fields:[{name:'title',label:'ชื่อแผนการเรียน',required:true},{name:'subtitle',label:'คำอธิบายสั้น'},{name:'desc',label:'รายละเอียด',type:'textarea'},{name:'icon',label:'ไอคอน',type:'icon'},{name:'color',label:'สีประจำกล่อง',type:'boxColor'},{name:'published',label:'แสดงบนเว็บไซต์',type:'checkbox'}]},
-  responsibilities:{title:'ฝ่ายงาน',empty:'ยังไม่มีฝ่ายงาน',summary:x=>`${x.title||''} • ติดต่อ ${x.contactName||'-'}`,defaults:{title:'',description:'',contactName:'',phone:'',email:'',published:true},fields:[{name:'title',label:'ชื่อฝ่ายงาน / งานรับผิดชอบ',required:true},{name:'description',label:'รายละเอียดหน้าที่',type:'textarea'},{name:'contactName',label:'ติดต่อใคร',placeholder:'ชื่อบุคคลหรือชื่อฝ่าย',required:true},{name:'phone',label:'เบอร์โทรศัพท์'},{name:'email',label:'Email',type:'email'},{name:'published',label:'แสดงบนหน้าเว็บไซต์',type:'checkbox'}]},
-  emergencyContacts:{title:'เบอร์ฉุกเฉิน',empty:'ยังไม่มีเบอร์ฉุกเฉิน',summary:x=>`${x.label||''} • ${x.phone||''}`,defaults:{label:'',phone:'',note:'',icon:'phone-call',published:true},fields:[{name:'label',label:'ชื่อหน่วยงาน / สายด่วน',required:true},{name:'phone',label:'เบอร์โทรศัพท์',required:true},{name:'note',label:'คำอธิบายสั้น'},{name:'icon',label:'ไอคอน',type:'icon'},{name:'published',label:'แสดงบนหน้า Emergency',type:'checkbox'}]},
   quickLinks:{title:'E-Services / เมนูลัด',empty:'ยังไม่มีเมนูลัด',summary:x=>`${x.label||''} • ${x.url||'#'}`,defaults:{icon:'link',label:'',bg:'bg-orange-100',text:'text-orange-600',url:'#',published:true},fields:[{name:'label',label:'ชื่อเมนู',required:true},{name:'url',label:'ลิงก์ปลายทาง',placeholder:'https://... หรือ #'},{name:'icon',label:'ไอคอน',type:'icon'},{name:'colorPicker',label:'สีเมนู',type:'quickColor'},{name:'published',label:'แสดงบนเว็บไซต์',type:'checkbox'}]},
   documents:{title:'เอกสารดาวน์โหลด',empty:'ยังไม่มีเอกสาร',summary:x=>`${x.title||''} • ${x.type||''} ${x.size?`• ${x.size}`:''}`,defaults:{title:'',size:'',type:'PDF',url:'',published:true},fields:[{name:'title',label:'ชื่อเอกสาร',required:true},{name:'type',label:'ประเภทไฟล์',placeholder:'PDF / DOCX / XLSX'},{name:'size',label:'ขนาดไฟล์',placeholder:'เช่น 1.2 MB'},{name:'url',label:'ไฟล์ / ลิงก์ดาวน์โหลด',type:'fileUpload',placeholder:'https://...'},{name:'published',label:'แสดงบนเว็บไซต์',type:'checkbox'}]}
 };
@@ -117,7 +113,7 @@ async function enterApp(session){
   $('#login-screen').classList.add('hidden');$('#app').classList.remove('hidden');
   $('#manager-email').textContent=session.user.email||'-';$('#manager-user-id').textContent=session.user.id||'-';
   const ref=(window.SCHOOL_APP_CONFIG?.SUPABASE_URL||'').match(/^https:\/\/([^.]+)\.supabase\.co/i)?.[1];if(ref)$('#supabase-auth-link').href=`https://supabase.com/dashboard/project/${ref}/auth/users`;
-  await loadAll();bindUI();renderAll();await loadSystemCenter();lucide.createIcons();
+  await loadAll();bindUI();renderAll();lucide.createIcons();
 }
 function showLoginError(msg){$('#login-error').textContent=msg;$('#login-error').classList.remove('hidden')}
 
@@ -190,14 +186,7 @@ function bindUI(){
   $('#add-news').addEventListener('click',()=>openNewsEditor());
   $$('[data-add-collection]').forEach(b=>b.addEventListener('click',()=>openCollectionEditor(b.dataset.addCollection)));
   $$('[data-close-modal]').forEach(x=>x.addEventListener('click',closeModal));
-  $('#backup-settings')?.addEventListener('click',downloadSettingsBackup);
-  $('#restore-settings-file')?.addEventListener('change',restoreSettingsBackup);
-  $('#seo-detect-url')?.addEventListener('click',detectPublicBaseUrl);
-  $('#download-sitemap')?.addEventListener('click',downloadSitemap);
-  $('#download-robots')?.addEventListener('click',downloadRobots);
-  $('#refresh-system-errors')?.addEventListener('click',loadSystemCenter);
 }
-
 function bindPathInputs(){
   $$('[data-path]').forEach(el=>{const event=el.type==='checkbox'?'change':'input';el.addEventListener(event,()=>{let v=el.type==='checkbox'?el.checked:el.value;if(el.type==='number'&&v!=='')v=Number(v);setPath(settings,el.dataset.path,v);const uploader=findStaticUploader(el.dataset.path);if(uploader&&el.type!=='checkbox')setImagePreview(uploader,el.value,el.value?'ตัวอย่างจาก URL':'ยังไม่ได้เลือกภาพ');refreshDerived();markDirty()})});
   $$('[data-upload-target]').forEach(el=>el.addEventListener('change',async()=>{if(!el.files?.[0])return;const file=el.files[0];previewSelectedImage(el,file);const path=el.dataset.uploadTarget,url=await uploadFile(file,path.replaceAll('.','-'));if(url){setPath(settings,path,url);const input=$$('[data-path]').find(x=>x.dataset.path===path);if(input)input.value=url;setImagePreview(el,url,'อัปโหลดแล้ว • พร้อมบันทึกเว็บไซต์');markDirty()}}));
@@ -205,7 +194,7 @@ function bindPathInputs(){
 
 function showView(name){
   $$('.panel').forEach(p=>p.classList.toggle('hidden',p.dataset.panel!==name));$$('.sidebar-btn').forEach(b=>b.classList.toggle('active',b.dataset.view===name));
-  const titles={dashboard:'ภาพรวม',general:'ข้อมูลโรงเรียน',visual:'หน้าแรก / แบนเนอร์',staff:'บุคลากร',news:'ข่าวสาร',events:'กิจกรรม / ปฏิทิน',academic:'ข้อมูลวิชาการ',services:'บริการ / ลิงก์ / เอกสาร',achievements:'ผลงานแห่งความภาคภูมิใจ',responsibilities:'ฝ่ายงาน / ติดต่อใคร',emergency:'ข้อมูลฉุกเฉิน',system:'ระบบเว็บไซต์ / Backup / Error',admins:'บัญชีผู้ดูแลระบบ'};$('#page-title').textContent=titles[name]||'Website Manager';
+  const titles={dashboard:'ภาพรวม',general:'ข้อมูลโรงเรียน',visual:'หน้าแรก / แบนเนอร์',staff:'บุคลากร',news:'ข่าวสาร',events:'กิจกรรม / ปฏิทิน',academic:'ข้อมูลวิชาการ',services:'บริการ / ลิงก์ / เอกสาร',achievements:'ผลงานแห่งความภาคภูมิใจ',admins:'บัญชีผู้ดูแลระบบ'};$('#page-title').textContent=titles[name]||'Website Manager';
 }
 
 function renderAll(){
@@ -483,110 +472,7 @@ async function deleteAchievement(index){if(!confirm('ลบผลงานรา
 function openModal(){const m=$('#editor-modal');m.classList.remove('hidden');m.classList.add('flex');lucide.createIcons()}
 function closeModal(){const m=$('#editor-modal');m.classList.add('hidden');m.classList.remove('flex');$('#editor-form').onsubmit=null}
 async function uploadFile(file,prefix='media'){
-  try{const ext=(file.name.split('.').pop()||'bin').toLowerCase(),name=`${prefix}/${Date.now()}-${crypto.randomUUID()}.${ext}`;toast('กำลังอัปโหลดไฟล์...');const {error}=await db.storage.from(bucket).upload(name,file,{cacheControl:'3600',upsert:false});if(error)throw error;const {data}=db.storage.from(bucket).getPublicUrl(name);toast('อัปโหลดเรียบร้อย');return data.publicUrl}catch(e){toast('อัปโหลดไม่สำเร็จ: '+e.message,true);window.WNWErrorMonitor?.log('manager_upload',e.message,{bucket,prefix,file_name:file?.name||'',file_size:file?.size||0},'error');return null}
-}
-
-function downloadBlobFile(filename,text,type='application/octet-stream'){
-  const blob=new Blob([text],{type});const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download=filename;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),500);
-}
-function downloadSettingsBackup(){
-  const payload={
-    schema:'wnw-site-settings-backup',
-    version:31,
-    exported_at:new Date().toISOString(),
-    site_settings:clone(settings)
-  };
-  downloadBlobFile(`WNW-settings-backup-${new Date().toISOString().slice(0,10)}.json`,JSON.stringify(payload,null,2),'application/json');
-  const st=$('#backup-status');if(st)st.textContent='ดาวน์โหลด Backup แล้ว • '+new Date().toLocaleTimeString('th-TH');
-  toast('ดาวน์โหลด Backup Settings แล้ว');
-}
-async function restoreSettingsBackup(e){
-  const file=e.target.files?.[0];e.target.value='';if(!file)return;
-  try{
-    const parsed=JSON.parse(await file.text());
-    const incoming=parsed?.site_settings||parsed;
-    if(!incoming||typeof incoming!=='object'||Array.isArray(incoming))throw new Error('รูปแบบไฟล์ Backup ไม่ถูกต้อง');
-    if(!confirm('นำการตั้งค่าจากไฟล์นี้มาแทนค่าที่กำลังแก้ไขหรือไม่? ระบบจะยังไม่เผยแพร่จนกว่าจะกด “บันทึกเว็บไซต์”'))return;
-    const fallback=await loadDefault();
-    settings=mergeDefaults(fallback,incoming);
-    delete settings.news;
-    if(personnelTableReady){delete settings.executives;delete settings.teachers;delete settings.specialTeachers;}
-    renderAll();markDirty();toast('โหลด Backup แล้ว กรุณาตรวจสอบและกดบันทึกเว็บไซต์');
-    const st=$('#backup-status');if(st)st.textContent='โหลด Backup เข้าแบบฟอร์มแล้ว • ยังไม่เผยแพร่';
-  }catch(err){toast('Restore ไม่สำเร็จ: '+(err.message||err),true)}
-}
-function normalizeBaseUrl(value=''){
-  let raw=String(value||'').trim();if(!raw)return '';
-  if(!/^https?:\/\//i.test(raw))raw='https://'+raw;
-  try{const u=new URL(raw);u.hash='';u.search='';if(!u.pathname.endsWith('/'))u.pathname+='/';return u.href}catch(_){return ''}
-}
-function detectPublicBaseUrl(){
-  let base;
-  try{base=new URL('../',location.href).href}catch(_){base=location.origin+'/'}
-  settings.seo=settings.seo||{};settings.seo.publicBaseUrl=normalizeBaseUrl(base);
-  const input=$('#seo-public-url');if(input)input.value=settings.seo.publicBaseUrl;
-  markDirty();toast('ตรวจพบ URL ปัจจุบันแล้ว กรุณาตรวจสอบก่อนดาวน์โหลด SEO files');
-}
-function seoRoutes(){
-  return ['', 'about-60/','responsibilities/','emergency/','privacy/','admission/','alumni/','alumni/pathways/','achievements/','university-admission/','donation/'];
-}
-function requirePublicBase(){
-  const base=normalizeBaseUrl(settings?.seo?.publicBaseUrl||$('#seo-public-url')?.value||'');
-  if(!base)throw new Error('กรุณาระบุ Public Base URL ก่อน');
-  settings.seo=settings.seo||{};settings.seo.publicBaseUrl=base;return base;
-}
-function downloadSitemap(){
-  try{
-    const base=requirePublicBase(),today=new Date().toISOString().slice(0,10);
-    const body=seoRoutes().map(route=>`  <url><loc>${escXml(new URL(route,base).href)}</loc><lastmod>${today}</lastmod></url>`).join('\n');
-    const xml=`<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${body}\n</urlset>\n`;
-    downloadBlobFile('sitemap.xml',xml,'application/xml');toast('สร้าง sitemap.xml แล้ว');
-  }catch(err){toast(err.message,true)}
-}
-function escXml(v=''){return String(v).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&apos;')}
-function downloadRobots(){
-  try{
-    const base=requirePublicBase();
-    const text=`User-agent: *\nAllow: /\nDisallow: /manager/\nDisallow: /admission/manager/\nDisallow: /alumni/manager/\nDisallow: /student-portal/\nDisallow: /student-portal/manager/\nDisallow: /university-admission/manager/\nDisallow: /donation/manager/\nDisallow: /donation/history/\n\nSitemap: ${new URL('sitemap.xml',base).href}\n`;
-    downloadBlobFile('robots.txt',text,'text/plain');toast('สร้าง robots.txt แล้ว');
-  }catch(err){toast(err.message,true)}
-}
-async function loadSystemCenter(){
-  const health=$('#system-health'),list=$('#system-error-list'),badge=$('#system-error-badge');
-  if(!health||!list)return;
-  health.innerHTML='<div class="sm:col-span-3 rounded-2xl bg-slate-50 p-5 text-sm text-slate-500">กำลังตรวจระบบ...</div>';
-  let errorLogs=[],donationErrors=[],siteOk=false,storageOk=false,appsScriptState='ยังไม่ตรวจ';
-  try{
-    const r=await db.from('site_settings').select('id').eq('id',1).maybeSingle();siteOk=!r.error;
-  }catch(_){}
-  try{
-    const r=await db.storage.from(bucket).list('',{limit:1});storageOk=!r.error;
-  }catch(_){}
-  try{
-    const r=await db.from('site_error_logs').select('*').eq('resolved',false).order('created_at',{ascending:false}).limit(40);
-    if(!r.error)errorLogs=r.data||[];
-  }catch(_){}
-  try{
-    const r=await db.from('donations').select('id,request_no,certificate_no,certificate_generation_status,certificate_generation_error,nikorn_generation_status,nikorn_generation_error,updated_at').or('certificate_generation_status.eq.error,nikorn_generation_status.eq.error').order('updated_at',{ascending:false}).limit(20);
-    if(!r.error)donationErrors=r.data||[];
-  }catch(_){}
-  try{
-    const r=await db.from('donation_settings').select('google_apps_script_url').eq('id',1).maybeSingle();
-    appsScriptState=r.error?'ตรวจไม่ได้':(r.data?.google_apps_script_url?'ตั้งค่าแล้ว':'ยังไม่ได้ตั้งค่า');
-  }catch(_){appsScriptState='ตรวจไม่ได้'}
-  systemErrorRows=errorLogs;donationErrorRows=donationErrors;
-  const total=errorLogs.length+donationErrors.length;
-  if(badge){badge.textContent=String(total);badge.classList.toggle('hidden',total===0);badge.classList.toggle('flex',total>0)}
-  health.innerHTML=[
-    ['Supabase',siteOk?'พร้อมใช้งาน':'มีปัญหา',siteOk?'green':'red'],
-    ['Storage',storageOk?'เชื่อมต่อได้':'ตรวจสอบไม่ได้',storageOk?'green':'amber'],
-    ['Apps Script',appsScriptState,appsScriptState==='ตั้งค่าแล้ว'?'green':'amber']
-  ].map(([a,b,c])=>`<div class="rounded-2xl bg-${c}-50 border border-${c}-100 p-4"><p class="text-[10px] text-${c}-600 font-black uppercase">${a}</p><p class="font-bold mt-1">${esc(b)}</p></div>`).join('');
-  const logHtml=errorLogs.map(x=>`<div class="rounded-2xl border border-red-100 bg-red-50/60 p-4"><div class="flex items-start justify-between gap-3"><div><span class="text-[10px] font-black uppercase text-red-600">${esc(x.source||'error')} • ${esc(x.level||'error')}</span><p class="font-bold text-sm mt-1">${esc(x.message||'')}</p><p class="text-[10px] text-slate-500 mt-1 break-all">${esc(x.page_url||'')}</p><p class="text-[10px] text-slate-400 mt-1">${new Date(x.created_at).toLocaleString('th-TH')}</p></div><button data-resolve-error="${x.id}" class="btn-secondary shrink-0">แก้แล้ว</button></div></div>`).join('');
-  const donHtml=donationErrors.map(x=>{const msg=x.certificate_generation_status==='error'?x.certificate_generation_error:x.nikorn_generation_error;return `<div class="rounded-2xl border border-fuchsia-100 bg-fuchsia-50/60 p-4"><span class="text-[10px] font-black uppercase text-fuchsia-600">Donation / Apps Script</span><p class="font-bold text-sm mt-1">${esc(x.request_no||x.certificate_no||'รายการบริจาค')}</p><p class="text-xs text-slate-600 mt-1">${esc(msg||'พบสถานะ error')}</p></div>`}).join('');
-  list.innerHTML=(logHtml+donHtml)||'<div class="rounded-2xl bg-green-50 border border-green-100 p-6 text-center text-green-700 font-bold">ไม่พบ Error ที่ยังค้างอยู่</div>';
-  $$('[data-resolve-error]').forEach(b=>b.addEventListener('click',async()=>{const {error}=await db.from('site_error_logs').update({resolved:true,resolved_at:new Date().toISOString()}).eq('id',b.dataset.resolveError);if(error)toast(error.message,true);else{toast('ทำเครื่องหมายว่าแก้แล้ว');loadSystemCenter()}}));
-  lucide.createIcons();
+  try{const ext=(file.name.split('.').pop()||'bin').toLowerCase(),name=`${prefix}/${Date.now()}-${crypto.randomUUID()}.${ext}`;toast('กำลังอัปโหลดไฟล์...');const {error}=await db.storage.from(bucket).upload(name,file,{cacheControl:'3600',upsert:false});if(error)throw error;const {data}=db.storage.from(bucket).getPublicUrl(name);toast('อัปโหลดเรียบร้อย');return data.publicUrl}catch(e){toast('อัปโหลดไม่สำเร็จ: '+e.message,true);return null}
 }
 
 start();
